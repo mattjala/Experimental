@@ -11,6 +11,7 @@ jobs:
         strategy:
             matrix:
                 api_tests: ["--enable-api-tests", "--disable-api-tests"]
+                multi_thread: ["--enable-multithread --disable-hl", "--disable-multithread"]
             fail-fast: false
 
         steps:
@@ -22,11 +23,12 @@ jobs:
                   sudo apt install automake autoconf libtool libtool-bin
                   sudo apt install libaec0 libaec-dev valgrind
 
-            - name: Configure HDF5
+
+            - name: Configure HDF5 
               working-directory: ${{github.workspace}}/hdf5
               run: |
-                    autoreconf -if
-                    ./configure --enable-shared --enable-tests ${{ matrix.api_tests }}
+                    sh ./autogen.sh
+                    ./configure --enable-shared --enable-tests ${{ matrix.multi_thread }} ${{ matrix.api_tests }}
 
             - name: Build HDF5
               working-directory: ${{github.workspace}}/hdf5
@@ -35,7 +37,7 @@ jobs:
                     make install
 
             - name: API Tests
-              if: matrix.api_tests == '--enable-api-tests'
+              if: ${{ matrix.api_tests == '--enable-api-tests' }}
               working-directory: ${{github.workspace}}/hdf5
               run: |
                 valgrind ./test/API/api_tests
