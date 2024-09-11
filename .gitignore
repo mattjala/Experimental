@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Don't ignore directories - recurse into them
+!*/
+
+!*.c
+!*.h
+!*.am
+
+!.gitignore
