@@ -16,24 +16,31 @@
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
-#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
+#include "H5private.h"   /* Generic Functions			*/
 
-static void  *H5O__mtime_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
-                                    size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static size_t H5O__mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static void *H5O__mtime_new_decode(H5F_t *f, H5O_t *open_oh,
+                                   unsigned mesg_flags, unsigned *ioflags,
+                                   size_t p_size, const uint8_t *p);
+static herr_t H5O__mtime_new_encode(H5F_t *f, hbool_t disable_shared,
+                                    uint8_t *p, const void *_mesg);
+static size_t H5O__mtime_new_size(const H5F_t *f, hbool_t disable_shared,
+                                  const void *_mesg);
 
-static void  *H5O__mtime_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
-                                size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void  *H5O__mtime_copy(const void *_mesg, void *_dest);
-static size_t H5O__mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static void *H5O__mtime_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+                               unsigned *ioflags, size_t p_size,
+                               const uint8_t *p);
+static herr_t H5O__mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p,
+                                const void *_mesg);
+static void *H5O__mtime_copy(const void *_mesg, void *_dest);
+static size_t H5O__mtime_size(const H5F_t *f, hbool_t disable_shared,
+                              const void *_mesg);
 static herr_t H5O__mtime_free(void *_mesg);
-static herr_t H5O__mtime_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
+static herr_t H5O__mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
+                               int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
@@ -60,7 +67,8 @@ const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
 }};
 
 /* This message derives from H5O message class */
-/* (Only encode, decode & size routines are different from old mtime routines) */
+/* (Only encode, decode & size routines are different from old mtime routines)
+ */
 const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
     H5O_MTIME_NEW_ID,      /*message id number		*/
     "mtime_new",           /*message name for debugging	*/
@@ -106,46 +114,50 @@ H5FL_DEFINE(time_t);
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-static void *
-H5O__mtime_new_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                      unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
-                      const uint8_t *p)
-{
-    const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
-    time_t        *mesg  = NULL;
-    uint32_t       tmp_time;         /* Temporary copy of the time */
-    void          *ret_value = NULL; /* Return value */
+static void *H5O__mtime_new_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f,
+                                   H5O_t H5_ATTR_UNUSED *open_oh,
+                                   unsigned H5_ATTR_UNUSED mesg_flags,
+                                   unsigned H5_ATTR_UNUSED *ioflags,
+                                   size_t p_size, const uint8_t *p) {
+  const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
+  time_t *mesg = NULL;
+  uint32_t tmp_time;      /* Temporary copy of the time */
+  void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    assert(f);
-    assert(p);
+  assert(f);
+  assert(p);
 
-    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    if (*p++ != H5O_MTIME_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for mtime message");
+  if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                "ran off end of input buffer while decoding");
+  if (*p++ != H5O_MTIME_VERSION)
+    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+                "bad version number for mtime message");
 
-    /* Skip reserved bytes */
-    if (H5_IS_BUFFER_OVERFLOW(p, 3, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    p += 3;
+  /* Skip reserved bytes */
+  if (H5_IS_BUFFER_OVERFLOW(p, 3, p_end))
+    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                "ran off end of input buffer while decoding");
+  p += 3;
 
-    /* Get the time_t from the file */
-    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    UINT32DECODE(p, tmp_time);
+  /* Get the time_t from the file */
+  if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                "ran off end of input buffer while decoding");
+  UINT32DECODE(p, tmp_time);
 
-    /* The return value */
-    if (NULL == (mesg = H5FL_MALLOC(time_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    *mesg = (time_t)tmp_time;
+  /* The return value */
+  if (NULL == (mesg = H5FL_MALLOC(time_t)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  *mesg = (time_t)tmp_time;
 
-    /* Set return value */
-    ret_value = mesg;
+  /* Set return value */
+  ret_value = mesg;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__mtime_new_decode() */
 
 /*-------------------------------------------------------------------------
@@ -164,51 +176,54 @@ done:
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-static void *
-H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
-                  const uint8_t *p)
-{
-    const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
-    time_t        *mesg  = NULL;
-    time_t         the_time;
-    struct tm      tm;
-    void          *ret_value = NULL;
+static void *H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f,
+                               H5O_t H5_ATTR_UNUSED *open_oh,
+                               unsigned H5_ATTR_UNUSED mesg_flags,
+                               unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                               const uint8_t *p) {
+  const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
+  time_t *mesg = NULL;
+  time_t the_time;
+  struct tm tm;
+  void *ret_value = NULL;
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    assert(f);
-    assert(p);
+  assert(f);
+  assert(p);
 
-    /* Buffer should have 14 message bytes and 2 reserved bytes */
-    if (H5_IS_BUFFER_OVERFLOW(p, 16, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    for (int i = 0; i < 14; i++)
-        if (!isdigit(p[i]))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message");
+  /* Buffer should have 14 message bytes and 2 reserved bytes */
+  if (H5_IS_BUFFER_OVERFLOW(p, 16, p_end))
+    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                "ran off end of input buffer while decoding");
+  for (int i = 0; i < 14; i++)
+    if (!isdigit(p[i]))
+      HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
+                  "badly formatted modification time message");
 
-    /* Convert YYYYMMDDhhmmss UTC to a time_t. */
-    memset(&tm, 0, sizeof tm);
-    tm.tm_year  = (p[0] - '0') * 1000 + (p[1] - '0') * 100 + (p[2] - '0') * 10 + (p[3] - '0') - 1900;
-    tm.tm_mon   = (p[4] - '0') * 10 + (p[5] - '0') - 1;
-    tm.tm_mday  = (p[6] - '0') * 10 + (p[7] - '0');
-    tm.tm_hour  = (p[8] - '0') * 10 + (p[9] - '0');
-    tm.tm_min   = (p[10] - '0') * 10 + (p[11] - '0');
-    tm.tm_sec   = (p[12] - '0') * 10 + (p[13] - '0');
-    tm.tm_isdst = -1; /* (figure it out) */
-    if ((time_t)-1 == (the_time = H5_make_time(&tm)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info");
+  /* Convert YYYYMMDDhhmmss UTC to a time_t. */
+  memset(&tm, 0, sizeof tm);
+  tm.tm_year = (p[0] - '0') * 1000 + (p[1] - '0') * 100 + (p[2] - '0') * 10 +
+               (p[3] - '0') - 1900;
+  tm.tm_mon = (p[4] - '0') * 10 + (p[5] - '0') - 1;
+  tm.tm_mday = (p[6] - '0') * 10 + (p[7] - '0');
+  tm.tm_hour = (p[8] - '0') * 10 + (p[9] - '0');
+  tm.tm_min = (p[10] - '0') * 10 + (p[11] - '0');
+  tm.tm_sec = (p[12] - '0') * 10 + (p[13] - '0');
+  tm.tm_isdst = -1; /* (figure it out) */
+  if ((time_t)-1 == (the_time = H5_make_time(&tm)))
+    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info");
 
-    /* The return value */
-    if (NULL == (mesg = H5FL_MALLOC(time_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    *mesg = the_time;
+  /* The return value */
+  if (NULL == (mesg = H5FL_MALLOC(time_t)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  *mesg = the_time;
 
-    /* Set return value */
-    ret_value = mesg;
+  /* Set return value */
+  ret_value = mesg;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__mtime_decode() */
 
 /*-------------------------------------------------------------------------
@@ -220,31 +235,30 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                      const void *_mesg)
-{
-    const time_t *mesg = (const time_t *)_mesg;
+static herr_t H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f,
+                                    hbool_t H5_ATTR_UNUSED disable_shared,
+                                    uint8_t *p, const void *_mesg) {
+  const time_t *mesg = (const time_t *)_mesg;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+  /* check args */
+  assert(f);
+  assert(p);
+  assert(mesg);
 
-    /* Version */
-    *p++ = H5O_MTIME_VERSION;
+  /* Version */
+  *p++ = H5O_MTIME_VERSION;
 
-    /* Reserved bytes */
-    *p++ = 0;
-    *p++ = 0;
-    *p++ = 0;
+  /* Reserved bytes */
+  *p++ = 0;
+  *p++ = 0;
+  *p++ = 0;
 
-    /* Encode time */
-    UINT32ENCODE(p, *mesg);
+  /* Encode time */
+  UINT32ENCODE(p, *mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_new_encode() */
 
 /*-------------------------------------------------------------------------
@@ -256,26 +270,25 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                  const void *_mesg)
-{
-    const time_t *mesg = (const time_t *)_mesg;
-    struct tm    *tm;
+static herr_t H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f,
+                                hbool_t H5_ATTR_UNUSED disable_shared,
+                                uint8_t *p, const void *_mesg) {
+  const time_t *mesg = (const time_t *)_mesg;
+  struct tm *tm;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+  /* check args */
+  assert(f);
+  assert(p);
+  assert(mesg);
 
-    /* encode */
-    tm = HDgmtime(mesg);
-    HDsprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
-              tm->tm_hour, tm->tm_min, tm->tm_sec);
+  /* encode */
+  tm = HDgmtime(mesg);
+  HDsprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year,
+            1 + tm->tm_mon, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_encode() */
 
 /*-------------------------------------------------------------------------
@@ -290,28 +303,26 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5O__mtime_copy(const void *_mesg, void *_dest)
-{
-    const time_t *mesg      = (const time_t *)_mesg;
-    time_t       *dest      = (time_t *)_dest;
-    void         *ret_value = NULL; /* Return value */
+static void *H5O__mtime_copy(const void *_mesg, void *_dest) {
+  const time_t *mesg = (const time_t *)_mesg;
+  time_t *dest = (time_t *)_dest;
+  void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* check args */
-    assert(mesg);
-    if (!dest && NULL == (dest = H5FL_MALLOC(time_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  /* check args */
+  assert(mesg);
+  if (!dest && NULL == (dest = H5FL_MALLOC(time_t)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* copy */
-    *dest = *mesg;
+  /* copy */
+  *dest = *mesg;
 
-    /* Set return value */
-    ret_value = dest;
+  /* Set return value */
+  ret_value = dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__mtime_copy() */
 
 /*-------------------------------------------------------------------------
@@ -328,17 +339,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
-                    const void H5_ATTR_UNUSED *mesg)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+static size_t H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f,
+                                  hbool_t H5_ATTR_UNUSED disable_shared,
+                                  const void H5_ATTR_UNUSED *mesg) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(mesg);
+  /* check args */
+  assert(f);
+  assert(mesg);
 
-    FUNC_LEAVE_NOAPI(8)
+  FUNC_LEAVE_NOAPI(8)
 } /* end H5O__mtime_new_size() */
 
 /*-------------------------------------------------------------------------
@@ -355,17 +365,16 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
-                const void H5_ATTR_UNUSED *mesg)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+static size_t H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f,
+                              hbool_t H5_ATTR_UNUSED disable_shared,
+                              const void H5_ATTR_UNUSED *mesg) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(mesg);
+  /* check args */
+  assert(f);
+  assert(mesg);
 
-    FUNC_LEAVE_NOAPI(16)
+  FUNC_LEAVE_NOAPI(16)
 } /* end H5O__mtime_size() */
 
 /*-------------------------------------------------------------------------
@@ -377,16 +386,14 @@ H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__mtime_free(void *mesg)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+static herr_t H5O__mtime_free(void *mesg) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    assert(mesg);
+  assert(mesg);
 
-    mesg = H5FL_FREE(time_t, mesg);
+  mesg = H5FL_FREE(time_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_free() */
 
 /*-------------------------------------------------------------------------
@@ -398,27 +405,26 @@ H5O__mtime_free(void *mesg)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int indent, int fwidth)
-{
-    const time_t *mesg = (const time_t *)_mesg;
-    struct tm    *tm;
-    char          buf[128];
+static herr_t H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg,
+                               FILE *stream, int indent, int fwidth) {
+  const time_t *mesg = (const time_t *)_mesg;
+  struct tm *tm;
+  char buf[128];
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+  /* check args */
+  assert(f);
+  assert(mesg);
+  assert(stream);
+  assert(indent >= 0);
+  assert(fwidth >= 0);
 
-    /* debug */
-    tm = HDlocaltime(mesg);
+  /* debug */
+  tm = HDlocaltime(mesg);
 
-    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
+  HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+  fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_debug() */

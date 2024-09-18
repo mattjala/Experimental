@@ -22,7 +22,7 @@
  *      reporting macros.
  */
 #define H5PB_MODULE
-#define H5_MY_PKG     H5PB
+#define H5_MY_PKG H5PB
 #define H5_MY_PKG_ERR H5E_RESOURCE
 
 #endif /* H5PBmodule_H */

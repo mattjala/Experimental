@@ -40,10 +40,11 @@
 /* ========  Map creation property names ======== */
 
 /* ========  Map access property names ======== */
-#define H5M_ACS_KEY_PREFETCH_SIZE_NAME                                                                       \
-    "key_prefetch_size" /* Number of keys to prefetch during map iteration */
-#define H5M_ACS_KEY_ALLOC_SIZE_NAME                                                                          \
-    "key_alloc_size" /* Initial allocation size for keys prefetched during map iteration */
+#define H5M_ACS_KEY_PREFETCH_SIZE_NAME                                         \
+  "key_prefetch_size" /* Number of keys to prefetch during map iteration */
+#define H5M_ACS_KEY_ALLOC_SIZE_NAME                                            \
+  "key_alloc_size" /* Initial allocation size for keys prefetched during map   \
+                      iteration */
 
 /* Default temporary buffer size */
 #define H5D_TEMP_BUF_SIZE (1024 * 1024)
@@ -52,10 +53,10 @@
 #define H5D_IO_VECTOR_SIZE 1024
 
 /* Default VL allocation & free info */
-#define H5D_VLEN_ALLOC      NULL
+#define H5D_VLEN_ALLOC NULL
 #define H5D_VLEN_ALLOC_INFO NULL
-#define H5D_VLEN_FREE       NULL
-#define H5D_VLEN_FREE_INFO  NULL
+#define H5D_VLEN_FREE NULL
+#define H5D_VLEN_FREE_INFO NULL
 
 /* Default virtual dataset list size */
 #define H5D_VIRTUAL_DEF_LIST_SIZE 8

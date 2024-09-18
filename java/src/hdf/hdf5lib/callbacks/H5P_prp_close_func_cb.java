@@ -17,24 +17,24 @@ package hdf.hdf5lib.callbacks;
  *
  */
 public interface H5P_prp_close_func_cb extends Callbacks {
-    /**
-     * @ingroup JCALL
-     *
-     *  application callback for each property list
-     *
-     *  @param name    the name of the property being closed
-     *  @param size    the size of the property value
-     *  @param value   the value of the property being closed
-     *
-     *  @return operation status
-     *      A. Zero causes the iterator to continue, returning zero when all
-     *          attributes have been processed.
-     *      B. Positive causes the iterator to immediately return that positive
-     *          value, indicating short-circuit success.  The iterator can be
-     *          restarted at the next attribute.
-     *      C. Negative causes the iterator to immediately return that value,
-     *          indicating failure.  The iterator can be restarted at the next
-     *          attribute.
-     */
-    int callback(String name, long size, byte[] value);
+  /**
+   * @ingroup JCALL
+   *
+   *  application callback for each property list
+   *
+   *  @param name    the name of the property being closed
+   *  @param size    the size of the property value
+   *  @param value   the value of the property being closed
+   *
+   *  @return operation status
+   *      A. Zero causes the iterator to continue, returning zero when all
+   *          attributes have been processed.
+   *      B. Positive causes the iterator to immediately return that positive
+   *          value, indicating short-circuit success.  The iterator can be
+   *          restarted at the next attribute.
+   *      C. Negative causes the iterator to immediately return that value,
+   *          indicating failure.  The iterator can be restarted at the next
+   *          attribute.
+   */
+  int callback(String name, long size, byte[] value);
 }

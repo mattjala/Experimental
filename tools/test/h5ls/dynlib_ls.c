@@ -13,15 +13,16 @@
  * Purpose:    Tests the plugin module (H5PL)
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "H5PLextern.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #define H5Z_FILTER_DYNLIBUD 300
-#define MULTIPLIER          3
+#define MULTIPLIER 3
 
-static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                  size_t nbytes, size_t *buf_size, void **buf);
+static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
+                                  const unsigned int *cd_values, size_t nbytes,
+                                  size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
@@ -34,16 +35,8 @@ const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     H5Z_filter_dynlibud, /* The actual filter function    */
 }};
 
-H5PL_type_t
-H5PLget_plugin_type(void)
-{
-    return H5PL_TYPE_FILTER;
-}
-const void *
-H5PLget_plugin_info(void)
-{
-    return H5Z_DYNLIBUD;
-}
+H5PL_type_t H5PLget_plugin_type(void) { return H5PL_TYPE_FILTER; }
+const void *H5PLget_plugin_info(void) { return H5Z_DYNLIBUD; }
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_filter_dynlibud
@@ -58,38 +51,37 @@ H5PLget_plugin_info(void)
  *        Failure:    0
  *-------------------------------------------------------------------------
  */
-static size_t
-H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
-                    size_t *buf_size, void **buf)
-{
-    char  *int_ptr  = (char *)*buf; /* Pointer to the data values */
-    size_t buf_left = *buf_size;    /* Amount of data buffer left to process */
+static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
+                                  const unsigned int *cd_values, size_t nbytes,
+                                  size_t *buf_size, void **buf) {
+  char *int_ptr = (char *)*buf; /* Pointer to the data values */
+  size_t buf_left = *buf_size;  /* Amount of data buffer left to process */
 
-    /* Check for the correct number of parameters */
-    if (cd_nelmts > 0)
-        return (0);
+  /* Check for the correct number of parameters */
+  if (cd_nelmts > 0)
+    return (0);
 
-    /* Assignment to eliminate unused parameter warning. */
-    (void)cd_values;
+  /* Assignment to eliminate unused parameter warning. */
+  (void)cd_values;
 
-    if (flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Subtract the original value with MULTIPLIER */
-        while (buf_left > 0) {
-            char temp = *int_ptr;
-            *int_ptr  = (int8_t)(temp - MULTIPLIER);
-            int_ptr++;
-            buf_left -= sizeof(*int_ptr);
-        }  /* end while */
-    }      /* end if */
-    else { /*write*/
-        /* Add the original value with MULTIPLIER */
-        while (buf_left > 0) {
-            char temp = *int_ptr;
-            *int_ptr  = (int8_t)(temp + MULTIPLIER);
-            int_ptr++;
-            buf_left -= sizeof(*int_ptr);
-        } /* end while */
-    }     /* end else */
+  if (flags & H5Z_FLAG_REVERSE) { /*read*/
+    /* Subtract the original value with MULTIPLIER */
+    while (buf_left > 0) {
+      char temp = *int_ptr;
+      *int_ptr = (int8_t)(temp - MULTIPLIER);
+      int_ptr++;
+      buf_left -= sizeof(*int_ptr);
+    }    /* end while */
+  }      /* end if */
+  else { /*write*/
+    /* Add the original value with MULTIPLIER */
+    while (buf_left > 0) {
+      char temp = *int_ptr;
+      *int_ptr = (int8_t)(temp + MULTIPLIER);
+      int_ptr++;
+      buf_left -= sizeof(*int_ptr);
+    } /* end while */
+  }   /* end else */
 
-    return nbytes;
+  return nbytes;
 } /* end H5Z_filter_dynlibud() */

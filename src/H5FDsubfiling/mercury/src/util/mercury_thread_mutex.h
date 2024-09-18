@@ -61,7 +61,8 @@ HG_UTIL_PUBLIC int hg_thread_mutex_destroy(hg_thread_mutex_t *mutex);
  *
  * \param mutex [IN/OUT]        pointer to mutex object
  */
-static HG_UTIL_INLINE void hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_ACQUIRE(*mutex);
+static HG_UTIL_INLINE void hg_thread_mutex_lock(hg_thread_mutex_t *mutex)
+    HG_LOCK_ACQUIRE(*mutex);
 
 /**
  * Try locking the mutex.
@@ -78,42 +79,40 @@ static HG_UTIL_INLINE int hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
  *
  * \param mutex [IN/OUT]        pointer to mutex object
  */
-static HG_UTIL_INLINE void hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_RELEASE(*mutex);
+static HG_UTIL_INLINE void hg_thread_mutex_unlock(hg_thread_mutex_t *mutex)
+    HG_LOCK_RELEASE(*mutex);
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE void
-hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
-{
+static HG_UTIL_INLINE void hg_thread_mutex_lock(hg_thread_mutex_t *mutex)
+    HG_LOCK_NO_THREAD_SAFETY_ANALYSIS {
 #ifdef _WIN32
-    EnterCriticalSection(mutex);
+  EnterCriticalSection(mutex);
 #else
-    (void)pthread_mutex_lock(mutex);
+  (void)pthread_mutex_lock(mutex);
 #endif
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
-hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
-{
+static HG_UTIL_INLINE int hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
+    HG_LOCK_NO_THREAD_SAFETY_ANALYSIS {
 #ifdef _WIN32
-    if (!TryEnterCriticalSection(mutex))
-        return HG_UTIL_FAIL;
+  if (!TryEnterCriticalSection(mutex))
+    return HG_UTIL_FAIL;
 #else
-    if (pthread_mutex_trylock(mutex))
-        return HG_UTIL_FAIL;
+  if (pthread_mutex_trylock(mutex))
+    return HG_UTIL_FAIL;
 #endif
 
-    return HG_UTIL_SUCCESS;
+  return HG_UTIL_SUCCESS;
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE void
-hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
-{
+static HG_UTIL_INLINE void hg_thread_mutex_unlock(hg_thread_mutex_t *mutex)
+    HG_LOCK_NO_THREAD_SAFETY_ANALYSIS {
 #ifdef _WIN32
-    LeaveCriticalSection(mutex);
+  LeaveCriticalSection(mutex);
 #else
-    (void)pthread_mutex_unlock(mutex);
+  (void)pthread_mutex_unlock(mutex);
 #endif
 }
 

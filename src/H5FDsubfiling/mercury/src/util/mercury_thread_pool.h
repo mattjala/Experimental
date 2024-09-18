@@ -19,17 +19,17 @@
 typedef struct hg_thread_pool hg_thread_pool_t;
 
 struct hg_thread_pool {
-    unsigned int sleeping_worker_count;
-    HG_QUEUE_HEAD(hg_thread_work) queue;
-    int               shutdown;
-    hg_thread_mutex_t mutex;
-    hg_thread_cond_t  cond;
+  unsigned int sleeping_worker_count;
+  HG_QUEUE_HEAD(hg_thread_work) queue;
+  int shutdown;
+  hg_thread_mutex_t mutex;
+  hg_thread_cond_t cond;
 };
 
 struct hg_thread_work {
-    hg_thread_func_t func;
-    void            *args;
-    HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
+  hg_thread_func_t func;
+  void *args;
+  HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
 };
 
 /*****************/
@@ -53,7 +53,8 @@ extern "C" {
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool);
+HG_UTIL_PUBLIC int hg_thread_pool_init(unsigned int thread_count,
+                                       hg_thread_pool_t **pool);
 
 /**
  * Destroy the thread pool.
@@ -73,39 +74,40 @@ HG_UTIL_PUBLIC int hg_thread_pool_destroy(hg_thread_pool_t *pool);
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work);
+static HG_UTIL_INLINE int hg_thread_pool_post(hg_thread_pool_t *pool,
+                                              struct hg_thread_work *work);
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
-hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work)
-{
-    int ret = HG_UTIL_SUCCESS;
+static HG_UTIL_INLINE int hg_thread_pool_post(hg_thread_pool_t *pool,
+                                              struct hg_thread_work *work) {
+  int ret = HG_UTIL_SUCCESS;
 
-    if (!pool || !work)
-        return HG_UTIL_FAIL;
+  if (!pool || !work)
+    return HG_UTIL_FAIL;
 
-    if (!work->func)
-        return HG_UTIL_FAIL;
+  if (!work->func)
+    return HG_UTIL_FAIL;
 
-    hg_thread_mutex_lock(&pool->mutex);
+  hg_thread_mutex_lock(&pool->mutex);
 
-    /* Are we shutting down ? */
-    if (pool->shutdown) {
-        ret = HG_UTIL_FAIL;
-        goto unlock;
-    }
+  /* Are we shutting down ? */
+  if (pool->shutdown) {
+    ret = HG_UTIL_FAIL;
+    goto unlock;
+  }
 
-    /* Add task to task queue */
-    HG_QUEUE_PUSH_TAIL(&pool->queue, work, entry);
+  /* Add task to task queue */
+  HG_QUEUE_PUSH_TAIL(&pool->queue, work, entry);
 
-    /* Wake up sleeping worker */
-    if (pool->sleeping_worker_count && (hg_thread_cond_signal(&pool->cond) != HG_UTIL_SUCCESS))
-        ret = HG_UTIL_FAIL;
+  /* Wake up sleeping worker */
+  if (pool->sleeping_worker_count &&
+      (hg_thread_cond_signal(&pool->cond) != HG_UTIL_SUCCESS))
+    ret = HG_UTIL_FAIL;
 
 unlock:
-    hg_thread_mutex_unlock(&pool->mutex);
+  hg_thread_mutex_unlock(&pool->mutex);
 
-    return ret;
+  return ret;
 }
 
 #ifdef __cplusplus

@@ -26,10 +26,10 @@ extern "C" {
  * <em>Bypassing default HDF5 behavior in order to optimize for specific
  * use cases (H5DO)</em>
  *
- * HDF5 functions described is this section are implemented in the HDF5 High-level
- * library as optimized functions. These functions generally require careful setup
- * and testing as they enable an application to bypass portions of the HDF5
- * library's I/O pipeline for performance purposes.
+ * HDF5 functions described is this section are implemented in the HDF5
+ * High-level library as optimized functions. These functions generally require
+ * careful setup and testing as they enable an application to bypass portions of
+ * the HDF5 library's I/O pipeline for performance purposes.
  *
  * These functions are distributed in the standard HDF5 distribution and are
  * available any time the HDF5 High-level library is available.
@@ -37,9 +37,11 @@ extern "C" {
  * - \ref H5DOappend
  *    \n Appends data to a dataset along a specified dimension.
  * - \ref H5DOread_chunk
- *   \n Reads a raw data chunk directly from a dataset in a file into a buffer (DEPRECATED)
+ *   \n Reads a raw data chunk directly from a dataset in a file into a buffer
+ * (DEPRECATED)
  * - \ref H5DOwrite_chunk
- *   \n  Writes a raw data chunk from a buffer directly to a dataset in a file (DEPRECATED)
+ *   \n  Writes a raw data chunk from a buffer directly to a dataset in a file
+ * (DEPRECATED)
  *
  */
 
@@ -92,8 +94,8 @@ extern "C" {
  * \since   1.10.0
  *
  */
-H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t memtype,
-                           const void *buf);
+H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis,
+                           size_t extension, hid_t memtype, const void *buf);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
@@ -125,14 +127,16 @@ H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t e
  *             The functionality of H5DOwrite_chunk() was moved
  *             to H5Dwrite_chunk().
  * \deprecated For compatibility, this API call has been left as a stub which
- *             simply calls H5Dwrite_chunk(). New code should use H5Dwrite_chunk().
+ *             simply calls H5Dwrite_chunk(). New code should use
+ * H5Dwrite_chunk().
  *
  * \details The H5DOwrite_chunk() writes a raw data chunk as specified by its
- *          logical \p offset in a chunked dataset \p dset_id from the application
- *          memory buffer \p buf to the dataset in the file. Typically, the data
- *          in \p buf is preprocessed in memory by a custom transformation, such as
+ *          logical \p offset in a chunked dataset \p dset_id from the
+ * application memory buffer \p buf to the dataset in the file. Typically, the
+ * data in \p buf is preprocessed in memory by a custom transformation, such as
  *          compression. The chunk will bypass the library's internal data
- *          transfer pipeline, including filters, and will be written directly to the file.
+ *          transfer pipeline, including filters, and will be written directly
+ * to the file.
  *
  *          \p dxpl_id is a data transfer property list identifier.
  *
@@ -146,22 +150,24 @@ H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t e
  *          \p offset is an array specifying the logical position of the first
  *          element of the chunk in the dataset's dataspace. The length of the
  *          offset array must equal the number of dimensions, or rank, of the
- *          dataspace. The values in \p offset must not exceed the dimension limits
- *          and must specify a point that falls on a dataset chunk boundary.
+ *          dataspace. The values in \p offset must not exceed the dimension
+ * limits and must specify a point that falls on a dataset chunk boundary.
  *
- *          \p data_size is the size in bytes of the chunk, representing the number of
- *          bytes to be read from the buffer \p buf. If the data chunk has been
- *          precompressed, \p data_size should be the size of the compressed data.
+ *          \p data_size is the size in bytes of the chunk, representing the
+ * number of bytes to be read from the buffer \p buf. If the data chunk has been
+ *          precompressed, \p data_size should be the size of the compressed
+ * data.
  *
- *          \p buf is the memory buffer containing data to be written to the chunk in the file.
+ *          \p buf is the memory buffer containing data to be written to the
+ * chunk in the file.
  *
- * \attention   Exercise caution when using H5DOread_chunk() and H5DOwrite_chunk(),
- *              as they read and write data chunks directly in a file.
- *              H5DOwrite_chunk() bypasses hyperslab selection, the conversion of data
- *              from one datatype to another, and the filter pipeline to write the chunk.
- *              Developers should have experience with these processes before
- *              using this function. Please see
- *              <a href="https://portal.hdfgroup.org/display/HDF5/Using+the+Direct+Chunk+Write+Function">
+ * \attention   Exercise caution when using H5DOread_chunk() and
+ * H5DOwrite_chunk(), as they read and write data chunks directly in a file.
+ *              H5DOwrite_chunk() bypasses hyperslab selection, the conversion
+ * of data from one datatype to another, and the filter pipeline to write the
+ * chunk. Developers should have experience with these processes before using
+ * this function. Please see <a
+ * href="https://portal.hdfgroup.org/display/HDF5/Using+the+Direct+Chunk+Write+Function">
  *              Using the Direct Chunk Write Function</a>
  *              for more information.
  *
@@ -177,14 +183,16 @@ H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t e
  *
  * \since   1.8.11
  */
-H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
-                                size_t data_size, const void *buf);
+H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters,
+                                const hsize_t *offset, size_t data_size,
+                                const void *buf);
 
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5DO
  *
- * \brief Reads a raw data chunk directly from a dataset in a file into a buffer.
+ * \brief Reads a raw data chunk directly from a dataset in a file into a
+ buffer.
  *
  * \param[in] dset_id           Identifier for the dataset to be read
  * \param[in] dxpl_id           Transfer property list identifier for
@@ -203,7 +211,8 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, 
  *             In HDF5 1.10.3, the functionality of H5DOread_chunk()
  *             was moved to H5Dread_chunk().
  * \deprecated For compatibility, this API call has been left as a stub which
- *             simply calls H5Dread_chunk().  New code should use H5Dread_chunk().
+ *             simply calls H5Dread_chunk().  New code should use
+ H5Dread_chunk().
  *
  * \details The H5DOread_chunk() reads a raw data chunk as specified
  *          by its logical \p offset in a chunked dataset \p dset_id
@@ -216,7 +225,8 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, 
  *
  *          The mask \p filters indicates which filters are used with the
  *          chunk when written. A zero value indicates that all enabled filters
- *          are applied on the chunk. A filter is skipped if the bit corresponding
+ *          are applied on the chunk. A filter is skipped if the bit
+ corresponding
  *          to the filter's position in the pipeline
  *          (<tt>0 ≤ position < 32</tt>) is turned on.
  *
@@ -224,9 +234,11 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, 
  *          element of the chunk in the dataset's dataspace. The length of the
  *          offset array must equal the number of dimensions, or rank, of the
  *          dataspace. The values in \p offset must not exceed the dimension
- *          limits and must specify a point that falls on a dataset chunk boundary.
+ *          limits and must specify a point that falls on a dataset chunk
+ boundary.
  *
- *          \p buf is the memory buffer containing the chunk read from the dataset
+ *          \p buf is the memory buffer containing the chunk read from the
+ dataset
  *          in the file.
  *
  * \par Example
@@ -238,7 +250,8 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, 
  *
  * \since   1.10.2, 1.8.19
  */
-H5_HLDLL herr_t H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters /*out*/,
+H5_HLDLL herr_t H5DOread_chunk(hid_t dset_id, hid_t dxpl_id,
+                               const hsize_t *offset, uint32_t *filters /*out*/,
                                void *buf /*out*/);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

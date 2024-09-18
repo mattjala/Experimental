@@ -2,7 +2,8 @@
 
 //! <!-- [first_declare] -->
 
-DATASET "DSET1" {DATATYPE H5T_STD_I32LE DATASPACE SIMPLE{(4, 13) / (60, 100)} : : }
+DATASET
+    "DSET1" {DATATYPE H5T_STD_I32LE DATASPACE SIMPLE{(4, 13) / (60, 100)} : : }
 
 //! <!-- [first_declare] -->
 
@@ -63,31 +64,21 @@ did = H5Dopen2(fid, "DSET1", H5P_DEFAULT);
     DATATYPE  H5T_COMPOUND {
         H5T_STD_I32LE "a";
     H5T_STD_I32LE "b";
-    H5T_ARRAY
-    {
-        [4] H5T_STD_I32LE
-    }
+    H5T_ARRAY { [4] H5T_STD_I32LE }
     "c";
     H5T_STD_I32LE "d";
     H5T_STD_I32LE "e";
-    H5T_COMPOUND
-    {
-        H5T_STD_I32LE "a";
-        H5T_STD_I32LE "b";
-        H5T_ARRAY
-        {
-            [4] H5T_STD_I32LE
-        }
-        "c";
-        H5T_STD_I32LE "d";
-        H5T_STD_I32LE "e";
+    H5T_COMPOUND {
+      H5T_STD_I32LE "a";
+      H5T_STD_I32LE "b";
+      H5T_ARRAY { [4] H5T_STD_I32LE }
+      "c";
+      H5T_STD_I32LE "d";
+      H5T_STD_I32LE "e";
     }
     "s2";
     }
-    DATASPACE SIMPLE
-    {
-        (5) / (5)
-    }
+    DATASPACE SIMPLE { (5) / (5) }
     ::
     }
 

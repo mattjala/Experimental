@@ -28,11 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions                        */
-#include "H5Mprivate.h" /* Maps                                     */
 #include "H5Eprivate.h" /* Error handling                           */
 #include "H5Iprivate.h" /* IDs                                      */
+#include "H5Mprivate.h" /* Maps                                     */
 #include "H5Ppkg.h"     /* Property lists                           */
+#include "H5private.h"  /* Generic Functions                        */
 
 /****************/
 /* Local Macros */
@@ -92,12 +92,10 @@ const H5P_libclass_t H5P_CLS_MCRT[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5P__mcrt_reg_prop(H5P_genclass_t H5_ATTR_UNUSED *pclass)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+static herr_t H5P__mcrt_reg_prop(H5P_genclass_t H5_ATTR_UNUSED *pclass) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__mcrt_reg_prop() */

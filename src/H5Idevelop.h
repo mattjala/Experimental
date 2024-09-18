@@ -33,7 +33,8 @@
  * The type of the realize_cb callback for H5Iregister_future
  */
 //! <!-- [H5I_future_realize_func_t_snip] -->
-typedef herr_t (*H5I_future_realize_func_t)(void *future_object, hid_t *actual_object_id);
+typedef herr_t (*H5I_future_realize_func_t)(void *future_object,
+                                            hid_t *actual_object_id);
 //! <!-- [H5I_future_realize_func_t_snip] -->
 
 /**
@@ -67,8 +68,8 @@ extern "C" {
  *
  * \return \hid_t{object}
  *
- * \details H5Iregister_future() creates and returns a new ID for a "future" object.
- *          Future objects are a special kind of object and represent a
+ * \details H5Iregister_future() creates and returns a new ID for a "future"
+ * object. Future objects are a special kind of object and represent a
  *          placeholder for an object that has not yet been created or opened.
  *          The \p realize_cb will be invoked by the HDF5 library to 'realize'
  *          the future object as an actual object.  A call to H5Iobject_verify()
@@ -76,14 +77,15 @@ extern "C" {
  *          returns, will return the actual object, not the future object.
  *
  * \details The \p type parameter is the identifier for the ID type to which
- *          this new future ID will belong. This identifier may have been created
- *          by a call to H5Iregister_type() or may be one of the HDF5 pre-defined
+ *          this new future ID will belong. This identifier may have been
+ * created by a call to H5Iregister_type() or may be one of the HDF5 pre-defined
  *          ID classes (e.g. H5I_FILE, H5I_GROUP, H5I_DATASPACE, etc).
  *
  * \details The \p object parameter is a pointer to the memory which the new ID
  *          will be a reference to. This pointer will be stored by the library,
  *          but will not be returned to a call to H5Iobject_verify() until the
- *          \p realize_cb callback has returned the actual pointer for the object.
+ *          \p realize_cb callback has returned the actual pointer for the
+ * object.
  *
  *          A  NULL value for \p object is allowed.
  *
@@ -104,9 +106,9 @@ extern "C" {
  *          doesn't change for the user when the object is realized.
  *
  *          Note that the \p realize_cb callback could receive a NULL value
- *          for a future object pointer, if one was used when H5Iregister_future()
- *          was initially called.  This is permitted as a means of allowing
- *          the \p realize_cb to act as a generator of new objects, without
+ *          for a future object pointer, if one was used when
+ * H5Iregister_future() was initially called.  This is permitted as a means of
+ * allowing the \p realize_cb to act as a generator of new objects, without
  *          requiring creation of unnecessary future objects.
  *
  *          It is an error to pass NULL for \p realize_cb.
@@ -120,16 +122,17 @@ extern "C" {
  *          requiring the future object to be realized into an actual one.
  *
  *          Note that the \p discard_cb callback could receive a NULL value
- *          for a future object pointer, if one was used when H5Iregister_future()
- *          was initially called.
+ *          for a future object pointer, if one was used when
+ * H5Iregister_future() was initially called.
  *
  *          It is an error to pass NULL for \p discard_cb.
  *
- * \note The H5Iregister_future() function is primarily targeted at VOL connector
- *          authors and is _not_ designed for general-purpose application use.
+ * \note The H5Iregister_future() function is primarily targeted at VOL
+ * connector authors and is _not_ designed for general-purpose application use.
  *
  */
-H5_DLL hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
+H5_DLL hid_t H5Iregister_future(H5I_type_t type, const void *object,
+                                H5I_future_realize_func_t realize_cb,
                                 H5I_future_discard_func_t discard_cb);
 
 #ifdef __cplusplus

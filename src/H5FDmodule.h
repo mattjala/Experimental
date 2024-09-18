@@ -22,7 +22,7 @@
  *      reporting macros.
  */
 #define H5FD_MODULE
-#define H5_MY_PKG     H5FD
+#define H5_MY_PKG H5FD
 #define H5_MY_PKG_ERR H5E_VFL
 
 #endif /* H5FDmodule_H */

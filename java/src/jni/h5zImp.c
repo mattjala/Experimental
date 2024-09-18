@@ -20,29 +20,29 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "h5zImp.h"
+#include "h5jni.h"
 #include "hdf5.h"
 #include <jni.h>
 #include <stdlib.h>
-#include "h5jni.h"
-#include "h5zImp.h"
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Zunregister
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister(JNIEnv *env, jclass clss, jint filter)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zunregister(JNIEnv *env,
+                                                         jclass clss,
+                                                         jint filter) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Zunregister((H5Z_filter_t)filter)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Zunregister((H5Z_filter_t)filter)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Zunregister */
 
 /*
@@ -50,18 +50,18 @@ done:
  * Method:    H5Zfilter_avail
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail(JNIEnv *env, jclass clss, jint filter)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zfilter_1avail(JNIEnv *env,
+                                                            jclass clss,
+                                                            jint filter) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Zfilter_avail((H5Z_filter_t)filter)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Zfilter_avail((H5Z_filter_t)filter)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Zfilter_1avail */
 
 /*
@@ -70,18 +70,18 @@ done:
  * Signature: (I)I
  */
 
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info(JNIEnv *env, jclass clss, jint filter)
-{
-    unsigned int flags = 0;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zget_1filter_1info(JNIEnv *env,
+                                                                jclass clss,
+                                                                jint filter) {
+  unsigned int flags = 0;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (H5Zget_filter_info((H5Z_filter_t)filter, (unsigned *)&flags) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Zget_filter_info((H5Z_filter_t)filter, (unsigned *)&flags) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)flags;
+  return (jint)flags;
 } /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1info */
 
 #ifdef __cplusplus

@@ -30,8 +30,8 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions    */
 #include "H5FDpkg.h"   /* File Drivers         */
+#include "H5private.h" /* Generic Functions    */
 
 /****************/
 /* Local Macros */
@@ -82,17 +82,15 @@
  *              error return value.
  *-------------------------------------------------------------------------
  */
-hbool_t
-H5FD__supports_swmr_test(const char *vfd_name)
-{
-    hbool_t ret_value = FALSE;
+hbool_t H5FD__supports_swmr_test(const char *vfd_name) {
+  hbool_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
-        ret_value = TRUE;
-    else
-        ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
+  if (!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
+    ret_value = TRUE;
+  else
+    ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__supports_swmr_test() */

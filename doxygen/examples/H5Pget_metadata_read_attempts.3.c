@@ -23,7 +23,8 @@ fapl = H5Pcreate(H5P_FILE_ACCESS);
 /* Set the # of read attempts */
 H5Pset_metadata_read_attempts(fapl, 20);
 
-/* Open the file with non-SWMR access and the non-default file access property list */
+/* Open the file with non-SWMR access and the non-default file access property
+ * list */
 fid = H5Fopen(FILE, H5F_ACC_RDONLY, fapl);
 
 /* Get the file's file access property list */

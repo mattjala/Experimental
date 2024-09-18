@@ -27,7 +27,7 @@
 */
 
 #define NELMTS 6
-#define TYPE   int
+#define TYPE int
 #define FORMAT "%d "
 
 /*-------------------------------------------------------------------------
@@ -39,11 +39,7 @@
  *
  *-------------------------------------------------------------------------
  */
-static void
-usage(void)
-{
-    fprintf(stderr, "usage: binread FILE_NAME\n");
-}
+static void usage(void) { fprintf(stderr, "usage: binread FILE_NAME\n"); }
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -53,37 +49,34 @@ usage(void)
  *-------------------------------------------------------------------------
  */
 
-int
-main(int argc, char *argv[])
-{
-    FILE  *stream;
-    size_t numread;
-    TYPE   buf[NELMTS];
-    size_t i, nelmts = NELMTS;
-    char  *fname = NULL;
+int main(int argc, char *argv[]) {
+  FILE *stream;
+  size_t numread;
+  TYPE buf[NELMTS];
+  size_t i, nelmts = NELMTS;
+  char *fname = NULL;
 
-    if (argc != 2) {
-        usage();
-        exit(1);
+  if (argc != 2) {
+    usage();
+    exit(1);
+  }
+
+  fname = strdup(argv[1]);
+
+  if ((stream = fopen(fname, "rb")) != NULL) {
+    numread = fread(buf, sizeof(TYPE), nelmts, stream);
+    printf("Number of items read = %llu\n", (unsigned long long)numread);
+
+    for (i = 0; i < nelmts; i++) {
+      printf(FORMAT, buf[i]);
     }
+    printf("\n");
 
-    fname = strdup(argv[1]);
+    fclose(stream);
+  } else
+    printf("File %s could not be opened\n", fname);
 
-    if ((stream = fopen(fname, "rb")) != NULL) {
-        numread = fread(buf, sizeof(TYPE), nelmts, stream);
-        printf("Number of items read = %llu\n", (unsigned long long)numread);
+  free(fname);
 
-        for (i = 0; i < nelmts; i++) {
-            printf(FORMAT, buf[i]);
-        }
-        printf("\n");
-
-        fclose(stream);
-    }
-    else
-        printf("File %s could not be opened\n", fname);
-
-    free(fname);
-
-    return 0;
+  return 0;
 }

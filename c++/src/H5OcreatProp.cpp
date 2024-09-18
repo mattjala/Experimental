@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5PropList.h"
+#include "H5Include.h"
 #include "H5OcreatProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 
@@ -38,24 +38,23 @@ ObjCreatPropList *ObjCreatPropList::DEFAULT_ = 0;
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
 //--------------------------------------------------------------------------
-ObjCreatPropList *
-ObjCreatPropList::getConstant()
-{
-    // Tell the C library not to clean up, H5Library::termH5cpp will call
-    // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called) {
-        (void)H5dont_atexit();
-        IdComponent::H5dontAtexit_called = true;
-    }
+ObjCreatPropList *ObjCreatPropList::getConstant() {
+  // Tell the C library not to clean up, H5Library::termH5cpp will call
+  // H5close - more dependency if use H5Library::dontAtExit()
+  if (!IdComponent::H5dontAtexit_called) {
+    (void)H5dont_atexit();
+    IdComponent::H5dontAtexit_called = true;
+  }
 
-    // If the constant pointer is not allocated, allocate it. Otherwise,
-    // throw because it shouldn't be.
-    if (DEFAULT_ == 0)
-        DEFAULT_ = new ObjCreatPropList(H5P_OBJECT_CREATE);
-    else
-        throw PropListIException("ObjCreatPropList::getConstant",
-                                 "ObjCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return (DEFAULT_);
+  // If the constant pointer is not allocated, allocate it. Otherwise,
+  // throw because it shouldn't be.
+  if (DEFAULT_ == 0)
+    DEFAULT_ = new ObjCreatPropList(H5P_OBJECT_CREATE);
+  else
+    throw PropListIException("ObjCreatPropList::getConstant",
+                             "ObjCreatPropList::getConstant is being invoked "
+                             "on an allocated DEFAULT_");
+  return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -64,11 +63,7 @@ ObjCreatPropList::getConstant()
 //              points to.
 // exception    H5::PropListIException
 //--------------------------------------------------------------------------
-void
-ObjCreatPropList::deleteConstants()
-{
-    delete DEFAULT_;
-}
+void ObjCreatPropList::deleteConstants() { delete DEFAULT_; }
 
 //--------------------------------------------------------------------------
 // Purpose:     Constant for default property
@@ -81,27 +76,22 @@ const ObjCreatPropList &ObjCreatPropList::DEFAULT = *getConstant();
 // Function:    Default Constructor
 ///\brief       Creates a file access property list
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE)
-{
-}
+ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: ObjCreatPropList instance to copy
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList &original) : PropList(original)
-{
-}
+ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList &original)
+    : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList overloaded constructor
 ///\brief       Creates a file access property list using the id of an
 ///             existing one.
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id)
-{
-}
+ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList::setAttrPhaseChange
@@ -116,13 +106,13 @@ ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id)
 ///             For more detail about on attribute storage, please refer to the
 ///             H5Pset_attr_phase_change API in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) const
-{
-    herr_t ret_value = H5Pset_attr_phase_change(id, max_compact, min_dense);
-    if (ret_value < 0) {
-        throw PropListIException("ObjCreatPropList::setAttrPhaseChange", "H5Pset_attr_phase_change failed");
-    }
+void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact,
+                                          unsigned min_dense) const {
+  herr_t ret_value = H5Pset_attr_phase_change(id, max_compact, min_dense);
+  if (ret_value < 0) {
+    throw PropListIException("ObjCreatPropList::setAttrPhaseChange",
+                             "H5Pset_attr_phase_change failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -138,14 +128,14 @@ ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) c
 ///             For more detail about on attribute storage, please refer to the
 ///             H5Pget_attr_phase_change API in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-ObjCreatPropList::getAttrPhaseChange(unsigned &max_compact, unsigned &min_dense) const
-{
-    herr_t ret_value;
-    ret_value = H5Pget_attr_phase_change(id, &max_compact, &min_dense);
-    if (ret_value < 0) {
-        throw PropListIException("ObjCreatPropList::getAttrPhaseChange", "H5Pget_attr_phase_change failed");
-    }
+void ObjCreatPropList::getAttrPhaseChange(unsigned &max_compact,
+                                          unsigned &min_dense) const {
+  herr_t ret_value;
+  ret_value = H5Pget_attr_phase_change(id, &max_compact, &min_dense);
+  if (ret_value < 0) {
+    throw PropListIException("ObjCreatPropList::getAttrPhaseChange",
+                             "H5Pget_attr_phase_change failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -156,8 +146,9 @@ ObjCreatPropList::getAttrPhaseChange(unsigned &max_compact, unsigned &min_dense)
 ///\exception   H5::PropListIException
 ///\par Description
 ///             Valid flags are:
-///             \li \c H5P_CRT_ORDER_TRACKED - Attribute creation order is tracked
-///             \li \c H5P_CRT_ORDER_INDEXED - Attribute creation order is
+///             \li \c H5P_CRT_ORDER_TRACKED - Attribute creation order is
+///             tracked \li \c H5P_CRT_ORDER_INDEXED - Attribute creation order
+///             is
 ///                              indexed (requires H5P_CRT_ORDER_TRACKED).
 ///             When no flag is set, attribute creation order is neither
 ///             tracked not indexed.  Note that HDF5 currently provides no
@@ -166,13 +157,12 @@ ObjCreatPropList::getAttrPhaseChange(unsigned &max_compact, unsigned &min_dense)
 ///             For detail, please refer to the H5Pset_attr_creation_order API
 ///             in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
-{
-    herr_t ret_value = H5Pset_attr_creation_order(id, crt_order_flags);
-    if (ret_value < 0) {
-        throw PropListIException("ObjCreatPropList::setAttrCrtOrder", "H5Pset_attr_creation_order failed");
-    }
+void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const {
+  herr_t ret_value = H5Pset_attr_creation_order(id, crt_order_flags);
+  if (ret_value < 0) {
+    throw PropListIException("ObjCreatPropList::setAttrCrtOrder",
+                             "H5Pset_attr_creation_order failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -187,24 +177,21 @@ ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 ///             For detail, please refer to the H5Pget_attr_creation_order API
 ///             in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-unsigned
-ObjCreatPropList::getAttrCrtOrder() const
-{
-    herr_t   ret_value;
-    unsigned crt_order_flags = 0;
-    ret_value                = H5Pget_attr_creation_order(id, &crt_order_flags);
-    if (ret_value < 0) {
-        throw PropListIException("ObjCreatPropList::getAttrCrtOrder", "H5Pget_attr_creation_order failed");
-    }
-    return (crt_order_flags);
+unsigned ObjCreatPropList::getAttrCrtOrder() const {
+  herr_t ret_value;
+  unsigned crt_order_flags = 0;
+  ret_value = H5Pget_attr_creation_order(id, &crt_order_flags);
+  if (ret_value < 0) {
+    throw PropListIException("ObjCreatPropList::getAttrCrtOrder",
+                             "H5Pget_attr_creation_order failed");
+  }
+  return (crt_order_flags);
 }
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList destructor
 ///\brief       Noop destructor
 //--------------------------------------------------------------------------
-ObjCreatPropList::~ObjCreatPropList()
-{
-}
+ObjCreatPropList::~ObjCreatPropList() {}
 
 } // namespace H5

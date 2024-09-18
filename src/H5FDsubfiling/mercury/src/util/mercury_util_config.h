@@ -32,7 +32,7 @@
 
 /* Return codes */
 #define HG_UTIL_SUCCESS 0
-#define HG_UTIL_FAIL    -1
+#define HG_UTIL_FAIL -1
 
 #include <mercury_compiler_attributes.h>
 

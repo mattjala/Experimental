@@ -13,7 +13,8 @@
 #ifdef _WIN32
 typedef CONDITION_VARIABLE hg_thread_cond_t;
 #else
-#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) &&                              \
+    defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
 #include <time.h>
 #elif defined(H5_HAVE_SYS_TIME_H)
 #include <sys/time.h>
@@ -70,7 +71,8 @@ static HG_UTIL_INLINE int hg_thread_cond_broadcast(hg_thread_cond_t *cond);
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int hg_thread_cond_wait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex);
+static HG_UTIL_INLINE int hg_thread_cond_wait(hg_thread_cond_t *cond,
+                                              hg_thread_mutex_t *mutex);
 
 /**
  * Wait timeout ms for the condition to change.
@@ -81,89 +83,87 @@ static HG_UTIL_INLINE int hg_thread_cond_wait(hg_thread_cond_t *cond, hg_thread_
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int hg_thread_cond_timedwait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex,
+static HG_UTIL_INLINE int hg_thread_cond_timedwait(hg_thread_cond_t *cond,
+                                                   hg_thread_mutex_t *mutex,
                                                    unsigned int timeout);
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
-hg_thread_cond_signal(hg_thread_cond_t *cond)
-{
+static HG_UTIL_INLINE int hg_thread_cond_signal(hg_thread_cond_t *cond) {
 #ifdef _WIN32
-    WakeConditionVariable(cond);
+  WakeConditionVariable(cond);
 #else
-    if (pthread_cond_signal(cond))
-        return HG_UTIL_FAIL;
+  if (pthread_cond_signal(cond))
+    return HG_UTIL_FAIL;
 #endif
 
-    return HG_UTIL_SUCCESS;
+  return HG_UTIL_SUCCESS;
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
-hg_thread_cond_broadcast(hg_thread_cond_t *cond)
-{
+static HG_UTIL_INLINE int hg_thread_cond_broadcast(hg_thread_cond_t *cond) {
 #ifdef _WIN32
-    WakeAllConditionVariable(cond);
+  WakeAllConditionVariable(cond);
 #else
-    if (pthread_cond_broadcast(cond))
-        return HG_UTIL_FAIL;
+  if (pthread_cond_broadcast(cond))
+    return HG_UTIL_FAIL;
 #endif
 
-    return HG_UTIL_SUCCESS;
+  return HG_UTIL_SUCCESS;
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
-hg_thread_cond_wait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex)
-{
+static HG_UTIL_INLINE int hg_thread_cond_wait(hg_thread_cond_t *cond,
+                                              hg_thread_mutex_t *mutex) {
 #ifdef _WIN32
-    if (!SleepConditionVariableCS(cond, mutex, INFINITE))
-        return HG_UTIL_FAIL;
+  if (!SleepConditionVariableCS(cond, mutex, INFINITE))
+    return HG_UTIL_FAIL;
 #else
-    if (pthread_cond_wait(cond, mutex))
-        return HG_UTIL_FAIL;
+  if (pthread_cond_wait(cond, mutex))
+    return HG_UTIL_FAIL;
 #endif
 
-    return HG_UTIL_SUCCESS;
+  return HG_UTIL_SUCCESS;
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
-hg_thread_cond_timedwait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex, unsigned int timeout)
-{
+static HG_UTIL_INLINE int hg_thread_cond_timedwait(hg_thread_cond_t *cond,
+                                                   hg_thread_mutex_t *mutex,
+                                                   unsigned int timeout) {
 #ifdef _WIN32
-    if (!SleepConditionVariableCS(cond, mutex, timeout))
-        return HG_UTIL_FAIL;
+  if (!SleepConditionVariableCS(cond, mutex, timeout))
+    return HG_UTIL_FAIL;
 #else
-#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
-    struct timespec now;
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) &&                              \
+    defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
+  struct timespec now;
 #else
-    struct timeval now;
+  struct timeval now;
 #endif
-    struct timespec abs_timeout;
-    ldiv_t          ld;
+  struct timespec abs_timeout;
+  ldiv_t ld;
 
-    /* Need to convert timeout (ms) to absolute time */
-#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
-    clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
+  /* Need to convert timeout (ms) to absolute time */
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) &&                              \
+    defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
+  clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
 
-    /* Get sec / nsec */
-    ld                  = ldiv(now.tv_nsec + timeout * 1000000L, 1000000000L);
-    abs_timeout.tv_nsec = ld.rem;
+  /* Get sec / nsec */
+  ld = ldiv(now.tv_nsec + timeout * 1000000L, 1000000000L);
+  abs_timeout.tv_nsec = ld.rem;
 #elif defined(H5_HAVE_SYS_TIME_H)
-    gettimeofday(&now, NULL);
+  gettimeofday(&now, NULL);
 
-    /* Get sec / usec */
-    ld                  = ldiv(now.tv_usec + timeout * 1000L, 1000000L);
-    abs_timeout.tv_nsec = ld.rem * 1000L;
+  /* Get sec / usec */
+  ld = ldiv(now.tv_usec + timeout * 1000L, 1000000L);
+  abs_timeout.tv_nsec = ld.rem * 1000L;
 #endif
-    abs_timeout.tv_sec  = now.tv_sec + ld.quot;
+  abs_timeout.tv_sec = now.tv_sec + ld.quot;
 
-    if (pthread_cond_timedwait(cond, mutex, &abs_timeout))
-        return HG_UTIL_FAIL;
+  if (pthread_cond_timedwait(cond, mutex, &abs_timeout))
+    return HG_UTIL_FAIL;
 #endif
 
-    return HG_UTIL_SUCCESS;
+  return HG_UTIL_SUCCESS;
 }
 
 #ifdef __cplusplus

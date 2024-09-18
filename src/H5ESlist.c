@@ -32,10 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			 */
-#include "H5Eprivate.h"  /* Error handling		  	 */
 #include "H5ESpkg.h"     /* Event Sets                           */
+#include "H5Eprivate.h"  /* Error handling		  	 */
 #include "H5FLprivate.h" /* Free Lists                           */
+#include "H5private.h"   /* Generic Functions			 */
 
 /****************/
 /* Local Macros */
@@ -74,30 +74,28 @@
  *
  *-------------------------------------------------------------------------
  */
-void
-H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+void H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Sanity check */
-    assert(el);
-    assert(ev);
+  /* Sanity check */
+  assert(el);
+  assert(ev);
 
-    ev->next = NULL;
+  ev->next = NULL;
 
-    /* Append event onto the event list */
-    if (NULL == el->tail)
-        el->head = el->tail = ev;
-    else {
-        ev->prev       = el->tail;
-        el->tail->next = ev;
-        el->tail       = ev;
-    } /* end else */
+  /* Append event onto the event list */
+  if (NULL == el->tail)
+    el->head = el->tail = ev;
+  else {
+    ev->prev = el->tail;
+    el->tail->next = ev;
+    el->tail = ev;
+  } /* end else */
 
-    /* Increment the # of events in list */
-    el->count++;
+  /* Increment the # of events in list */
+  el->count++;
 
-    FUNC_LEAVE_NOAPI_VOID
+  FUNC_LEAVE_NOAPI_VOID
 } /* end H5ES__list_append() */
 
 /*-------------------------------------------------------------------------
@@ -109,15 +107,13 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE size_t
-H5ES__list_count(const H5ES_event_list_t *el)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+H5_ATTR_PURE size_t H5ES__list_count(const H5ES_event_list_t *el) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Sanity check */
-    assert(el);
+  /* Sanity check */
+  assert(el);
 
-    FUNC_LEAVE_NOAPI(el->count)
+  FUNC_LEAVE_NOAPI(el->count)
 } /* end H5ES__list_count() */
 
 /*-------------------------------------------------------------------------
@@ -136,38 +132,37 @@ H5ES__list_count(const H5ES_event_list_t *el)
  *
  *-------------------------------------------------------------------------
  */
-int
-H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_func_t cb, void *ctx)
-{
-    H5ES_event_t *ev;                       /* Event in list */
-    int           ret_value = H5_ITER_CONT; /* Return value */
+int H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order,
+                       H5ES_list_iter_func_t cb, void *ctx) {
+  H5ES_event_t *ev;             /* Event in list */
+  int ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Sanity check */
-    assert(el);
-    assert(cb);
+  /* Sanity check */
+  assert(el);
+  assert(cb);
 
-    /* Iterate over events in list */
-    ev = (order == H5_ITER_DEC) ? el->tail : el->head;
-    while (ev) {
-        H5ES_event_t *tmp; /* Temporary event */
+  /* Iterate over events in list */
+  ev = (order == H5_ITER_DEC) ? el->tail : el->head;
+  while (ev) {
+    H5ES_event_t *tmp; /* Temporary event */
 
-        /* Get pointer to next node, so it's safe if this one is removed */
-        tmp = (order == H5_ITER_DEC) ? ev->prev : ev->next;
+    /* Get pointer to next node, so it's safe if this one is removed */
+    tmp = (order == H5_ITER_DEC) ? ev->prev : ev->next;
 
-        /* Perform iterator callback */
-        if ((ret_value = (*cb)(ev, ctx)) != H5_ITER_CONT) {
-            if (ret_value < 0)
-                HERROR(H5E_EVENTSET, H5E_CANTNEXT, "iteration operator failed");
-            break;
-        } /* end if */
+    /* Perform iterator callback */
+    if ((ret_value = (*cb)(ev, ctx)) != H5_ITER_CONT) {
+      if (ret_value < 0)
+        HERROR(H5E_EVENTSET, H5E_CANTNEXT, "iteration operator failed");
+      break;
+    } /* end if */
 
-        /* Advance to next node */
-        ev = tmp;
-    } /* end while */
+    /* Advance to next node */
+    ev = tmp;
+  } /* end while */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__list_iterate() */
 
 /*-------------------------------------------------------------------------
@@ -179,28 +174,26 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_
  *
  *-------------------------------------------------------------------------
  */
-void
-H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+void H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Sanity check */
-    assert(el);
-    assert(el->head);
-    assert(ev);
+  /* Sanity check */
+  assert(el);
+  assert(el->head);
+  assert(ev);
 
-    /* Stitch event out of list */
-    if (ev == el->head)
-        el->head = ev->next;
-    if (NULL != ev->next)
-        ev->next->prev = ev->prev;
-    if (NULL != ev->prev)
-        ev->prev->next = ev->next;
-    if (NULL == el->head)
-        el->tail = NULL;
+  /* Stitch event out of list */
+  if (ev == el->head)
+    el->head = ev->next;
+  if (NULL != ev->next)
+    ev->next->prev = ev->prev;
+  if (NULL != ev->prev)
+    ev->prev->next = ev->next;
+  if (NULL == el->head)
+    el->tail = NULL;
 
-    /* Decrement the # of events in list */
-    el->count--;
+  /* Decrement the # of events in list */
+  el->count--;
 
-    FUNC_LEAVE_NOAPI_VOID
+  FUNC_LEAVE_NOAPI_VOID
 } /* end H5ES__list_remove() */

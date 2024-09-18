@@ -21,8 +21,8 @@
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
-#include "H5private.h" /* Generic Functions			*/
 #include "H5Opkg.h"    /* Object headers			*/
+#include "H5private.h" /* Generic Functions			*/
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_NULL[1] = {{

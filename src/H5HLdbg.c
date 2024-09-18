@@ -24,10 +24,10 @@
 /* Headers */
 /***********/
 
-#include "H5private.h"   /* Generic Functions            */
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5HLpkg.h"     /* Local heaps                  */
 #include "H5MMprivate.h" /* Memory management            */
+#include "H5private.h"   /* Generic Functions            */
 
 /*-------------------------------------------------------------------------
  * Function:    H5HL_debug
@@ -38,78 +38,85 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
-{
-    H5HL_t      *h = NULL;
-    int          free_block;
-    H5HL_free_t *freelist;
-    uint8_t     *marker      = NULL;
-    size_t       amount_free = 0;
-    herr_t       ret_value   = SUCCEED; /* Return value */
+herr_t H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
+                  int fwidth) {
+  H5HL_t *h = NULL;
+  int free_block;
+  H5HL_free_t *freelist;
+  uint8_t *marker = NULL;
+  size_t amount_free = 0;
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* check arguments */
-    assert(f);
-    assert(H5_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+  /* check arguments */
+  assert(f);
+  assert(H5_addr_defined(addr));
+  assert(stream);
+  assert(indent >= 0);
+  assert(fwidth >= 0);
 
-    if (NULL == (h = (H5HL_t *)H5HL_protect(f, addr, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load/protect local heap");
+  if (NULL == (h = (H5HL_t *)H5HL_protect(f, addr, H5AC__READ_ONLY_FLAG)))
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL,
+                "unable to load/protect local heap");
 
-    fprintf(stream, "%*sLocal Heap...\n", indent, "");
-    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size (in bytes):", h->prfx_size);
-    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of heap data:", h->dblk_addr);
-    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data bytes allocated for heap:", h->dblk_size);
+  fprintf(stream, "%*sLocal Heap...\n", indent, "");
+  fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+          "Header size (in bytes):", h->prfx_size);
+  fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+          "Address of heap data:", h->dblk_addr);
+  fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+          "Data bytes allocated for heap:", h->dblk_size);
 
-    /* Traverse the free list and check that all free blocks fall within
-     * the heap and that no two free blocks point to the same region of
-     * the heap.
-     */
-    if (NULL == (marker = (uint8_t *)H5MM_calloc(h->dblk_size)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed");
+  /* Traverse the free list and check that all free blocks fall within
+   * the heap and that no two free blocks point to the same region of
+   * the heap.
+   */
+  if (NULL == (marker = (uint8_t *)H5MM_calloc(h->dblk_size)))
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
-    fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
-    for (free_block = 0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
-        char temp_str[32];
+  fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
+  for (free_block = 0, freelist = h->freelist; freelist;
+       freelist = freelist->next, free_block++) {
+    char temp_str[32];
 
-        HDsnprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
-        fprintf(stream, "%*s%-*s %8zu, %8zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
-                freelist->offset, freelist->size);
-        if ((freelist->offset + freelist->size) > h->dblk_size)
-            fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
-        else {
-            int    overlap = 0;
-            size_t i;
+    HDsnprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
+    fprintf(stream, "%*s%-*s %8zu, %8zu\n", indent + 3, "", MAX(0, fwidth - 9),
+            temp_str, freelist->offset, freelist->size);
+    if ((freelist->offset + freelist->size) > h->dblk_size)
+      fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
+    else {
+      int overlap = 0;
+      size_t i;
 
-            for (i = 0; i < freelist->size; i++) {
-                if (marker[freelist->offset + i])
-                    overlap++;
-                marker[freelist->offset + i] = 1;
-            }
-            if (overlap)
-                fprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
-            else
-                amount_free += freelist->size;
-        }
+      for (i = 0; i < freelist->size; i++) {
+        if (marker[freelist->offset + i])
+          overlap++;
+        marker[freelist->offset + i] = 1;
+      }
+      if (overlap)
+        fprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
+      else
+        amount_free += freelist->size;
     }
+  }
 
-    if (h->dblk_size)
-        fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
-                (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
+  if (h->dblk_size)
+    fprintf(
+        stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
+        (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
 
-    /* Print the data in a VMS-style octal dump */
-    H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);
+  /* Print the data in a VMS-style octal dump */
+  H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0,
+                 h->dblk_size);
 
 done:
-    if (h && FAIL == H5HL_unprotect(h))
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release/unprotect local heap");
+  if (h && FAIL == H5HL_unprotect(h))
+    HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL,
+                "unable to release/unprotect local heap");
 
-    if (marker && NULL != (marker = (uint8_t *)H5MM_xfree(marker)))
-        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't free marker buffer");
+  if (marker && NULL != (marker = (uint8_t *)H5MM_xfree(marker)))
+    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't free marker buffer");
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_debug() */

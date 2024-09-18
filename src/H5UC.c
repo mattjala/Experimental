@@ -50,28 +50,26 @@ H5FL_DEFINE_STATIC(H5UC_t);
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5UC_t *
-H5UC_create(void *o, H5UC_free_func_t free_func)
-{
-    H5UC_t *ret_value; /* Return value */
+H5UC_t *H5UC_create(void *o, H5UC_free_func_t free_func) {
+  H5UC_t *ret_value; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    /* Sanity check */
-    assert(o);
-    assert(free_func);
+  /* Sanity check */
+  assert(o);
+  assert(free_func);
 
-    /* Allocate ref-counted string structure */
-    if (NULL == (ret_value = H5FL_MALLOC(H5UC_t)))
-        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed");
+  /* Allocate ref-counted string structure */
+  if (NULL == (ret_value = H5FL_MALLOC(H5UC_t)))
+    HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* Set the internal fields */
-    ret_value->o         = o;
-    ret_value->n         = 1;
-    ret_value->free_func = free_func;
+  /* Set the internal fields */
+  ret_value->o = o;
+  ret_value->n = 1;
+  ret_value->free_func = free_func;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5UC_create() */
 
 /*--------------------------------------------------------------------------
@@ -93,31 +91,29 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
-H5UC_decr(H5UC_t *rc)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5UC_decr(H5UC_t *rc) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity check */
-    assert(rc);
-    assert(rc->o);
-    assert(rc->n > 0);
-    assert(rc->free_func);
+  /* Sanity check */
+  assert(rc);
+  assert(rc->o);
+  assert(rc->n > 0);
+  assert(rc->free_func);
 
-    /* Decrement reference count */
-    rc->n--;
+  /* Decrement reference count */
+  rc->n--;
 
-    /* Check if we should delete this object now */
-    if (rc->n == 0) {
-        if ((rc->free_func)(rc->o) < 0) {
-            rc = H5FL_FREE(H5UC_t, rc);
-            HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed");
-        } /* end if */
-        rc = H5FL_FREE(H5UC_t, rc);
+  /* Check if we should delete this object now */
+  if (rc->n == 0) {
+    if ((rc->free_func)(rc->o) < 0) {
+      rc = H5FL_FREE(H5UC_t, rc);
+      HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed");
     } /* end if */
+    rc = H5FL_FREE(H5UC_t, rc);
+  } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5UC_decr() */

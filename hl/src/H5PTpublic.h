@@ -132,8 +132,8 @@ extern "C" {
  * \since   1.10.0 and 1.8.17
  *
  */
-H5_HLDLL hid_t H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
-                          hid_t plist_id);
+H5_HLDLL hid_t H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id,
+                          hsize_t chunk_size, hid_t plist_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -216,7 +216,8 @@ H5_HLDLL herr_t H5PTclose(hid_t table_id);
  *
  */
 /* This function may be removed from the packet table in release 1.8.19. */
-H5_HLDLL hid_t H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
+H5_HLDLL hid_t H5PTcreate_fl(hid_t loc_id, const char *dset_name,
+                             hid_t dtype_id, hsize_t chunk_size,
                              int compression);
 
 /*-------------------------------------------------------------------------
@@ -271,7 +272,8 @@ H5_HLDLL herr_t H5PTappend(hid_t table_id, size_t nrecords, const void *data);
  *          For a packet table holding variable-length records, the data
  *          returned in the buffer will be in form of a #hvl_t struct
  *          containing the length of the data and a pointer to it in memory.
- *          The memory used by this data must be freed using H5PTfree_vlen_buff().
+ *          The memory used by this data must be freed using
+ * H5PTfree_vlen_buff().
  *
  */
 H5_HLDLL herr_t H5PTget_next(hid_t table_id, size_t nrecords, void *data);
@@ -301,7 +303,8 @@ H5_HLDLL herr_t H5PTget_next(hid_t table_id, size_t nrecords, void *data);
  *          H5PTfree_vlen_buff().
  *
  */
-H5_HLDLL herr_t H5PTread_packets(hid_t table_id, hsize_t start, size_t nrecords, void *data);
+H5_HLDLL herr_t H5PTread_packets(hid_t table_id, hsize_t start, size_t nrecords,
+                                 void *data);
 
 /*-------------------------------------------------------------------------
  * Inquiry functions

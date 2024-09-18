@@ -22,7 +22,7 @@
  *      reporting macros.
  */
 #define H5SL_MODULE
-#define H5_MY_PKG     H5SL
+#define H5_MY_PKG H5SL
 #define H5_MY_PKG_ERR H5E_SLIST
 
 #endif /* H5SLmodule_H */

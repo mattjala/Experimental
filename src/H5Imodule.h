@@ -22,7 +22,7 @@
  * reporting macros.
  */
 #define H5I_MODULE
-#define H5_MY_PKG     H5I
+#define H5_MY_PKG H5I
 #define H5_MY_PKG_ERR H5E_ID
 
 /** \page H5I_UG The HDF5 Identifiers

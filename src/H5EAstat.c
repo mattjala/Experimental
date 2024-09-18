@@ -32,10 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5EApkg.h"     /* Extensible Arrays			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions			*/
 
 /****************/
 /* Local Macros */
@@ -74,17 +74,15 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats)
-{
-    FUNC_ENTER_NOAPI_NOERR
+herr_t H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats) {
+  FUNC_ENTER_NOAPI_NOERR
 
-    /* Check arguments */
-    assert(ea);
-    assert(stats);
+  /* Check arguments */
+  assert(ea);
+  assert(stats);
 
-    /* Copy extensible array statistics */
-    H5MM_memcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
+  /* Copy extensible array statistics */
+  H5MM_memcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5EA_get_stats() */

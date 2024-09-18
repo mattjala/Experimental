@@ -22,7 +22,7 @@
  *      reporting macros.
  */
 #define H5T_MODULE
-#define H5_MY_PKG     H5T
+#define H5_MY_PKG H5T
 #define H5_MY_PKG_ERR H5E_DATATYPE
 
 /** \page H5T_UG HDF5 Datatypes
@@ -39,13 +39,18 @@
  *
  * \subsection subsec_datatype_intro Introduction and Definitions
  *
- * An HDF5 dataset is an array of data elements, arranged according to the specifications
- * of the dataspace. In general, a data element is the smallest addressable unit of storage
- * in the HDF5 file. (Compound datatypes are the exception to this rule.) The HDF5 datatype
+ * An HDF5 dataset is an array of data elements, arranged according to the
+specifications
+ * of the dataspace. In general, a data element is the smallest addressable unit
+of storage
+ * in the HDF5 file. (Compound datatypes are the exception to this rule.) The
+HDF5 datatype
  * defines the storage format for a single data element. See the figure below.
  *
- * The model for HDF5 attributes is extremely similar to datasets: an attribute has a dataspace
- * and a data type, as shown in the figure below. The information in this chapter applies to both
+ * The model for HDF5 attributes is extremely similar to datasets: an attribute
+has a dataspace
+ * and a data type, as shown in the figure below. The information in this
+chapter applies to both
  * datasets and attributes.
  *
  * <table>
@@ -56,50 +61,76 @@
  * </tr>
  * </table>
  *
- * Abstractly, each data element within the dataset is a sequence of bits, interpreted as a single
- * value from a set of values (for example, a number or a character). For a given datatype, there is a
- * standard or convention for representing the values as bits, and when the bits are represented in a
- * particular storage the bits are laid out in a specific storage scheme such as 8-bit bytes with a
+ * Abstractly, each data element within the dataset is a sequence of bits,
+interpreted as a single
+ * value from a set of values (for example, a number or a character). For a
+given datatype, there is a
+ * standard or convention for representing the values as bits, and when the bits
+are represented in a
+ * particular storage the bits are laid out in a specific storage scheme such as
+8-bit bytes with a
  * specific ordering and alignment of bytes within the storage array.
  *
- * HDF5 datatypes implement a flexible, extensible, and portable mechanism for specifying and
- * discovering the storage layout of the data elements, determining how to interpret the elements
- * (for example, as floating point numbers), and for transferring data from different compatible
+ * HDF5 datatypes implement a flexible, extensible, and portable mechanism for
+specifying and
+ * discovering the storage layout of the data elements, determining how to
+interpret the elements
+ * (for example, as floating point numbers), and for transferring data from
+different compatible
  * layouts.
  *
- * An HDF5 datatype describes one specific layout of bits. A dataset has a single datatype which
- * applies to every data element. When a dataset is created, the storage datatype is defined. After
+ * An HDF5 datatype describes one specific layout of bits. A dataset has a
+single datatype which
+ * applies to every data element. When a dataset is created, the storage
+datatype is defined. After
  * the dataset or attribute is created, the datatype cannot be changed.
  * \li The datatype describes the storage layout of a singledata element
  * \li All elements of the dataset must have the same type
  * \li The datatype of a dataset is immutable
  *
- * When data is transferred (for example, a read or write), each end point of the transfer has a
- * datatype, which describes the correct storage for the elements. The source and destination may
- * have different (but compatible) layouts, in which case the data elements are automatically
+ * When data is transferred (for example, a read or write), each end point of
+the transfer has a
+ * datatype, which describes the correct storage for the elements. The source
+and destination may
+ * have different (but compatible) layouts, in which case the data elements are
+automatically
  * transformed during the transfer.
  *
  * HDF5 datatypes describe commonly used binary formats for numbers (integers
- * and floating point) and characters (ASCII). A given computing architecture and programming language
- * supports certain number and character representations. For example, a computer may support 8-,
- * 16-, 32-, and 64-bit signed integers, stored in memory in little-endian byte order. These would
- * presumably correspond to the C programming language types \Emph{char}, \Emph{short},
+ * and floating point) and characters (ASCII). A given computing architecture
+and programming language
+ * supports certain number and character representations. For example, a
+computer may support 8-,
+ * 16-, 32-, and 64-bit signed integers, stored in memory in little-endian byte
+order. These would
+ * presumably correspond to the C programming language types \Emph{char},
+\Emph{short},
  * \Emph{int}, and \Emph{long}.
  *
- * When reading and writing from memory, the HDF5 library must know the appropriate datatype
- * that describes the architecture specific layout. The HDF5 library provides the platform
- * independent \Emph{NATIVE} types, which are mapped to an appropriate datatype for each platform.
- * So the type #H5T_NATIVE_INT is an alias for the appropriate descriptor for each platform.
+ * When reading and writing from memory, the HDF5 library must know the
+appropriate datatype
+ * that describes the architecture specific layout. The HDF5 library provides
+the platform
+ * independent \Emph{NATIVE} types, which are mapped to an appropriate datatype
+for each platform.
+ * So the type #H5T_NATIVE_INT is an alias for the appropriate descriptor for
+each platform.
  *
  * Data in memory has a datatype:
  * \li The storage layout in memory is architecture-specific
- * \li The HDF5 \Emph{NATIVE} types are predefined aliases for the architecture-specific memory layout
- * \li The memory datatype need not be the same as the stored datatype of the dataset
+ * \li The HDF5 \Emph{NATIVE} types are predefined aliases for the
+architecture-specific memory layout
+ * \li The memory datatype need not be the same as the stored datatype of the
+dataset
  *
- * In addition to numbers and characters, an HDF5 datatype can describe more abstract classes of
- * types including enumerations, strings, bit strings, and references (pointers to objects in the HDF5
- * file). HDF5 supports several classes of composite datatypes which are combinations of one or
- * more other datatypes. In addition to the standard predefined datatypes, users can define new
+ * In addition to numbers and characters, an HDF5 datatype can describe more
+abstract classes of
+ * types including enumerations, strings, bit strings, and references (pointers
+to objects in the HDF5
+ * file). HDF5 supports several classes of composite datatypes which are
+combinations of one or
+ * more other datatypes. In addition to the standard predefined datatypes, users
+can define new
  * datatypes within the datatype classes.
  *
  * The HDF5 datatype model is very general and flexible:
@@ -109,41 +140,64 @@
  * \li Committed datatypes can be shared by datasets or attributes
  *
  * \subsection subsec_datatype_model Datatype Model
- * The HDF5 library implements an object-oriented model of datatypes. HDF5 datatypes are
- * organized as a logical set of base types, or datatype classes. Each datatype class defines
- * a format for representing logical values as a sequence of bits. For example the #H5T_INTEGER
+ * The HDF5 library implements an object-oriented model of datatypes. HDF5
+datatypes are
+ * organized as a logical set of base types, or datatype classes. Each datatype
+class defines
+ * a format for representing logical values as a sequence of bits. For example
+the #H5T_INTEGER
  * class is a format for representing twos complement integers of various sizes.
  *
- * A datatype class is defined as a set of one or more datatype properties. A datatype property is
- * a property of the bit string. The datatype properties are defined by the logical model of the
- * datatype class. For example, the integer class (twos complement integers) has properties such as
- * “signed or unsigned”, “length”, and “byte-order”. The float class (IEEE floating point numbers)
+ * A datatype class is defined as a set of one or more datatype properties. A
+datatype property is
+ * a property of the bit string. The datatype properties are defined by the
+logical model of the
+ * datatype class. For example, the integer class (twos complement integers) has
+properties such as
+ * “signed or unsigned”, “length”, and “byte-order”. The float class (IEEE
+floating point numbers)
  * has these properties, plus “exponent bits”, “exponent sign”, etc.
  *
- * A datatype is derived from one datatype class: a given datatype has a specific value for the
- * datatype properties defined by the class. For example, for 32-bit signed integers, stored
- * big-endian, the HDF5 datatype is a sub-type of integer with the properties set to
+ * A datatype is derived from one datatype class: a given datatype has a
+specific value for the
+ * datatype properties defined by the class. For example, for 32-bit signed
+integers, stored
+ * big-endian, the HDF5 datatype is a sub-type of integer with the properties
+set to
  * signed=1, size=4(bytes), and byte-order=BE.
  *
- * The HDF5 datatype API (H5T functions) provides methods to create datatypes of different
- * datatype classes, to set the datatype properties of a new datatype, and to discover the datatype
+ * The HDF5 datatype API (H5T functions) provides methods to create datatypes of
+different
+ * datatype classes, to set the datatype properties of a new datatype, and to
+discover the datatype
  * properties of an existing datatype.
  *
- * The datatype for a dataset is stored in the HDF5 file as part of the metadata for the dataset.
- * A datatype can be shared by more than one dataset in the file if the datatype is saved to the
- * file with a name. This shareable datatype is known as a committed datatype. In the past,
+ * The datatype for a dataset is stored in the HDF5 file as part of the metadata
+for the dataset.
+ * A datatype can be shared by more than one dataset in the file if the datatype
+is saved to the
+ * file with a name. This shareable datatype is known as a committed datatype.
+In the past,
  * this kind of datatype was called a named datatype.
  *
- * When transferring data (for example, a read or write), the data elements of the source and
- * destination storage must have compatible types. As a general rule, data elements with the same
- * datatype class are compatible while elements from different datatype classes are not compatible.
- * When transferring data of one datatype to another compatible datatype, the HDF5 Library uses
- * the datatype properties of the source and destination to automatically transform each data
- * element. For example, when reading from data stored as 32-bit signed integers, big
- * endian into 32-bit signed integers, little-endian, the HDF5 Library will automatically swap the
+ * When transferring data (for example, a read or write), the data elements of
+the source and
+ * destination storage must have compatible types. As a general rule, data
+elements with the same
+ * datatype class are compatible while elements from different datatype classes
+are not compatible.
+ * When transferring data of one datatype to another compatible datatype, the
+HDF5 Library uses
+ * the datatype properties of the source and destination to automatically
+transform each data
+ * element. For example, when reading from data stored as 32-bit signed
+integers, big
+ * endian into 32-bit signed integers, little-endian, the HDF5 Library will
+automatically swap the
  * bytes.
  *
- * Thus, data transfer operations (\ref H5Dread, \ref H5Dwrite, \ref H5Aread, \ref H5Awrite) require
+ * Thus, data transfer operations (\ref H5Dread, \ref H5Dwrite, \ref H5Aread,
+\ref H5Awrite) require
  * a datatype for both the source and the destination.
  *
  * <table>
@@ -154,15 +208,22 @@
  * </tr>
  * </table>
  *
- * The HDF5 library defines a set of predefined datatypes, corresponding to commonly used
- * storage formats, such as twos complement integers, IEEE Floating point numbers, etc., 4-
- * and 8-byte sizes, big-endian and little-endian byte orders. In addition, a user can derive types with
- * custom values for the properties. For example, a user program may create a datatype to describe
+ * The HDF5 library defines a set of predefined datatypes, corresponding to
+commonly used
+ * storage formats, such as twos complement integers, IEEE Floating point
+numbers, etc., 4-
+ * and 8-byte sizes, big-endian and little-endian byte orders. In addition, a
+user can derive types with
+ * custom values for the properties. For example, a user program may create a
+datatype to describe
  * a 6-bit integer, or a 600-bit floating point number.
  *
- * In addition to atomic datatypes, the HDF5 library supports composite datatypes. A composite
- * datatype is an aggregation of one or more datatypes. Each class of composite datatypes has
- * properties that describe the organization of the composite datatype. See the figure below.
+ * In addition to atomic datatypes, the HDF5 library supports composite
+datatypes. A composite
+ * datatype is an aggregation of one or more datatypes. Each class of composite
+datatypes has
+ * properties that describe the organization of the composite datatype. See the
+figure below.
  * Composite datatypes include:
  * \li Compound datatypes: structured records
  * \li Array: a multidimensional array of a datatype
@@ -177,8 +238,10 @@
  * </table>
  *
  * \subsubsection subsubsec_datatype_model_class Datatype Classes and Properties
- * The figure below shows the HDF5 datatype classes. Each class is defined to have a set of
- * properties which describe the layout of the data element and the interpretation of the bits. The
+ * The figure below shows the HDF5 datatype classes. Each class is defined to
+have a set of
+ * properties which describe the layout of the data element and the
+interpretation of the bits. The
  * table below lists the properties for the datatype classes.
  *
  * <table>
@@ -213,7 +276,8 @@
  *       Twos complement integers
  *       </td>
  *       <td>
- *       Size (bytes), precision (bits), offset (bits), pad, byte order, signed/unsigned
+ *       Size (bytes), precision (bits), offset (bits), pad, byte order,
+signed/unsigned
  *       </td>
  *       <td>
  *       </td>
@@ -226,8 +290,10 @@
  * Floating Point numbers
  *       </td>
  *       <td>
- * Size (bytes), precision (bits), offset (bits), pad, byte order, sign position,
- * exponent position, exponent size (bits), exponent sign, exponent bias, mantissa position,
+ * Size (bytes), precision (bits), offset (bits), pad, byte order, sign
+position,
+ * exponent position, exponent size (bits), exponent sign, exponent bias,
+mantissa position,
  * mantissa (size) bits, mantissa sign, mantissa normalization, internal padding
  *       </td>
  *       <td>
@@ -353,19 +419,26 @@
  *   </table>
  *
  * \subsubsection subsubsec_datatype_model_predefine Predefined Datatypes
- * The HDF5 library predefines a modest number of commonly used datatypes. These types have
- * standard symbolic names of the form H5T_arch_base where arch is an architecture name and
- * base is a programming type name <b>Table 2</b>. New types can be derived from the predefined
- * types by copying the predefined type \ref H5Tcopy() and then modifying the result.
+ * The HDF5 library predefines a modest number of commonly used datatypes. These
+types have
+ * standard symbolic names of the form H5T_arch_base where arch is an
+architecture name and
+ * base is a programming type name <b>Table 2</b>. New types can be derived from
+the predefined
+ * types by copying the predefined type \ref H5Tcopy() and then modifying the
+result.
  *
- * The base name of most types consists of a letter to indicate the class <b>Table 3</b>, a precision in
+ * The base name of most types consists of a letter to indicate the class
+<b>Table 3</b>, a precision in
  * bits, and an indication of the byte order <b>Table 4</b>.
  *
- * <b>Table 5</b> shows examples of predefined datatypes. The full list can be found in the
+ * <b>Table 5</b> shows examples of predefined datatypes. The full list can be
+found in the
  * \ref PDT section of the \ref RM.
  *
  *   <table>
- *     <caption align=top>Table 2. Architectures used in predefined datatypes</caption>
+ *     <caption align=top>Table 2. Architectures used in predefined
+datatypes</caption>
  *     <tr>
  *       <th>
  *       Architecture Name
@@ -606,11 +679,16 @@
  *     </tr>
  *   </table>
  *
- * The HDF5 library predefines a set of \Emph{NATIVE} datatypes which are similar to C type names.
- * The native types are set to be an alias for the appropriate HDF5 datatype for each platform. For
- * example, #H5T_NATIVE_INT corresponds to a C int type. On an Intel based PC, this type is the same as
- * #H5T_STD_I32LE, while on a MIPS system this would be equivalent to #H5T_STD_I32BE. Table 6 shows
- * examples of \Emph{NATIVE} types and corresponding C types for a common 32-bit workstation.
+ * The HDF5 library predefines a set of \Emph{NATIVE} datatypes which are
+similar to C type names.
+ * The native types are set to be an alias for the appropriate HDF5 datatype for
+each platform. For
+ * example, #H5T_NATIVE_INT corresponds to a C int type. On an Intel based PC,
+this type is the same as
+ * #H5T_STD_I32LE, while on a MIPS system this would be equivalent to
+#H5T_STD_I32BE. Table 6 shows
+ * examples of \Emph{NATIVE} types and corresponding C types for a common 32-bit
+workstation.
  *
  *   <table>
  *     <caption align=top>Table 6. Native and 32-bit C datatypes</caption>
@@ -802,16 +880,24 @@
  *
  * \subsection subsec_datatype_usage How Datatypes are Used
  *
- * \subsubsection subsubsec_datatype_usage_object The Datatype Object and the HDF5 Datatype API
- * The HDF5 library manages datatypes as objects. The HDF5 datatype API manipulates the
- * datatype objects through C function calls. New datatypes can be created from scratch or
- * copied from existing datatypes. When a datatype is no longer needed its resources should be released by
+ * \subsubsection subsubsec_datatype_usage_object The Datatype Object and the
+HDF5 Datatype API
+ * The HDF5 library manages datatypes as objects. The HDF5 datatype API
+manipulates the
+ * datatype objects through C function calls. New datatypes can be created from
+scratch or
+ * copied from existing datatypes. When a datatype is no longer needed its
+resources should be released by
  * calling \ref H5Tclose().
  *
- * The datatype object is used in several roles in the HDF5 data model and library. Essentially, a
- * datatype is used whenever the form at of data elements is needed. There are four major uses of
- * datatypes in the HDF5 library: at dataset creation, during data transfers, when discovering the
- * contents of a file, and for specifying user-defined datatypes. See the table below.
+ * The datatype object is used in several roles in the HDF5 data model and
+library. Essentially, a
+ * datatype is used whenever the form at of data elements is needed. There are
+four major uses of
+ * datatypes in the HDF5 library: at dataset creation, during data transfers,
+when discovering the
+ * contents of a file, and for specifying user-defined datatypes. See the table
+below.
  *
  *   <table>
  *     <caption align=top>Table 7. Datatype uses</caption>
@@ -828,7 +914,8 @@
  * Dataset creation
  *       </td>
  *       <td span='2'>
- * The datatype of the data elements must be declared when the dataset is created.
+ * The datatype of the data elements must be declared when the dataset is
+created.
  *       </td>
  *     </tr>
  *     <tr>
@@ -836,7 +923,8 @@
  * Dataset transfer
  *       </td>
  *       <td span='2'>
- * The datatype (format) of the data elements must be defined for both the source and destination.
+ * The datatype (format) of the data elements must be defined for both the
+source and destination.
  *       </td>
  *     </tr>
  *     <tr>
@@ -844,7 +932,8 @@
  * Discovery
  *       </td>
  *       <td span='2'>
- * The datatype of a dataset can be interrogated to retrieve a complete description of the storage layout.
+ * The datatype of a dataset can be interrogated to retrieve a complete
+description of the storage layout.
  *       </td>
  *     </tr>
  *     <tr>
@@ -852,15 +941,19 @@
  * Creating user-defined datatypes
  *       </td>
  *       <td span='2'>
- * Users can define their own datatypes by creating datatype objects and setting their properties.
+ * Users can define their own datatypes by creating datatype objects and setting
+their properties.
  *       </td>
  *     </tr>
  *   </table>
  *
  * \subsubsection subsubsec_datatype_usage_create Dataset Creation
- * All the data elements of a dataset have the same datatype. When a dataset is created, the datatype
- * for the data elements must be specified. The datatype of a dataset can never be changed. The
- * example below shows the use of a datatype to create a dataset called “/dset”. In this example, the
+ * All the data elements of a dataset have the same datatype. When a dataset is
+created, the datatype
+ * for the data elements must be specified. The datatype of a dataset can never
+be changed. The
+ * example below shows the use of a datatype to create a dataset called “/dset”.
+In this example, the
  * dataset will be stored as 32-bit signed integers in big-endian order.
  *
  * <em> Using a datatype to create a dataset </em>
@@ -868,50 +961,69 @@
  *   hid_t dt;
  *
  *   dt = H5Tcopy(H5T_STD_I32BE);
- *   dataset_id = H5Dcreate(file_id, “/dset”, dt, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   dataset_id = H5Dcreate(file_id, “/dset”, dt, dataspace_id, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
  * \endcode
  *
- * \subsubsection subsubsec_datatype_usage_transfer Data Transfer (Read and Write)
- * Probably the most common use of datatypes is to write or read data from a dataset or attribute. In
- * these operations, each data element is transferred from the source to the destination (possibly
- * rearranging the order of the elements). Since the source and destination do not need to be
- * identical (in other words, one is disk and the other is memory), the transfer requires
- * both the format of the source element and the destination element. Therefore, data transfers use two
+ * \subsubsection subsubsec_datatype_usage_transfer Data Transfer (Read and
+Write)
+ * Probably the most common use of datatypes is to write or read data from a
+dataset or attribute. In
+ * these operations, each data element is transferred from the source to the
+destination (possibly
+ * rearranging the order of the elements). Since the source and destination do
+not need to be
+ * identical (in other words, one is disk and the other is memory), the transfer
+requires
+ * both the format of the source element and the destination element. Therefore,
+data transfers use two
  * datatype objects, for the source and destination.
  *
- * When data is written, the source is memory and the destination is disk (file). The memory
- * datatype describes the format of the data element in the machine memory, and the file datatype
- * describes the desired format of the data element on disk. Similarly, when reading, the source
- * datatype describes the format of the data element on disk, and the destination datatype describes
+ * When data is written, the source is memory and the destination is disk
+(file). The memory
+ * datatype describes the format of the data element in the machine memory, and
+the file datatype
+ * describes the desired format of the data element on disk. Similarly, when
+reading, the source
+ * datatype describes the format of the data element on disk, and the
+destination datatype describes
  * the format in memory.
  *
  * In the most common cases, the file datatype is the datatype specified when
  * the dataset was
- * created, and the memory datatype should be the appropriate \Emph{NATIVE} type.
- * The examples below show samples of writing data to and reading data from a dataset. The data
- * in memory is declared C type ‘int’, and the datatype #H5T_NATIVE_INT corresponds to this
+ * created, and the memory datatype should be the appropriate \Emph{NATIVE}
+type.
+ * The examples below show samples of writing data to and reading data from a
+dataset. The data
+ * in memory is declared C type ‘int’, and the datatype #H5T_NATIVE_INT
+corresponds to this
  * type. The datatype of the dataset should be of datatype class #H5T_INTEGER.
  *
  * <em> Writing to a dataset </em>
  * \code
  *   int dset_data[DATA_SIZE];
  *
- *   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
+ *   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+H5P_DEFAULT, dset_data);
  * \endcode
  *
  * <em> Reading from a dataset </em>
  * \code
  *   int dset_data[DATA_SIZE];
  *
- *   status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
+ *   status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+dset_data);
  * \endcode
  *
  * \subsubsection subsubsec_datatype_usage_discover Discovery of Data Format
  * The HDF5 Library enables a program to
  * determine the datatype class and properties for any
- * datatype. In order to discover the storage format of data in a dataset, the datatype is obtained, and
- * the properties are determined by queries to the datatype object. The example below shows code
- * that analyzes the datatype for an integer and prints out a description of its storage properties
+ * datatype. In order to discover the storage format of data in a dataset, the
+datatype is obtained, and
+ * the properties are determined by queries to the datatype object. The example
+below shows code
+ * that analyzes the datatype for an integer and prints out a description of its
+storage properties
  * (byte order, signed, size).
  *
  * <em> Discovering datatype properties </em>
@@ -949,28 +1061,43 @@
  *   }
  * \endcode
  *
- * \subsubsection subsubsec_datatype_usage_user Creating and Using User‐defined Datatypes
- * Most programs will primarily use the predefined datatypes described above, possibly in
- * composite data types such as compound or array datatypes. However, the HDF5 datatype model
- * is extremely general; a user program can define a great variety of atomic datatypes (storage
- * layouts). In particular, the datatype properties can define signed and unsigned integers of any
- * size and byte order, and floating point numbers with different formats, size, and byte order. The
+ * \subsubsection subsubsec_datatype_usage_user Creating and Using User‐defined
+Datatypes
+ * Most programs will primarily use the predefined datatypes described above,
+possibly in
+ * composite data types such as compound or array datatypes. However, the HDF5
+datatype model
+ * is extremely general; a user program can define a great variety of atomic
+datatypes (storage
+ * layouts). In particular, the datatype properties can define signed and
+unsigned integers of any
+ * size and byte order, and floating point numbers with different formats, size,
+and byte order. The
  * HDF5 datatype API provides methods to set these properties.
  *
- * User-defined types can be used to define the layout of data in memory; examples might match
- * some platform specific number format or application defined bit-field. The user-defined type can
- * also describe data in the file such as an application-defined format. The user-defined types can be
+ * User-defined types can be used to define the layout of data in memory;
+examples might match
+ * some platform specific number format or application defined bit-field. The
+user-defined type can
+ * also describe data in the file such as an application-defined format. The
+user-defined types can be
  * translated to and from standard types of the same class, as described above.
  *
  * \subsection subsec_datatype_function Datatype Function Summaries
- * @see H5T reference manual provides a reference list of datatype functions, the H5T APIs.
+ * @see H5T reference manual provides a reference list of datatype functions,
+the H5T APIs.
  *
  * \subsection subsec_datatype_program Programming Model for Datatypes
- * The HDF5 Library implements an object-oriented model of datatypes. HDF5 datatypes are
- * organized as a logical set of base types, or datatype classes. The HDF5 Library manages
- * datatypes as objects. The HDF5 datatype API manipulates the datatype objects through C
- * function calls. The figure below shows the abstract view of the datatype object. The table below
- * shows the methods (C functions) that operate on datatype objects. New datatypes can be created
+ * The HDF5 Library implements an object-oriented model of datatypes. HDF5
+datatypes are
+ * organized as a logical set of base types, or datatype classes. The HDF5
+Library manages
+ * datatypes as objects. The HDF5 datatype API manipulates the datatype objects
+through C
+ * function calls. The figure below shows the abstract view of the datatype
+object. The table below
+ * shows the methods (C functions) that operate on datatype objects. New
+datatypes can be created
  * from scratch or copied from existing datatypes.
  *
  * <table>
@@ -982,7 +1109,8 @@
  * </table>
  *
  *   <table>
- *     <caption align=top>Table 8. General operations on datatype objects</caption>
+ *     <caption align=top>Table 8. General operations on datatype
+objects</caption>
  *     <tr>
  *       <th>
  *       API Function
@@ -996,7 +1124,8 @@
  * \ref hid_t \ref H5Tcreate (\ref H5T_class_t class, size_t size)
  *       </td>
  *       <td>
- * Create a new datatype object of datatype class . The following datatype classes care supported
+ * Create a new datatype object of datatype class . The following datatype
+classes care supported
  * with this function:
  * \li #H5T_COMPOUND
  * \li #H5T_OPAQUE
@@ -1009,8 +1138,10 @@
  * \ref hid_t \ref H5Tcopy (\ref hid_t type)
  *       </td>
  *       <td>
- * Obtain a modifiable transient datatype which is a copy of type. If type is a dataset identifier
- * then the type returned is a modifiable transient copy of the datatype of the specified dataset.
+ * Obtain a modifiable transient datatype which is a copy of type. If type is a
+dataset identifier
+ * then the type returned is a modifiable transient copy of the datatype of the
+specified dataset.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1018,7 +1149,8 @@
  * \ref hid_t \ref H5Topen (\ref hid_t location, const char *name, #H5P_DEFAULT)
  *       </td>
  *       <td>
- * Open a committed datatype. The committed datatype returned by this function is read-only.
+ * Open a committed datatype. The committed datatype returned by this function
+is read-only.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1034,17 +1166,21 @@
  * \ref herr_t \ref H5Tclose (\ref hid_t type)
  *       </td>
  *       <td>
- * Releases resources associated with a datatype obtained from \ref H5Tcopy, \ref H5Topen, or
- * \ref H5Tcreate. It is illegal to close an immutable transient datatype (for example, predefined types).
+ * Releases resources associated with a datatype obtained from \ref H5Tcopy,
+\ref H5Topen, or
+ * \ref H5Tcreate. It is illegal to close an immutable transient datatype (for
+example, predefined types).
  *       </td>
  *     </tr>
  *     <tr>
  *       <td>
- * \ref herr_t \ref H5Tcommit (\ref hid_t location, const char *name, hid_t type,
+ * \ref herr_t \ref H5Tcommit (\ref hid_t location, const char *name, hid_t
+type,
  *                             #H5P_DEFAULT, #H5P_DEFAULT, #H5P_DEFAULT)
  *       </td>
  *       <td>
- * Commit a transient datatype (not immutable) to a file to become a committed datatype. Committed
+ * Commit a transient datatype (not immutable) to a file to become a committed
+datatype. Committed
  * datatypes can be shared.
  *       </td>
  *     </tr>
@@ -1061,37 +1197,53 @@
  * \ref herr_t \ref H5Tlock (\ref hid_t type)
  *       </td>
  *       <td>
- * Make a transient datatype immutable (read-only and not closable). Predefined types are locked.
+ * Make a transient datatype immutable (read-only and not closable). Predefined
+types are locked.
  *       </td>
  *     </tr>
  *   </table>
  *
- * In order to use a datatype, the object must be created (\ref H5Tcreate), or a reference obtained by
- * cloning from an existing type (\ref H5Tcopy), or opened (\ref H5Topen). In addition, a reference to the
- * datatype of a dataset or attribute can be obtained with \ref H5Dget_type or \ref H5Aget_type. For
- * composite datatypes a reference to the datatype for members or base types can be obtained
- * (\ref H5Tget_member_type, \ref H5Tget_super). When the datatype object is no longer needed, the
+ * In order to use a datatype, the object must be created (\ref H5Tcreate), or a
+reference obtained by
+ * cloning from an existing type (\ref H5Tcopy), or opened (\ref H5Topen). In
+addition, a reference to the
+ * datatype of a dataset or attribute can be obtained with \ref H5Dget_type or
+\ref H5Aget_type. For
+ * composite datatypes a reference to the datatype for members or base types can
+be obtained
+ * (\ref H5Tget_member_type, \ref H5Tget_super). When the datatype object is no
+longer needed, the
  * reference is discarded with \ref H5Tclose.
  *
- * Two datatype objects can be tested to see if they are the same with \ref H5Tequal. This function
- * returns true if the two datatype references refer to the same datatype object. However, if two
- * datatype objects define equivalent datatypes (the same datatype class and datatype properties),
+ * Two datatype objects can be tested to see if they are the same with \ref
+H5Tequal. This function
+ * returns true if the two datatype references refer to the same datatype
+object. However, if two
+ * datatype objects define equivalent datatypes (the same datatype class and
+datatype properties),
  * they will not be considered ‘equal’.
  *
- * A datatype can be written to the file as a first class object (\ref H5Tcommit). This is a committed
+ * A datatype can be written to the file as a first class object (\ref
+H5Tcommit). This is a committed
  * datatype and can be used in thesame way as any other datatype.
  *
- * \subsubsection subsubsec_datatype_program_discover Discovery of Datatype Properties
- * Any HDF5 datatype object can be queried to discover all of its datatype properties. For each
- * datatype class, there are a set of API functions to retrieve the datatype properties for this class.
+ * \subsubsection subsubsec_datatype_program_discover Discovery of Datatype
+Properties
+ * Any HDF5 datatype object can be queried to discover all of its datatype
+properties. For each
+ * datatype class, there are a set of API functions to retrieve the datatype
+properties for this class.
  *
  * <h4>Properties of Atomic Datatypes</h4>
- * Table 9 lists the functions to discover the properties of atomic datatypes. Table 10 lists the
- * queries relevant to specific numeric types. Table 11 gives the properties for atomic string
+ * Table 9 lists the functions to discover the properties of atomic datatypes.
+Table 10 lists the
+ * queries relevant to specific numeric types. Table 11 gives the properties for
+atomic string
  * datatype, and Table 12 gives the property of the opaque datatype.
  *
  *   <table>
- *     <caption align=top>Table 9. Functions to discover properties of atomic datatypes</caption>
+ *     <caption align=top>Table 9. Functions to discover properties of atomic
+datatypes</caption>
  *     <tr>
  *       <th>
  *       API Function
@@ -1105,7 +1257,8 @@
  * \ref H5T_class_t \ref H5Tget_class (\ref hid_t type)
  *       </td>
  *       <td>
- * The datatype class: #H5T_INTEGER, #H5T_FLOAT, #H5T_STRING, #H5T_BITFIELD, #H5T_OPAQUE, #H5T_COMPOUND,
+ * The datatype class: #H5T_INTEGER, #H5T_FLOAT, #H5T_STRING, #H5T_BITFIELD,
+#H5T_OPAQUE, #H5T_COMPOUND,
  * #H5T_REFERENCE, #H5T_ENUM, #H5T_VLEN, #H5T_ARRAY
  *       </td>
  *     </tr>
@@ -1114,7 +1267,8 @@
  * size_t \ref H5Tget_size (\ref hid_t type)
  *       </td>
  *       <td>
- * The total size of the element in bytes, including padding which may appear on either side of the
+ * The total size of the element in bytes, including padding which may appear on
+either side of the
  * actual value.
  *       </td>
  *     </tr>
@@ -1123,9 +1277,12 @@
  * \ref H5T_order_t \ref H5Tget_order (\ref hid_t type)
  *       </td>
  *       <td>
- * The byte order describes how the bytes of the datatype are laid out in memory. If the lowest memory
- * address contains the least significant byte of the datum then it is said to be little-endian or
- * #H5T_ORDER_LE. If the bytes are in the opposite order then they are said to be big-endianor #H5T_ORDER_BE.
+ * The byte order describes how the bytes of the datatype are laid out in
+memory. If the lowest memory
+ * address contains the least significant byte of the datum then it is said to
+be little-endian or
+ * #H5T_ORDER_LE. If the bytes are in the opposite order then they are said to
+be big-endianor #H5T_ORDER_BE.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1133,9 +1290,12 @@
  * size_t \ref H5Tget_precision (\ref hid_t type)
  *       </td>
  *       <td>
- * The precision property identifies the number of significant bits of a datatype and the offset property
- * (defined below) identifies its location. Some datatypes occupy more bytes than what is needed to store
- * the value. For instance, a short on a Cray is 32 significant bits in an eight-byte field.
+ * The precision property identifies the number of significant bits of a
+datatype and the offset property
+ * (defined below) identifies its location. Some datatypes occupy more bytes
+than what is needed to store
+ * the value. For instance, a short on a Cray is 32 significant bits in an
+eight-byte field.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1143,24 +1303,30 @@
  * int \ref H5Tget_offset (\ref hid_t type)
  *       </td>
  *       <td>
- * The offset property defines the bit location of the least significant bit of a bit field whose length
+ * The offset property defines the bit location of the least significant bit of
+a bit field whose length
  * is precision.
  *       </td>
  *     </tr>
  *     <tr>
  *       <td>
- * \ref herr_t \ref H5Tget_pad (\ref hid_t type, \ref H5T_pad_t *lsb, \ref H5T_pad_t *msb)
+ * \ref herr_t \ref H5Tget_pad (\ref hid_t type, \ref H5T_pad_t *lsb, \ref
+H5T_pad_t *msb)
  *       </td>
  *       <td>
- * Padding is the bits of a data element which are not significant as defined by the precision and offset
- * properties. Padding in the low-numbered bits is lsb padding and padding in the high-numbered bits is msb
- * padding. Padding bits can be set to zero (#H5T_PAD_ZERO) or one (#H5T_PAD_ONE).
+ * Padding is the bits of a data element which are not significant as defined by
+the precision and offset
+ * properties. Padding in the low-numbered bits is lsb padding and padding in
+the high-numbered bits is msb
+ * padding. Padding bits can be set to zero (#H5T_PAD_ZERO) or one
+(#H5T_PAD_ONE).
  *       </td>
  *     </tr>
  *   </table>
  *
  *   <table>
- *     <caption align=top>Table 10. Functions to discover properties of atomic datatypes</caption>
+ *     <caption align=top>Table 10. Functions to discover properties of atomic
+datatypes</caption>
  *     <tr>
  *       <th>
  *       API Function
@@ -1174,18 +1340,23 @@
  * \ref H5T_sign_t \ref H5Tget_sign (\ref hid_t type)
  *       </td>
  *       <td>
- * (INTEGER)Integer data can be signed two's complement (#H5T_SGN_2) or unsigned (#H5T_SGN_NONE).
+ * (INTEGER)Integer data can be signed two's complement (#H5T_SGN_2) or unsigned
+(#H5T_SGN_NONE).
  *       </td>
  *     </tr>
  *     <tr>
  *       <td>
- * \ref herr_t \ref H5Tget_fields (\ref hid_t type, size_t *spos, size_t *epos, size_t *esize,
+ * \ref herr_t \ref H5Tget_fields (\ref hid_t type, size_t *spos, size_t *epos,
+size_t *esize,
  *                                 size_t*mpos, size_t *msize)
  *       </td>
  *       <td>
- * (FLOAT)A floating-point data element has bit fields which are the exponent and mantissa as well as a
- * mantissa sign bit. These properties define the location (bit position of least significant bit of the
- * field) and size (in bits) of each field. The sign bit is always of length one and none of the fields
+ * (FLOAT)A floating-point data element has bit fields which are the exponent
+and mantissa as well as a
+ * mantissa sign bit. These properties define the location (bit position of
+least significant bit of the
+ * field) and size (in bits) of each field. The sign bit is always of length one
+and none of the fields
  *  are allowed to overlap.
  *       </td>
  *     </tr>
@@ -1194,8 +1365,10 @@
  * size_t \ref H5Tget_ebias (\ref hid_t type)
  *       </td>
  *       <td>
- * (FLOAT)A floating-point data element has bit fields which are the exponent and
- * mantissa as well as a mantissa sign bit. These properties define the location (bit
+ * (FLOAT)A floating-point data element has bit fields which are the exponent
+and
+ * mantissa as well as a mantissa sign bit. These properties define the location
+(bit
  * position of least significant bit of the field) and size (in bits) of
  * each field. The sign bit is always of length one and none of the
  * fields are allowed to overlap.
@@ -1207,13 +1380,18 @@
  *       </td>
  *       <td>
  * (FLOAT)This property describes the normalization method of the mantissa.
- * <ul><li>#H5T_NORM_MSBSET: the mantissa is shifted left (if non-zero) until the first bit
- * after the radix point is set and the exponent is adjusted accordingly. All bits of the
+ * <ul><li>#H5T_NORM_MSBSET: the mantissa is shifted left (if non-zero) until
+the first bit
+ * after the radix point is set and the exponent is adjusted accordingly. All
+bits of the
  * mantissa after the radix point are stored. </li>
- * <li>#H5T_NORM_IMPLIED: the mantissa is shifted left \(if non-zero) until the first
- * bit after the radix point is set and the exponent is adjusted accordingly. The first
+ * <li>#H5T_NORM_IMPLIED: the mantissa is shifted left \(if non-zero) until the
+first
+ * bit after the radix point is set and the exponent is adjusted accordingly.
+The first
  * bit after the radix point is not stored since it's always set. </li>
- * <li>#H5T_NORM_NONE: the fractional part of the mantissa is stored without normalizing it.</li></ul>
+ * <li>#H5T_NORM_NONE: the fractional part of the mantissa is stored without
+normalizing it.</li></ul>
  *       </td>
  *     </tr>
  *     <tr>
@@ -1221,8 +1399,10 @@
  * \ref H5T_pad_t \ref H5Tget_inpad (\ref hid_t type)
  *       </td>
  *       <td>
- * (FLOAT)If any internal bits (that is, bits between the sign bit, the mantissa field,
- * and the exponent field but within the precision field) are unused, then they will be
+ * (FLOAT)If any internal bits (that is, bits between the sign bit, the mantissa
+field,
+ * and the exponent field but within the precision field) are unused, then they
+will be
  * filled according to the value of this property. The padding can be:
  * #H5T_PAD_BACKGROUND, #H5T_PAD_ZERO,or #H5T_PAD_ONE.
  *       </td>
@@ -1230,7 +1410,8 @@
  *   </table>
  *
  *   <table>
- *     <caption align=top>Table 11. Functions to discover properties of atomic string datatypes</caption>
+ *     <caption align=top>Table 11. Functions to discover properties of atomic
+string datatypes</caption>
  *     <tr>
  *       <th>
  *       API Function
@@ -1253,8 +1434,10 @@
  * \ref H5T_str_t \ref H5Tget_strpad (\ref hid_t type)
  *       </td>
  *       <td>
- * The string datatype has a fixed length, but the string may be shorter than the length.
- * This property defines the storage mechanism for the left over bytes. The options are:
+ * The string datatype has a fixed length, but the string may be shorter than
+the length.
+ * This property defines the storage mechanism for the left over bytes. The
+options are:
  * \li #H5T_STR_NULLTERM
  * \li #H5T_STR_NULLPAD
  * \li #H5T_STR_SPACEPAD.
@@ -1263,7 +1446,8 @@
  *   </table>
  *
  *   <table>
- *     <caption align=top>Table 12. Functions to discover properties of atomic opaque datatypes</caption>
+ *     <caption align=top>Table 12. Functions to discover properties of atomic
+opaque datatypes</caption>
  *     <tr>
  *       <th>
  *       API Function
@@ -1283,13 +1467,17 @@
  *   </table>
  *
  * <h4>Properties of Composite Datatypes</h4>
- * The composite datatype classes can also be analyzed to discover their datatype properties and the
- * datatypes that are members or base types of the composite datatype. The member or base type
- * can, in turn, be analyzed. The table below lists the functions that can access the datatype
+ * The composite datatype classes can also be analyzed to discover their
+datatype properties and the
+ * datatypes that are members or base types of the composite datatype. The
+member or base type
+ * can, in turn, be analyzed. The table below lists the functions that can
+access the datatype
  * properties of the different composite datatypes.
  *
  *   <table>
- *     <caption align=top>Table 13. Functions to discover properties of composite datatypes</caption>
+ *     <caption align=top>Table 13. Functions to discover properties of
+composite datatypes</caption>
  *     <tr>
  *       <th>
  *       API Function
@@ -1308,7 +1496,8 @@
  *     </tr>
  *     <tr>
  *       <td>
- * \ref H5T_class_t \ref H5Tget_member_class (\ref hid_t cdtype_id, unsigned member_no)
+ * \ref H5T_class_t \ref H5Tget_member_class (\ref hid_t cdtype_id, unsigned
+member_no)
  *       </td>
  *       <td>
  * (COMPOUND)The datatype class of compound datatype member member_no.
@@ -1327,7 +1516,8 @@
  * size_t  \ref H5Tget_member_offset (\ref hid_t type_id, unsigned memb_no)
  *       </td>
  *       <td>
- * (COMPOUND)The byte offset of the beginning of a field within a compound datatype.
+ * (COMPOUND)The byte offset of the beginning of a field within a compound
+datatype.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1351,7 +1541,8 @@
  * int  \ref H5Tget_array_dims (\ref hid_t adtype_id, hsize_t *dims[])
  *       </td>
  *       <td>
- * (ARRAY)The sizes of the dimensions and the dimension permutations of the array datatype object.
+ * (ARRAY)The sizes of the dimensions and the dimension permutations of the
+array datatype object.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1364,23 +1555,28 @@
  *     </tr>
  *     <tr>
  *       <td>
- *  \ref herr_t  \ref H5Tenum_nameof(\ref hid_t type, const void *value, char *name, size_t size)
+ *  \ref herr_t  \ref H5Tenum_nameof(\ref hid_t type, const void *value, char
+*name, size_t size)
  *       </td>
  *       <td>
- * (ENUM)The symbol name that corresponds to the specified value of the enumeration datatype.
- *       </td>
- *     </tr>
- *     <tr>
- *       <td>
- *  \ref herr_t  \ref H5Tenum_valueof(\ref hid_t type, const char *name, void *value)
- *       </td>
- *       <td>
- * (ENUM)The value that corresponds to the specified name of the enumeration datatype.
+ * (ENUM)The symbol name that corresponds to the specified value of the
+enumeration datatype.
  *       </td>
  *     </tr>
  *     <tr>
  *       <td>
- *  \ref herr_t  \ref H5Tget_member_value (\ref hid_t type unsigned memb_no, void *value)
+ *  \ref herr_t  \ref H5Tenum_valueof(\ref hid_t type, const char *name, void
+*value)
+ *       </td>
+ *       <td>
+ * (ENUM)The value that corresponds to the specified name of the enumeration
+datatype.
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ *  \ref herr_t  \ref H5Tget_member_value (\ref hid_t type unsigned memb_no,
+void *value)
  *       </td>
  *       <td>
  * (ENUM)The value of the enumeration datatype member memb_no.
@@ -1389,16 +1585,21 @@
  *   </table>
  *
  * \subsubsection subsubsec_datatype_program_define Definition of Datatypes
- * The HDF5 library enables user programs to create and modify datatypes. The essential steps are:
- * <ul><li>1. Create a new datatype object of a specific composite datatype class, or copy an existing
+ * The HDF5 library enables user programs to create and modify datatypes. The
+essential steps are:
+ * <ul><li>1. Create a new datatype object of a specific composite datatype
+class, or copy an existing
  * atomic datatype object</li>
  * <li>2. Set properties of the datatype object</li>
  * <li>3. Use the datatype object</li>
  * <li>4. Close the datatype object</li></ul>
  *
- * To create a user-defined atomic datatype, the procedure is to clone a predefined datatype of the
- * appropriate datatype class (\ref H5Tcopy), and then set the datatype properties appropriate to the
- * datatype class. The table below shows how to create a datatype to describe a 1024-bit unsigned
+ * To create a user-defined atomic datatype, the procedure is to clone a
+predefined datatype of the
+ * appropriate datatype class (\ref H5Tcopy), and then set the datatype
+properties appropriate to the
+ * datatype class. The table below shows how to create a datatype to describe a
+1024-bit unsigned
  * integer.
  *
  * <em>Create a new datatype</em>
@@ -1409,13 +1610,17 @@
  *   H5Tset_sign(new_type, H5T_SGN_NONE);
  * \endcode
  *
- * Composite datatypes are created with a specific API call for each datatype class. The table below
- * shows the creation method for each datatype class. A newly created datatype cannot be used until the
- * datatype properties are set. For example, a newly created compound datatype has no members and cannot
+ * Composite datatypes are created with a specific API call for each datatype
+class. The table below
+ * shows the creation method for each datatype class. A newly created datatype
+cannot be used until the
+ * datatype properties are set. For example, a newly created compound datatype
+has no members and cannot
  * be used.
  *
  *   <table>
- *     <caption align=top>Table 14. Functions to create each datatype class</caption>
+ *     <caption align=top>Table 14. Functions to create each datatype
+class</caption>
  *     <tr>
  *       <th>
  *       Datatype Class
@@ -1466,20 +1671,27 @@
  *     </tr>
  *   </table>
  *
- * Once the datatype is created and the datatype properties set, the datatype object can be used.
+ * Once the datatype is created and the datatype properties set, the datatype
+object can be used.
  *
- * Predefined datatypes are defined by the library during initialization using the same mechanisms
- * as described here. Each predefined datatype is locked (\ref H5Tlock), so that it cannot be changed or
+ * Predefined datatypes are defined by the library during initialization using
+the same mechanisms
+ * as described here. Each predefined datatype is locked (\ref H5Tlock), so that
+it cannot be changed or
  * destroyed. User-defined datatypes may also be locked using \ref H5Tlock.
  *
  * <h4>User-defined Atomic Datatypes</h4>
- * Table 15 summarizes the API methods that set properties of atomic types. Table 16 shows
- * properties specific to numeric types, Table 17 shows properties specific to the string datatype
- * class. Note that offset, pad, etc. do not apply to strings. Table 18 shows the specific property of
+ * Table 15 summarizes the API methods that set properties of atomic types.
+Table 16 shows
+ * properties specific to numeric types, Table 17 shows properties specific to
+the string datatype
+ * class. Note that offset, pad, etc. do not apply to strings. Table 18 shows
+the specific property of
  * the OPAQUE datatype class.
  *
  *   <table>
- *     <caption align=top>Table 15. API methods that set properties of atomic datatypes</caption>
+ *     <caption align=top>Table 15. API methods that set properties of atomic
+datatypes</caption>
  *     <tr>
  *       <th>
  *       Functions
@@ -1493,12 +1705,18 @@
  *  \ref herr_t  \ref H5Tset_size (\ref hid_t type, size_t size)
  *       </td>
  *       <td>
- * Set the total size of the element in bytes. This includes padding which may appear on either
- * side of the actual value. If this property is reset to a smaller value which would cause the
- * significant part of the data to extend beyond the edge of the datatype, then the offset property
- * is decremented a bit at a time. If the offset reaches zero and the significant part of the data
- * still extends beyond the edge of the datatype then the precision property is decremented a bit at
- * a time. Decreasing the size of a datatype may fail if the #H5T_FLOAT bit fields would extend beyond
+ * Set the total size of the element in bytes. This includes padding which may
+appear on either
+ * side of the actual value. If this property is reset to a smaller value which
+would cause the
+ * significant part of the data to extend beyond the edge of the datatype, then
+the offset property
+ * is decremented a bit at a time. If the offset reaches zero and the
+significant part of the data
+ * still extends beyond the edge of the datatype then the precision property is
+decremented a bit at
+ * a time. Decreasing the size of a datatype may fail if the #H5T_FLOAT bit
+fields would extend beyond
  * the significant part of the type.
  *       </td>
  *     </tr>
@@ -1507,7 +1725,8 @@
  *  \ref herr_t  \ref H5Tset_order (\ref hid_t type, \ref H5T_order_t order)
  *       </td>
  *       <td>
- * Set the byte order to little-endian (#H5T_ORDER_LE) or big-endian (#H5T_ORDER_BE).
+ * Set the byte order to little-endian (#H5T_ORDER_LE) or big-endian
+(#H5T_ORDER_BE).
  *       </td>
  *     </tr>
  *     <tr>
@@ -1515,13 +1734,20 @@
  *  \ref herr_t  \ref H5Tset_precision (\ref hid_t type, size_t precision)
  *       </td>
  *       <td>
- * Set the number of significant bits of a datatype. The offset property (defined below) identifies
- * its location. The size property defined above represents the entire size (in bytes) of the datatype.
- * If the precision is decreased then padding bits are inserted on the MSB side of the significant
- * bits (this will fail for #H5T_FLOAT types if it results in the sign,mantissa, or exponent bit field
- * extending beyond the edge of the significant bit field). On the other hand, if the precision is
- * increased so that it “hangs over” the edge of the total size then the offset property is decremented
- * a bit at a time. If the offset reaches zero and the significant bits still hang over the edge, then
+ * Set the number of significant bits of a datatype. The offset property
+(defined below) identifies
+ * its location. The size property defined above represents the entire size (in
+bytes) of the datatype.
+ * If the precision is decreased then padding bits are inserted on the MSB side
+of the significant
+ * bits (this will fail for #H5T_FLOAT types if it results in the sign,mantissa,
+or exponent bit field
+ * extending beyond the edge of the significant bit field). On the other hand,
+if the precision is
+ * increased so that it “hangs over” the edge of the total size then the offset
+property is decremented
+ * a bit at a time. If the offset reaches zero and the significant bits still
+hang over the edge, then
  *  the total size is increased a byte at a time.
  *       </td>
  *     </tr>
@@ -1530,28 +1756,39 @@
  *  \ref herr_t  \ref H5Tset_offset (\ref hid_t type, size_t offset)
  *       </td>
  *       <td>
- * Set the bit location of the least significant bit of a bit field whose length is precision. The
- * bits of the entire data are numbered beginning at zero at the least significant bit of the least
- * significant byte (the byte at the lowest memory address for a little-endian type or the byte at
- * the highest address for a big-endian type). The offset property defines the bit location of the
- * least significant bit of a bit field whose length is precision. If the offset is increased so the
- * significant bits “hang over” the edge of the datum, then the size property is automatically incremented.
+ * Set the bit location of the least significant bit of a bit field whose length
+is precision. The
+ * bits of the entire data are numbered beginning at zero at the least
+significant bit of the least
+ * significant byte (the byte at the lowest memory address for a little-endian
+type or the byte at
+ * the highest address for a big-endian type). The offset property defines the
+bit location of the
+ * least significant bit of a bit field whose length is precision. If the offset
+is increased so the
+ * significant bits “hang over” the edge of the datum, then the size property is
+automatically incremented.
  *       </td>
  *     </tr>
  *     <tr>
  *       <td>
- *  \ref herr_t  \ref H5Tset_pad (\ref hid_t type, \ref H5T_pad_t lsb, \ref H5T_pad_t msb)
+ *  \ref herr_t  \ref H5Tset_pad (\ref hid_t type, \ref H5T_pad_t lsb, \ref
+H5T_pad_t msb)
  *       </td>
  *       <td>
- * Set the padding to zeros (#H5T_PAD_ZERO) or ones (#H5T_PAD_ONE). Padding is the bits of a
- * data element which are not significant as defined by the precision and offset properties. Padding
- * in the low-numbered bits is lsb padding and padding in the high-numbered bits is msb padding.
+ * Set the padding to zeros (#H5T_PAD_ZERO) or ones (#H5T_PAD_ONE). Padding is
+the bits of a
+ * data element which are not significant as defined by the precision and offset
+properties. Padding
+ * in the low-numbered bits is lsb padding and padding in the high-numbered bits
+is msb padding.
  *       </td>
  *     </tr>
  *   </table>
  *
  *   <table>
- *     <caption align=top>Table 16. API methods that set properties of numeric datatypes</caption>
+ *     <caption align=top>Table 16. API methods that set properties of numeric
+datatypes</caption>
  *     <tr>
  *       <th>
  *       Functions
@@ -1565,17 +1802,21 @@
  *  \ref herr_t  \ref H5Tset_sign (\ref hid_t type, \ref H5T_sign_t sign)
  *       </td>
  *       <td>
- * (INTEGER)Integer data can be signed two's complement (#H5T_SGN_2) or unsigned (#H5T_SGN_NONE).
+ * (INTEGER)Integer data can be signed two's complement (#H5T_SGN_2) or unsigned
+(#H5T_SGN_NONE).
  *       </td>
  *     </tr>
  *     <tr>
  *       <td>
- *  \ref herr_t  \ref H5Tset_fields (\ref hid_t type, size_t spos, size_t epos, size_t esize,
+ *  \ref herr_t  \ref H5Tset_fields (\ref hid_t type, size_t spos, size_t epos,
+size_t esize,
  *  size_t mpos, size_t msize)
  *       </td>
  *       <td>
- * (FLOAT)Set the properties define the location (bit position of least significant bit of the field)
- * and size (in bits) of each field. The sign bit is always of length one and none of the fields are
+ * (FLOAT)Set the properties define the location (bit position of least
+significant bit of the field)
+ * and size (in bits) of each field. The sign bit is always of length one and
+none of the fields are
  * allowed to overlap.
  *       </td>
  *     </tr>
@@ -1584,7 +1825,8 @@
  *  \ref herr_t  \ref H5Tset_ebias (\ref hid_t type, size_t ebias)
  *       </td>
  *       <td>
- * (FLOAT)The exponent is stored as a non-negative value which is ebias larger than the true exponent.
+ * (FLOAT)The exponent is stored as a non-negative value which is ebias larger
+than the true exponent.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1593,13 +1835,18 @@
  *       </td>
  *       <td>
  * (FLOAT)This property describes the normalization method of the mantissa.
- * <ul><li>#H5T_NORM_MSBSET: the mantissa is shifted left (if non-zero) until the first bit
- * after theradix point is set and the exponent is adjusted accordingly. All bits of the
+ * <ul><li>#H5T_NORM_MSBSET: the mantissa is shifted left (if non-zero) until
+the first bit
+ * after theradix point is set and the exponent is adjusted accordingly. All
+bits of the
  * mantissa after the radix point are stored. </li>
- * <li>#H5T_NORM_IMPLIED: the mantissa is shifted left (if non-zero) until the first bit
- * after the radix point is set and the exponent is adjusted accordingly. The first bit after
+ * <li>#H5T_NORM_IMPLIED: the mantissa is shifted left (if non-zero) until the
+first bit
+ * after the radix point is set and the exponent is adjusted accordingly. The
+first bit after
  * the radix point is not stored since it is always set. </li>
- * <li>#H5T_NORM_NONE: the fractional part of the mantissa is stored without normalizing it.</li></ul>
+ * <li>#H5T_NORM_NONE: the fractional part of the mantissa is stored without
+normalizing it.</li></ul>
  *       </td>
  *     </tr>
  *     <tr>
@@ -1609,8 +1856,8 @@
  *       <td>
  * (FLOAT)
 If any internal bits (that is, bits between the sign bit, the mantissa field,
-and the exponent field but within the precision field) are unused, then they will be
-filled according to the value of this property. The padding can be:
+and the exponent field but within the precision field) are unused, then they
+will be filled according to the value of this property. The padding can be:
  * \li #H5T_PAD_BACKGROUND
  * \li #H5T_PAD_ZERO
  * \li #H5T_PAD_ONE
@@ -1619,7 +1866,8 @@ filled according to the value of this property. The padding can be:
  *   </table>
  *
  *   <table>
- *     <caption align=top>Table 17. API methods that set properties of string datatypes</caption>
+ *     <caption align=top>Table 17. API methods that set properties of string
+datatypes</caption>
  *     <tr>
  *       <th>
  *       Functions
@@ -1633,7 +1881,8 @@ filled according to the value of this property. The padding can be:
  *  \ref herr_t  \ref H5Tset_size (\ref hid_t type, size_t size)
  *       </td>
  *       <td>
- * Set the length of the string, in bytes. The precision is automatically set to 8*size.
+ * Set the length of the string, in bytes. The precision is automatically set to
+8*size.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1659,13 +1908,16 @@ filled according to the value of this property. The padding can be:
  *  \ref herr_t \ref H5Tset_strpad (\ref hid_t type_id, H5T_str_t strpad)
  *       </td>
  *       <td>
- * The string datatype has a fixed length, but the string may be shorter than the length. This
- * property defines the storage mechanism for the left over bytes. The method used to store
+ * The string datatype has a fixed length, but the string may be shorter than
+the length. This
+ * property defines the storage mechanism for the left over bytes. The method
+used to store
  * character strings differs with the programming language:
  * \li C usually null terminates strings
  * \li Fortran left-justifies and space-pads strings
  *
- * Valid string padding values, as passed in the parameter strpad, are as follows:
+ * Valid string padding values, as passed in the parameter strpad, are as
+follows:
  * \li #H5T_STR_NULLTERM: Null terminate (as C does)
  * \li #H5T_STR_NULLPAD: Pad with zeros
  * \li #H5T_STR_SPACEPAD: Pad with spaces (as FORTRAN does)
@@ -1674,7 +1926,8 @@ filled according to the value of this property. The padding can be:
  *   </table>
  *
  *   <table>
- *     <caption align=top>Table 18. API methods that set properties of opaque datatypes</caption>
+ *     <caption align=top>Table 18. API methods that set properties of opaque
+datatypes</caption>
  *     <tr>
  *       <th>
  *       Functions
@@ -1694,9 +1947,12 @@ filled according to the value of this property. The padding can be:
  *   </table>
  *
  * <h4>Examples</h4>
- * The example below shows how to create a 128-bit little-endian signed integer type. Increasing
- * the precision of a type automatically increases the total size. Note that the proper
- * procedure is to begin from a type of the intended datatype class which in this case is a
+ * The example below shows how to create a 128-bit little-endian signed integer
+type. Increasing
+ * the precision of a type automatically increases the total size. Note that the
+proper
+ * procedure is to begin from a type of the intended datatype class which in
+this case is a
  * NATIVE INT.
  *
  * <em>Create a new 128-bit little-endian signed integer datatype</em>
@@ -1706,26 +1962,36 @@ filled according to the value of this property. The padding can be:
  *   H5Tset_order (new_type, H5T_ORDER_LE);
  * \endcode
  *
- * The figure below shows the storage layout as the type is defined. The \ref H5Tcopy creates a
- * datatype that is the same as #H5T_NATIVE_INT. In this example, suppose this is a 32-bit
- * big-endian number (Figure a). The precision is set to 128 bits, which automatically extends
- * the size to 8 bytes (Figure b). Finally, the byte order is set to little-endian (Figure c).
+ * The figure below shows the storage layout as the type is defined. The \ref
+H5Tcopy creates a
+ * datatype that is the same as #H5T_NATIVE_INT. In this example, suppose this
+is a 32-bit
+ * big-endian number (Figure a). The precision is set to 128 bits, which
+automatically extends
+ * the size to 8 bytes (Figure b). Finally, the byte order is set to
+little-endian (Figure c).
  *
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig6.gif "The storage layout for a new 128-bit little-endian signed integer datatype"
+ * \image html Dtypes_fig6.gif "The storage layout for a new 128-bit
+little-endian signed integer datatype"
  * </td>
  * </tr>
  * </table>
  *
- * The significant bits of a data element can be offset from the beginning of the memory for that
- * element by an amount of padding. The offset property specifies the number of bits of padding
- * that appear to the “right of” the value. The table and figure below show how a 32-bit unsigned
- * integer with 16-bits of precision having the value 0x1122 will be laid out in memory.
+ * The significant bits of a data element can be offset from the beginning of
+the memory for that
+ * element by an amount of padding. The offset property specifies the number of
+bits of padding
+ * that appear to the “right of” the value. The table and figure below show how
+a 32-bit unsigned
+ * integer with 16-bits of precision having the value 0x1122 will be laid out in
+memory.
  *
  *   <table>
- *     <caption align=top>Table 19. Memory Layout for a 32-bit unsigned integer</caption>
+ *     <caption align=top>Table 19. Memory Layout for a 32-bit unsigned
+integer</caption>
  *     <tr>
  *       <th>
  *       Byte Position
@@ -1821,18 +2087,27 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * If the offset is incremented then the total size is incremented also if necessary to prevent
+ * If the offset is incremented then the total size is incremented also if
+necessary to prevent
  * significant bits of the value from hanging over the edge of the datatype.
  *
- * The bits of the entire data are numbered beginning at zero at the least significant bit of the least
- * significant byte (the byte at the lowest memory address for a little-endian type or the byte at the
- * highest address for a big-endian type). The offset property defines the bit location of the least
- * significant bit of a bit field whose length is precision. If the offset is increased so the significant
- * bits “hang over” the edge of the datum, then the size property is automatically incremented.
+ * The bits of the entire data are numbered beginning at zero at the least
+significant bit of the least
+ * significant byte (the byte at the lowest memory address for a little-endian
+type or the byte at the
+ * highest address for a big-endian type). The offset property defines the bit
+location of the least
+ * significant bit of a bit field whose length is precision. If the offset is
+increased so the significant
+ * bits “hang over” the edge of the datum, then the size property is
+automatically incremented.
  *
- * To illustrate the properties of the integer datatype class, the example below shows how to create
- * a user-defined datatype that describes a 24-bit signed integer that starts on the third bit of a 32-bit
- * word. The datatype is specialized from a 32-bit integer, the precision is set to 24 bits, and the
+ * To illustrate the properties of the integer datatype class, the example below
+shows how to create
+ * a user-defined datatype that describes a 24-bit signed integer that starts on
+the third bit of a 32-bit
+ * word. The datatype is specialized from a 32-bit integer, the precision is set
+to 24 bits, and the
  * offset is set to 3.
  *
  * <em>A user-defined datatype with a 24-bit signed integer</em>
@@ -1845,21 +2120,28 @@ filled according to the value of this property. The padding can be:
  *   H5Tset_pad(dt, H5T_PAD_ZERO, H5T_PAD_ONE);
  * \endcode
  *
- * The figure below shows the storage layout for a data element. Note that the unused bits in the
- * offset will be set to zero and the unused bits at the end will be set to one, as specified in the
+ * The figure below shows the storage layout for a data element. Note that the
+unused bits in the
+ * offset will be set to zero and the unused bits at the end will be set to one,
+as specified in the
  * \ref H5Tset_pad call.
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig8.gif "A user-defined integer datatype with a range of -1,048,583 to 1,048,584"
+ * \image html Dtypes_fig8.gif "A user-defined integer datatype with a range of
+-1,048,583 to 1,048,584"
  * </td>
  * </tr>
  * </table>
  *
- * To illustrate a user-defined floating point number, the example below shows how to create a 24-bit
- * floating point number that starts 5 bits into a 4 byte word. The floating point number is defined to
- * have a mantissa of 19 bits (bits 5-23), an exponent of 3 bits (25-27), and the sign bit is bit 28.
- * (Note that this is an illustration of what can be done and is not necessarily a floating point
+ * To illustrate a user-defined floating point number, the example below shows
+how to create a 24-bit
+ * floating point number that starts 5 bits into a 4 byte word. The floating
+point number is defined to
+ * have a mantissa of 19 bits (bits 5-23), an exponent of 3 bits (25-27), and
+the sign bit is bit 28.
+ * (Note that this is an illustration of what can be done and is not necessarily
+a floating point
  * format that a user would require.)
  *
  * <em>A user-defined datatype with a 24-bit floating point datatype</em>
@@ -1880,37 +2162,55 @@ filled according to the value of this property. The padding can be:
  * </td>
  * </tr>
  * </table>
- * The figure above shows the storage layout of a data element for this datatype. Note that there is
- * an unused bit (24) between the mantissa and the exponent. This bit is filled with the inpad value
+ * The figure above shows the storage layout of a data element for this
+datatype. Note that there is
+ * an unused bit (24) between the mantissa and the exponent. This bit is filled
+with the inpad value
  * which in this case is 0.
  *
- * The sign bit is always of length one and none of the fields are allowed to overlap. When
- * expanding a floating-point type one should set the precision first; when decreasing the size one
+ * The sign bit is always of length one and none of the fields are allowed to
+overlap. When
+ * expanding a floating-point type one should set the precision first; when
+decreasing the size one
  * should set the field positions and sizes first.
  *
  * <h4>Composite Datatypes</h4>
- * All composite datatypes must be user-defined; there are no predefined composite datatypes.
+ * All composite datatypes must be user-defined; there are no predefined
+composite datatypes.
  *
  * <h4>Compound Datatypes</h4>
- * The subsections below describe how to create a compound datatype and how to write and read
+ * The subsections below describe how to create a compound datatype and how to
+write and read
  * data of a compound datatype.
  *
  * <h4>Defining Compound Datatypes</h4>
  *
- * Compound datatypes are conceptually similar to a C struct or Fortran derived types. The
- * compound datatype defines a contiguous sequence of bytes, which are formatted using one up to
- * 2^16 datatypes (members). A compound datatype may have any number of members, in any
- * order, and the members may have any datatype, including compound. Thus, complex nested
- * compound datatypes can be created. The total size of the compound datatype is greater than or
- * equal to the sum of the size of its members, up to a maximum of 2^32 bytes. HDF5 does not
- * support datatypes with distinguished records or the equivalent of C unions or Fortran
+ * Compound datatypes are conceptually similar to a C struct or Fortran derived
+types. The
+ * compound datatype defines a contiguous sequence of bytes, which are formatted
+using one up to
+ * 2^16 datatypes (members). A compound datatype may have any number of members,
+in any
+ * order, and the members may have any datatype, including compound. Thus,
+complex nested
+ * compound datatypes can be created. The total size of the compound datatype is
+greater than or
+ * equal to the sum of the size of its members, up to a maximum of 2^32 bytes.
+HDF5 does not
+ * support datatypes with distinguished records or the equivalent of C unions or
+Fortran
  * EQUIVALENCE statements.
  *
- * Usually a C struct or Fortran derived type will be defined to hold a data point in memory, and the
- * offsets of the members in memory will be the offsets of the struct members from the beginning
- * of an instance of the struct. The HDF5 C library provides a macro #HOFFSET (s,m)to calculate
- * the member's offset. The HDF5 Fortran applications have to calculate offsets by using sizes of
- * members datatypes and by taking in consideration the order of members in the Fortran derived type.
+ * Usually a C struct or Fortran derived type will be defined to hold a data
+point in memory, and the
+ * offsets of the members in memory will be the offsets of the struct members
+from the beginning
+ * of an instance of the struct. The HDF5 C library provides a macro #HOFFSET
+(s,m)to calculate
+ * the member's offset. The HDF5 Fortran applications have to calculate offsets
+by using sizes of
+ * members datatypes and by taking in consideration the order of members in the
+Fortran derived type.
  * \code
  * HOFFSET(s,m)
  * \endcode
@@ -1918,26 +2218,40 @@ filled according to the value of this property. The padding can be:
  * \code
  * offsetof(s,m)
  * \endcode
- * This macro defined in stddef.h does exactly the same thing as the HOFFSET()macro.
+ * This macro defined in stddef.h does exactly the same thing as the
+HOFFSET()macro.
  *
- * Note for Fortran users: Offsets of Fortran structure members correspond to the offsets within a
+ * Note for Fortran users: Offsets of Fortran structure members correspond to
+the offsets within a
  * packed datatype (see explanation below) stored in an HDF5 file.
  *
- * Each member of a compound datatype must have a descriptive name which is the key used to
- * uniquely identify the member within the compound datatype. A member name in an HDF5
- * datatype does not necessarily have to be the same as the name of the member in the C struct or
- * Fortran derived type, although this is often the case. Nor does one need to define all members of
- * the C struct or Fortran derived type in the HDF5 compound datatype (or vice versa).
+ * Each member of a compound datatype must have a descriptive name which is the
+key used to
+ * uniquely identify the member within the compound datatype. A member name in
+an HDF5
+ * datatype does not necessarily have to be the same as the name of the member
+in the C struct or
+ * Fortran derived type, although this is often the case. Nor does one need to
+define all members of
+ * the C struct or Fortran derived type in the HDF5 compound datatype (or vice
+versa).
  *
- * Unlike atomic datatypes which are derived from other atomic datatypes, compound datatypes are
- * created from scratch. First, one creates an empty compound datatype and specifies its total size.
- * Then members are added to the compound datatype in any order. Each member type is inserted
- * at a designated offset. Each member has a name which is the key used to uniquely identify the
+ * Unlike atomic datatypes which are derived from other atomic datatypes,
+compound datatypes are
+ * created from scratch. First, one creates an empty compound datatype and
+specifies its total size.
+ * Then members are added to the compound datatype in any order. Each member
+type is inserted
+ * at a designated offset. Each member has a name which is the key used to
+uniquely identify the
  * member within the compound datatype.
  *
- * The example below shows a way of creating an HDF5 C compound datatype to describe a
- * complex number. This is a structure with two components, “real” and “imaginary”, and each
- * component is a double. An equivalent C struct whose type is defined by the complex_tstruct is
+ * The example below shows a way of creating an HDF5 C compound datatype to
+describe a
+ * complex number. This is a structure with two components, “real” and
+“imaginary”, and each
+ * component is a double. An equivalent C struct whose type is defined by the
+complex_tstruct is
  * shown.
  *
  * <em>A compound datatype for complex numbers in C</em>
@@ -1954,9 +2268,12 @@ filled according to the value of this property. The padding can be:
  *   H5T_NATIVE_DOUBLE);
  * \endcode
  *
- * The example below shows a way of creating an HDF5 Fortran compound datatype to describe a
- * complex number. This is a Fortran derived type with two components, “real” and “imaginary”,
- * and each component is DOUBLE PRECISION. An equivalent Fortran TYPE whose type is defined
+ * The example below shows a way of creating an HDF5 Fortran compound datatype
+to describe a
+ * complex number. This is a Fortran derived type with two components, “real”
+and “imaginary”,
+ * and each component is DOUBLE PRECISION. An equivalent Fortran TYPE whose type
+is defined
  * by the TYPE complex_t is shown.
  *
  * <em>A compound datatype for complex numbers in Fortran</em>
@@ -1976,18 +2293,28 @@ filled according to the value of this property. The padding can be:
  *   CALL h5tinsert_f(type_id, “imaginary”, offset, H5T_NATIVE_DOUBLE, error)
  * \endcode
  *
- * Important Note: The compound datatype is created with a size sufficient to hold all its members.
- * In the C example above, the size of the C struct and the #HOFFSET macro are used as a
- * convenient mechanism to determine the appropriate size and offset. Alternatively, the size and
- * offset could be manually determined: the size can be set to 16 with “real” at offset 0 and
- * “imaginary” at offset 8. However, different platforms and compilers have different sizes for
- * “double” and may have alignment restrictions which require additional padding within the
- * structure. It is much more portable to use the #HOFFSET macro which assures that the values will
+ * Important Note: The compound datatype is created with a size sufficient to
+hold all its members.
+ * In the C example above, the size of the C struct and the #HOFFSET macro are
+used as a
+ * convenient mechanism to determine the appropriate size and offset.
+Alternatively, the size and
+ * offset could be manually determined: the size can be set to 16 with “real” at
+offset 0 and
+ * “imaginary” at offset 8. However, different platforms and compilers have
+different sizes for
+ * “double” and may have alignment restrictions which require additional padding
+within the
+ * structure. It is much more portable to use the #HOFFSET macro which assures
+that the values will
  * be correct for any platform.
  *
- * The figure below shows how the compound datatype would be laid out assuming that
- * NATIVE_DOUBLE are 64-bit numbers and that there are no alignment requirements. The total
- * size of the compound datatype will be 16 bytes, the “real” component will start at byte 0, and
+ * The figure below shows how the compound datatype would be laid out assuming
+that
+ * NATIVE_DOUBLE are 64-bit numbers and that there are no alignment
+requirements. The total
+ * size of the compound datatype will be 16 bytes, the “real” component will
+start at byte 0, and
  * “imaginary” will start at byte 8.
  *
  * <table>
@@ -1998,15 +2325,19 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * The members of a compound datatype may be any HDF5 datatype including the compound,
- * array, and variable-length (VL) types. The figure and example below show the memory layout
- * and code which creates a compound datatype composed of two complex values, and each
+ * The members of a compound datatype may be any HDF5 datatype including the
+compound,
+ * array, and variable-length (VL) types. The figure and example below show the
+memory layout
+ * and code which creates a compound datatype composed of two complex values,
+and each
  * complex value is also a compound datatype as in the figure above.
  *
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig11.gif "Layout of a compound datatype nested in a compound datatype"
+ * \image html Dtypes_fig11.gif "Layout of a compound datatype nested in a
+compound datatype"
  * </td>
  * </tr>
  * </table>
@@ -2029,9 +2360,12 @@ filled according to the value of this property. The padding can be:
  *   H5Tinsert (surf_id, “y”, HOFFSET(surf_t, y), complex_id);
  * \endcode
  *
- * Note that a similar result could be accomplished by creating a compound datatype and inserting
- * four fields. See the figure below. This results in the same layout as the figure above. The difference
- * would be how the fields are addressed. In the first case, the real part of ‘y’ is called ‘y.re’;
+ * Note that a similar result could be accomplished by creating a compound
+datatype and inserting
+ * four fields. See the figure below. This results in the same layout as the
+figure above. The difference
+ * would be how the fields are addressed. In the first case, the real part of
+‘y’ is called ‘y.re’;
  * in the second case it is ‘y-re’.
  *
  * <em>Another compound datatype nested in a compound datatype</em>
@@ -2048,16 +2382,24 @@ filled according to the value of this property. The padding can be:
  *   H5Tinsert (surf_id, “y-im”, HOFFSET(surf_t, y.im), H5T_NATIVE_DOUBLE);
  * \endcode
  *
- * The members of a compound datatype do not always fill all the bytes. The #HOFFSET macro
- * assures that the members will be laid out according to the requirements of the platform and
- * language. The example below shows an example of a C struct which requires extra bytes of
- * padding on many platforms. The second element, ‘b’, is a 1-byte character followed by an 8 byte
- * double, ‘c’. On many systems, the 8-byte value must be stored on a 4-or 8-byte boundary. This
+ * The members of a compound datatype do not always fill all the bytes. The
+#HOFFSET macro
+ * assures that the members will be laid out according to the requirements of
+the platform and
+ * language. The example below shows an example of a C struct which requires
+extra bytes of
+ * padding on many platforms. The second element, ‘b’, is a 1-byte character
+followed by an 8 byte
+ * double, ‘c’. On many systems, the 8-byte value must be stored on a 4-or
+8-byte boundary. This
  * requires the struct to be larger than the sum of the size of its elements.
  *
- * In the example below, sizeof and #HOFFSET are used to assure that the members are inserted at
- * the correct offset to match the memory conventions of the platform. The figure below shows how
- * this data element would be stored in memory, assuming the double must start on a 4-byte
+ * In the example below, sizeof and #HOFFSET are used to assure that the members
+are inserted at
+ * the correct offset to match the memory conventions of the platform. The
+figure below shows how
+ * this data element would be stored in memory, assuming the double must start
+on a 4-byte
  * boundary. Notice the extra bytes between ‘b’ and ‘c’.
  *
  * <em>A compound datatype that requires padding</em>
@@ -2077,21 +2419,30 @@ filled according to the value of this property. The padding can be:
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig12.gif "Memory layout of a compound datatype that requires padding"
+ * \image html Dtypes_fig12.gif "Memory layout of a compound datatype that
+requires padding"
  * </td>
  * </tr>
  * </table>
  *
- * However, data stored on disk does not require alignment, so unaligned versions of compound
- * data structures can be created to improve space efficiency on disk. These unaligned compound
- * datatypes can be created by computing offsets by hand to eliminate inter-member padding, or the
- * members can be packed by calling #H5Tpack (which modifies a datatype directly, so it is usually
+ * However, data stored on disk does not require alignment, so unaligned
+versions of compound
+ * data structures can be created to improve space efficiency on disk. These
+unaligned compound
+ * datatypes can be created by computing offsets by hand to eliminate
+inter-member padding, or the
+ * members can be packed by calling #H5Tpack (which modifies a datatype
+directly, so it is usually
  * preceded by a call to #H5Tcopy).
  *
- * The example below shows how to create a disk version of the compound datatype from the
- * figure above in order to store data on disk in as compact a form as possible. Packed compound
- * datatypes should generally not be used to describe memory as they may violate alignment
- * constraints for the architecture being used. Note also that using a packed datatype for disk
+ * The example below shows how to create a disk version of the compound datatype
+from the
+ * figure above in order to store data on disk in as compact a form as possible.
+Packed compound
+ * datatypes should generally not be used to describe memory as they may violate
+alignment
+ * constraints for the architecture being used. Note also that using a packed
+datatype for disk
  * storage may involve a higher data conversion cost.
  *
  * <em>Create a packed compound datatype in C</em>
@@ -2100,10 +2451,14 @@ filled according to the value of this property. The padding can be:
  *   H5Tpack (s2_tid);
  * \endcode
  *
- * The example below shows the sequence of Fortran calls to create a packed compound datatype.
- * An HDF5 Fortran compound datatype never describes a compound datatype in memory and
- * compound data is ALWAYS written by fields as described in the next section. Therefore packing
- * is not needed unless the offset of each consecutive member is not equal to the sum of the sizes of
+ * The example below shows the sequence of Fortran calls to create a packed
+compound datatype.
+ * An HDF5 Fortran compound datatype never describes a compound datatype in
+memory and
+ * compound data is ALWAYS written by fields as described in the next section.
+Therefore packing
+ * is not needed unless the offset of each consecutive member is not equal to
+the sum of the sizes of
  * the previous members.
  *
  * <em>Create a packed compound datatype in Fortran</em>
@@ -2114,13 +2469,18 @@ filled according to the value of this property. The padding can be:
  *
  * <h4>Creating and Writing Datasets with Compound Datatypes</h4>
  *
- * Creating datasets with compound datatypes is similar to creating datasets with any other HDF5
- * datatypes. But writing and reading may be different since datasets that have compound datatypes
- * can be written or read by a field (member) or subsets of fields (members). The compound
- * datatype is the only composite datatype that supports “sub-setting” by the elements the datatype
+ * Creating datasets with compound datatypes is similar to creating datasets
+with any other HDF5
+ * datatypes. But writing and reading may be different since datasets that have
+compound datatypes
+ * can be written or read by a field (member) or subsets of fields (members).
+The compound
+ * datatype is the only composite datatype that supports “sub-setting” by the
+elements the datatype
  * is built from.
  *
- * The example below shows a C example of creating and writing a dataset with a compound
+ * The example below shows a C example of creating and writing a dataset with a
+compound
  * datatype.
  *
  *
@@ -2155,8 +2515,10 @@ filled according to the value of this property. The padding can be:
  *   H5Dwrite (dataset_id, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
  * \endcode
  *
- * The example below shows the content of the file written on a little-endian machine.
- * <em>Create and write a little-endian dataset with a compound datatype in C</em>
+ * The example below shows the content of the file written on a little-endian
+machine.
+ * <em>Create and write a little-endian dataset with a compound datatype in
+C</em>
  * \code
  *   HDF5 “SDScompound.h5” {
  *   GROUP “/” {
@@ -2189,10 +2551,14 @@ filled according to the value of this property. The padding can be:
  *   }
  * \endcode
  *
- * It is not necessary to write the whole data at once. Datasets with compound datatypes can be
- * written by field or by subsets of fields. In order to do this one has to remember to set the transfer
- * property of the dataset using the H5Pset_preserve call and to define the memory datatype that
- * corresponds to a field. The example below shows how float and double fields are written to the
+ * It is not necessary to write the whole data at once. Datasets with compound
+datatypes can be
+ * written by field or by subsets of fields. In order to do this one has to
+remember to set the transfer
+ * property of the dataset using the H5Pset_preserve call and to define the
+memory datatype that
+ * corresponds to a field. The example below shows how float and double fields
+are written to the
  * dataset.
  *
  * <em>Writing floats and doubles to a dataset</em>
@@ -2238,8 +2604,10 @@ filled according to the value of this property. The padding can be:
  *   H5Dwrite (dataset_id, sc_tid, H5S_ALL, H5S_ALL, xfer_id, data2);
  * \endcode
  *
- * The figure below shows the content of the file written on a little-endian machine. Only float and
- * double fields are written. The default fill value is used to initialize the unwritten integer field.
+ * The figure below shows the content of the file written on a little-endian
+machine. Only float and
+ * double fields are written. The default fill value is used to initialize the
+unwritten integer field.
  * <em>Writing floats and doubles to a dataset on a little-endian system</em>
  * \code
  *   HDF5 “SDScompound.h5” {
@@ -2273,9 +2641,12 @@ filled according to the value of this property. The padding can be:
  *   }
  * \endcode
  *
- * The example below contains a Fortran example that creates and writes a dataset with a
- * compound datatype. As this example illustrates, writing and reading compound datatypes in
- * Fortran is always done by fields. The content of the written file is the same as shown in the
+ * The example below contains a Fortran example that creates and writes a
+dataset with a
+ * compound datatype. As this example illustrates, writing and reading compound
+datatypes in
+ * Fortran is always done by fields. The content of the written file is the same
+as shown in the
  * example above.
  * <em>Create and write a dataset with a compound datatype in Fortran</em>
  * \code
@@ -2345,7 +2716,8 @@ filled according to the value of this property. The padding can be:
  *   !
  *   ! Create the dataset with compound datatype.
  *   !
- *   CALL h5dcreate_f(file_id, dsetname, dtype_id, dspace_id, &dset_id, error, H5P_DEFAULT_F,
+ *   CALL h5dcreate_f(file_id, dsetname, dtype_id, dspace_id, &dset_id, error,
+H5P_DEFAULT_F,
  *   H5P_DEFAULT_F, H5P_DEFAULT_F)
  *   !
  *
@@ -2376,13 +2748,19 @@ filled according to the value of this property. The padding can be:
  *
  * <h4>Reading Datasets with Compound Datatypes</h4>
  *
- * Reading datasets with compound datatypes may be a challenge. For general applications there is
- * no way to know a priori the corresponding C structure. Also, C structures cannot be allocated on
- * the fly during discovery of the dataset's datatype. For general C, C++, Fortran and Java
- * application the following steps will be required to read and to interpret data from the dataset with
+ * Reading datasets with compound datatypes may be a challenge. For general
+applications there is
+ * no way to know a priori the corresponding C structure. Also, C structures
+cannot be allocated on
+ * the fly during discovery of the dataset's datatype. For general C, C++,
+Fortran and Java
+ * application the following steps will be required to read and to interpret
+data from the dataset with
  * compound datatype:
- * \li 1. Get the identifier of the compound datatype in the file with the #H5Dget_type call
- * \li 2. Find the number of the compound datatype members with the #H5Tget_nmembers call
+ * \li 1. Get the identifier of the compound datatype in the file with the
+#H5Dget_type call
+ * \li 2. Find the number of the compound datatype members with the
+#H5Tget_nmembers call
  * \li 3. Iterate through compound datatype members
  * <ul><li>Get member class with the #H5Tget_member_class call</li>
  * <li>Get member name with the #H5Tget_member_name call</li>
@@ -2398,16 +2776,22 @@ filled according to the value of this property. The padding can be:
  * <li>#H5T_VLEN</li>
  * <li>#H5T_ARRAY</li></ul>
  * </li>
- * <li>If class is #H5T_COMPOUND, then go to step 2 and repeat all steps under step 3. If
- * class is not #H5T_COMPOUND, then a member is of an atomic class and can be read
- * to a corresponding buffer after discovering all necessary information specific to each
- * atomic type (for example, size of the integer or floats, super class for enumerated and
+ * <li>If class is #H5T_COMPOUND, then go to step 2 and repeat all steps under
+step 3. If
+ * class is not #H5T_COMPOUND, then a member is of an atomic class and can be
+read
+ * to a corresponding buffer after discovering all necessary information
+specific to each
+ * atomic type (for example, size of the integer or floats, super class for
+enumerated and
  * array datatype, and its sizes)</li></ul>
  *
  * The examples below show how to read a dataset with a known compound datatype.
  *
- * The first example below shows the steps needed to read data of a known structure. First, build a
- * memory datatype the same way it was built when the dataset was created, and then second use
+ * The first example below shows the steps needed to read data of a known
+structure. First, build a
+ * memory datatype the same way it was built when the dataset was created, and
+then second use
  * the datatype in an #H5Dread call.
  *
  * <em>Read a dataset using a memory datatype</em>
@@ -2465,7 +2849,8 @@ filled according to the value of this property. The padding can be:
  *   H5Dread (dataset_id,mem_s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
  * \endcode
  *
- * The example below shows how to read just one float member of a compound datatype.
+ * The example below shows how to read just one float member of a compound
+datatype.
  *
  * <em>Read one floating point member of a compound datatype</em>
  * \code
@@ -2490,8 +2875,10 @@ filled according to the value of this property. The padding can be:
  *   H5Dread(dataset_id, sf_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
  * \endcode
  *
- * The example below shows how to read float and double members of a compound datatype into a
- * structure that has those fields in a different order. Please notice that #H5Tinsert calls can be used
+ * The example below shows how to read float and double members of a compound
+datatype into a
+ * structure that has those fields in a different order. Please notice that
+#H5Tinsert calls can be used
  * in an order different from the order of the structure's members.
  *
  * <em>Read float and double members of a compound datatype</em>
@@ -2521,8 +2908,10 @@ filled according to the value of this property. The padding can be:
  *
  * <h4>Array</h4>
  *
- * Many scientific datasets have multiple measurements for each point in a space. There are several
- * natural ways to represent this data, depending on the variables and how they are used in
+ * Many scientific datasets have multiple measurements for each point in a
+space. There are several
+ * natural ways to represent this data, depending on the variables and how they
+are used in
  * computation. See the table and the figure below.
  *
  * <table>
@@ -2545,7 +2934,8 @@ filled according to the value of this property. The padding can be:
  * Several datasets with identical dataspaces
  * </td>
  * <td>
- * This is optimal when variables are accessed individually, or when often uses only selected
+ * This is optimal when variables are accessed individually, or when often uses
+only selected
  * variables.
  * </td>
  * </tr>
@@ -2557,7 +2947,8 @@ filled according to the value of this property. The padding can be:
  * One dataset, the last “dimension” is a vec-tor of variables
  * </td>
  * <td>
- * This can give good performance, although selecting only a few variables may be slow. This may
+ * This can give good performance, although selecting only a few variables may
+be slow. This may
  * not reflect the science.
  * </td>
  * </tr>
@@ -2569,7 +2960,8 @@ filled according to the value of this property. The padding can be:
  * One dataset with compound datatype
  * </td>
  * <td>
- * This enables the variables to be read all together or selected. Also handles “vectors” of
+ * This enables the variables to be read all together or selected. Also handles
+“vectors” of
  * heterogeneous data.
  * </td>
  * </tr>
@@ -2581,7 +2973,8 @@ filled according to the value of this property. The padding can be:
  * One dataset, each data element is a small array of values.
  * </td>
  * <td>
- * This uses the same amount of space as the previous two, and may represent the science model
+ * This uses the same amount of space as the previous two, and may represent the
+science model
  * better.
  * </td>
  * </tr>
@@ -2607,12 +3000,17 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * The HDF5 #H5T_ARRAY datatype defines the data element to be a homogeneous, multi-dimensional array.
+ * The HDF5 #H5T_ARRAY datatype defines the data element to be a homogeneous,
+multi-dimensional array.
  * See Figure 13 above. The elements of the array can be any HDF5 datatype
- * (including compound and array), and the size of the datatype is the total size of the array. A
- * dataset of array datatype cannot be subdivided for I/O within the data element: the entire array of
- * the data element must be transferred. If the data elements need to be accessed separately, for
- * example, by plane, then the array datatype should not be used. The table below shows
+ * (including compound and array), and the size of the datatype is the total
+size of the array. A
+ * dataset of array datatype cannot be subdivided for I/O within the data
+element: the entire array of
+ * the data element must be transferred. If the data elements need to be
+accessed separately, for
+ * example, by plane, then the array datatype should not be used. The table
+below shows
  * advantages and disadvantages of various storage methods.
  *
  * <table>
@@ -2679,16 +3077,25 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * An array datatype may be multi-dimensional with 1 to #H5S_MAX_RANK(the maximum rank
- * of a dataset is currently 32) dimensions. The dimensions can be any size greater than 0, but
- * unlimited dimensions are not supported (although the datatype can be a variable-length datatype).
+ * An array datatype may be multi-dimensional with 1 to #H5S_MAX_RANK(the
+maximum rank
+ * of a dataset is currently 32) dimensions. The dimensions can be any size
+greater than 0, but
+ * unlimited dimensions are not supported (although the datatype can be a
+variable-length datatype).
  *
- * An array datatype is created with the #H5Tarray_create call, which specifies the number of
- * dimensions, the size of each dimension, and the base type of the array. The array datatype can
- * then be used in any way that any datatype object is used. The example below shows the creation
- * of a datatype that is a two-dimensional array of native integers, and this is then used to create a
- * dataset. Note that the dataset can be a dataspace that is any number and size of dimensions. The figure
- * below shows the layout in memory assuming that the native integers are 4 bytes. Each
+ * An array datatype is created with the #H5Tarray_create call, which specifies
+the number of
+ * dimensions, the size of each dimension, and the base type of the array. The
+array datatype can
+ * then be used in any way that any datatype object is used. The example below
+shows the creation
+ * of a datatype that is a two-dimensional array of native integers, and this is
+then used to create a
+ * dataset. Note that the dataset can be a dataspace that is any number and size
+of dimensions. The figure
+ * below shows the layout in memory assuming that the native integers are 4
+bytes. Each
  * data element has 6 elements, for a total of 24 bytes.
  *
  * <em>Create a two-dimensional array datatype</em>
@@ -2706,51 +3113,69 @@ filled according to the value of this property. The padding can be:
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig14.gif "Memory layout of a two-dimensional array datatype"
+ * \image html Dtypes_fig14.gif "Memory layout of a two-dimensional array
+datatype"
  * </td>
  * </tr>
  * </table>
  *
  * @anchor h4_vlen_datatype <h4>Variable-length Datatypes</h4>
  *
- * A variable-length (VL) datatype is a one-dimensional sequence of a datatype which are not fixed
- * in length from one dataset location to another. In other words, each data element may have a
- * different number of members. Variable-length datatypes cannot be divided;the entire data
+ * A variable-length (VL) datatype is a one-dimensional sequence of a datatype
+which are not fixed
+ * in length from one dataset location to another. In other words, each data
+element may have a
+ * different number of members. Variable-length datatypes cannot be divided;the
+entire data
  * element must be transferred.
  *
- * VL datatypes are useful to the scientific community in many different ways, possibly including:
+ * VL datatypes are useful to the scientific community in many different ways,
+possibly including:
  * <ul>
- * <li>Ragged arrays: Multi-dimensional ragged arrays can be implemented with the last (fastest changing)
- * dimension being ragged by using a VL datatype as the type of the element stored.
+ * <li>Ragged arrays: Multi-dimensional ragged arrays can be implemented with
+the last (fastest changing)
+ * dimension being ragged by using a VL datatype as the type of the element
+stored.
  * </li>
- * <li>Fractal arrays: A nested VL datatype can be used to implement ragged arrays of ragged arrays, to
+ * <li>Fractal arrays: A nested VL datatype can be used to implement ragged
+arrays of ragged arrays, to
  * whatever nesting depth is required for the user.
  * </li>
- * <li>Polygon lists: A common storage requirement is to efficiently store arrays of polygons with
- * different numbers of vertices. A VL datatype can be used to efficiently and succinctly describe
+ * <li>Polygon lists: A common storage requirement is to efficiently store
+arrays of polygons with
+ * different numbers of vertices. A VL datatype can be used to efficiently and
+succinctly describe
  * an array of polygons with different numbers of vertices.
  * </li>
- * <li>Character strings: Perhaps the most common use of VL datatypes will be to store C-like VL
+ * <li>Character strings: Perhaps the most common use of VL datatypes will be to
+store C-like VL
  * character strings in dataset elements or as attributes of objects.
  * </li>
- * <li>Indices (for example, of objects within a file): An array of VL object references could be used
- * as an index to all the objects in a file which contain a particular sequence of dataset values.
+ * <li>Indices (for example, of objects within a file): An array of VL object
+references could be used
+ * as an index to all the objects in a file which contain a particular sequence
+of dataset values.
  * </li>
- * <li>Object Tracking: An array of VL dataset region references can be used as a method of tracking
+ * <li>Object Tracking: An array of VL dataset region references can be used as
+a method of tracking
  * objects or features appearing in a sequence of datasets.
  * </li>
  * </ul>
  *
- * A VL datatype is created by calling #H5Tvlen_create which specifies the base datatype. The first
- * example below shows an example of code that creates a VL datatype of unsigned integers. Each
- * data element is a one-dimensional array of zero or more members and is stored in the
+ * A VL datatype is created by calling #H5Tvlen_create which specifies the base
+datatype. The first
+ * example below shows an example of code that creates a VL datatype of unsigned
+integers. Each
+ * data element is a one-dimensional array of zero or more members and is stored
+in the
  * hvl_t structure. See the second example below.
  *
  * <em>Create a variable-length datatype of unsigned integers</em>
  * \code
  *   tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
  *
- *   dataset=H5Dcreate(fid1,“Dataset1”, tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   dataset=H5Dcreate(fid1,“Dataset1”, tid1, sid1, H5P_DEFAULT, H5P_DEFAULT,
+H5P_DEFAULT);
  * \endcode
  *
  * <em>Data element storage for members of the VL datatype</em>
@@ -2763,19 +3188,30 @@ filled according to the value of this property. The padding can be:
  *   } hvl_t;
  * \endcode
  *
- * The first example below shows how the VL data is written. For each of the 10 data elements, a
- * length and data buffer must be allocated. Below the two examples is a figure that shows how the
+ * The first example below shows how the VL data is written. For each of the 10
+data elements, a
+ * length and data buffer must be allocated. Below the two examples is a figure
+that shows how the
  * data is laid out in memory.
  *
- * An analogous procedure must be used to read the data. See the second example below. An
- * appropriate array of vl_t must be allocated, and the data read. It is then traversed one data
- * element at a time. The #H5Dvlen_reclaim call frees the data buffer for the buffer. With each
- * element possibly being of different sequence lengths for a dataset with a VL datatype, the
- * memory for the VL datatype must be dynamically allocated. Currently there are two methods of
- * managing the memory for VL datatypes: the standard C malloc/free memory allocation routines
- * or a method of calling user-defined memory management routines to allocate or free memory
- * (set with #H5Pset_vlen_mem_manager). Since the memory allocated when reading (or writing)
- * may be complicated to release, the #H5Dvlen_reclaim function is provided to traverse a memory
+ * An analogous procedure must be used to read the data. See the second example
+below. An
+ * appropriate array of vl_t must be allocated, and the data read. It is then
+traversed one data
+ * element at a time. The #H5Dvlen_reclaim call frees the data buffer for the
+buffer. With each
+ * element possibly being of different sequence lengths for a dataset with a VL
+datatype, the
+ * memory for the VL datatype must be dynamically allocated. Currently there are
+two methods of
+ * managing the memory for VL datatypes: the standard C malloc/free memory
+allocation routines
+ * or a method of calling user-defined memory management routines to allocate or
+free memory
+ * (set with #H5Pset_vlen_mem_manager). Since the memory allocated when reading
+(or writing)
+ * may be complicated to release, the #H5Dvlen_reclaim function is provided to
+traverse a memory
  * buffer and free the VL datatype information without leaking memory.
  *
  * <em>Write VL data</em>
@@ -2814,14 +3250,20 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * The user program must carefully manage these relatively complex data structures. The
- * #H5Dvlen_reclaim function performs a standard traversal, freeing all the data. This function
- * analyzes the datatype and dataspace objects, and visits each VL data element, recursing through
- * nested types. By default, the system free is called for the pointer in each vl_t. Obviously, this
+ * The user program must carefully manage these relatively complex data
+structures. The
+ * #H5Dvlen_reclaim function performs a standard traversal, freeing all the
+data. This function
+ * analyzes the datatype and dataspace objects, and visits each VL data element,
+recursing through
+ * nested types. By default, the system free is called for the pointer in each
+vl_t. Obviously, this
  * call assumes that all of this memory was allocated with the system malloc.
  *
- * The user program may specify custom memory manager routines, one for allocating and one for
- * freeing. These may be set with the #H5Pset_vlen_mem_manager, and must have the following
+ * The user program may specify custom memory manager routines, one for
+allocating and one for
+ * freeing. These may be set with the #H5Pset_vlen_mem_manager, and must have
+the following
  * prototypes:
  * <ul>
  * <li>
@@ -2835,27 +3277,36 @@ filled according to the value of this property. The padding can be:
  * \endcode
  * </li>
  * </ul>
- * The utility function #H5Dvlen_get_buf_size checks the number of bytes required to store the VL
- * data from the dataset. This function analyzes the datatype and dataspace object to visit all the VL
- * data elements, to determine the number of bytes required to store the data for the in the
- * destination storage (memory). The size value is adjusted for data conversion and alignment in the
+ * The utility function #H5Dvlen_get_buf_size checks the number of bytes
+required to store the VL
+ * data from the dataset. This function analyzes the datatype and dataspace
+object to visit all the VL
+ * data elements, to determine the number of bytes required to store the data
+for the in the
+ * destination storage (memory). The size value is adjusted for data conversion
+and alignment in the
  * destination.
  *
  * \subsection subsec_datatype_other Other Non-numeric Datatypes
  * Several datatype classes define special types of objects.
  *
  * \subsubsection subsubsec_datatype_other_strings Strings
- * Text data is represented by arrays of characters, called strings. Many programming languages
- * support different conventions for storing strings, which may be fixed or variable-length, and may
- * have different rules for padding unused storage. HDF5 can represent strings in several ways. See
+ * Text data is represented by arrays of characters, called strings. Many
+programming languages
+ * support different conventions for storing strings, which may be fixed or
+variable-length, and may
+ * have different rules for padding unused storage. HDF5 can represent strings
+in several ways. See
  * the figure below.
  *
  * The strings to store are “Four score” and “lazy programmers.”
  * <table>
- * <caption>A string stored as one-character elements in a one-dimensional array</caption>
+ * <caption>A string stored as one-character elements in a one-dimensional
+array</caption>
  * <tr>
  * <td>
- * a) #H5T_NATIVE_CHAR: The dataset is a one-dimensional array with 29 elements, and each element
+ * a) #H5T_NATIVE_CHAR: The dataset is a one-dimensional array with 29 elements,
+and each element
  * is a single character.
  * </td>
  * </tr>
@@ -2866,7 +3317,8 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * <tr>
  * <td>
- * b) Fixed-length string: The dataset is a one-dimensional array with two elements, and each
+ * b) Fixed-length string: The dataset is a one-dimensional array with two
+elements, and each
  * element is 20 characters.
  * </td>
  * </tr>
@@ -2877,9 +3329,12 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * <tr>
  * <td>
- * c) Variable-length string: The dataset is a one-dimensional array with two elements, and each
- * element is a variable-length string. This is the same result when stored as a fixed-length
- * string except that the first element of the array will need only 11 bytes for storage instead of 20.
+ * c) Variable-length string: The dataset is a one-dimensional array with two
+elements, and each
+ * element is a variable-length string. This is the same result when stored as a
+fixed-length
+ * string except that the first element of the array will need only 11 bytes for
+storage instead of 20.
  * </td>
  * </tr>
  * <tr>
@@ -2894,24 +3349,38 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * First, a dataset may have a dataset with datatype #H5T_NATIVE_CHAR with each character of
- * the string as an element of the dataset. This will store an unstructured block of text data, but
- * gives little indication of any structure in the text. See item a in the figure above.
+ * First, a dataset may have a dataset with datatype #H5T_NATIVE_CHAR with each
+character of
+ * the string as an element of the dataset. This will store an unstructured
+block of text data, but
+ * gives little indication of any structure in the text. See item a in the
+figure above.
  *
- * A second alternative is to store the data using the datatype class #H5T_STRING with each
- * element a fixed length. See item b in the figure above. In this approach, each element might be a
- * word or a sentence, addressed by the dataspace. The dataset reserves space for the specified
- * number of characters, although some strings may be shorter. This approach is simple and usually
- * is fast to access, but can waste storage space if the length of the Strings varies.
+ * A second alternative is to store the data using the datatype class
+#H5T_STRING with each
+ * element a fixed length. See item b in the figure above. In this approach,
+each element might be a
+ * word or a sentence, addressed by the dataspace. The dataset reserves space
+for the specified
+ * number of characters, although some strings may be shorter. This approach is
+simple and usually
+ * is fast to access, but can waste storage space if the length of the Strings
+varies.
  *
- * A third alternative is to use a variable-length datatype. See item c in the figure above. This can
- * be done using the standard mechanisms described above. The program would use vl_t structures
+ * A third alternative is to use a variable-length datatype. See item c in the
+figure above. This can
+ * be done using the standard mechanisms described above. The program would use
+vl_t structures
  * to write and read the data.
  *
- * A fourth alternative is to use a special feature of the string datatype class to set the size of the
- * datatype to #H5T_VARIABLE. See item c in the figure above. The example below shows a
- * declaration of a datatype of type #H5T_C_S1 which is set to #H5T_VARIABLE. The HDF5
- * Library automatically translates between this and the vl_t structure. Note: the #H5T_VARIABLE
+ * A fourth alternative is to use a special feature of the string datatype class
+to set the size of the
+ * datatype to #H5T_VARIABLE. See item c in the figure above. The example below
+shows a
+ * declaration of a datatype of type #H5T_C_S1 which is set to #H5T_VARIABLE.
+The HDF5
+ * Library automatically translates between this and the vl_t structure. Note:
+the #H5T_VARIABLE
  * size can only be used with string datatypes.
  * <em>Set the string datatype size to H5T_VARIABLE</em>
  * \code
@@ -2919,7 +3388,8 @@ filled according to the value of this property. The padding can be:
  *   ret = H5Tset_size (tid1, H5T_VARIABLE);
  * \endcode
  *
- * Variable-length strings can be read into C strings (in other words, pointers to zero terminated
+ * Variable-length strings can be read into C strings (in other words, pointers
+to zero terminated
  * arrays of char). See the example below.
  * <em>Read variable-length strings into C strings</em>
  * \code
@@ -2935,24 +3405,35 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * \subsubsection subsubsec_datatype_other_refs Reference
- * In HDF5, objects (groups, datasets, and committed datatypes) are usually accessed by name.
- * There is another way to access stored objects - by reference. There are two reference datatypes:
- * object reference and region reference. Object reference objects are created with #H5Rcreate and
- * other calls (cross reference). These objects can be stored and retrieved in a dataset as elements
- * with reference datatype. The first example below shows an example of code that creates
- * references to four objects, and then writes the array of object references to a dataset. The second
- * example below shows a dataset of datatype reference being read and one of the reference objects
+ * In HDF5, objects (groups, datasets, and committed datatypes) are usually
+accessed by name.
+ * There is another way to access stored objects - by reference. There are two
+reference datatypes:
+ * object reference and region reference. Object reference objects are created
+with #H5Rcreate and
+ * other calls (cross reference). These objects can be stored and retrieved in a
+dataset as elements
+ * with reference datatype. The first example below shows an example of code
+that creates
+ * references to four objects, and then writes the array of object references to
+a dataset. The second
+ * example below shows a dataset of datatype reference being read and one of the
+reference objects
  * being dereferenced to obtain an object pointer.
  *
- * In order to store references to regions of a dataset, the datatype should be #H5T_STD_REF_DSETREG.
- * Note that a data element must be either an object reference or a region reference: these are
+ * In order to store references to regions of a dataset, the datatype should be
+#H5T_STD_REF_DSETREG.
+ * Note that a data element must be either an object reference or a region
+reference: these are
  * different types and cannot be mixed within a single array.
  *
- * A reference datatype cannot be divided for I/O: an element is read or written completely.
+ * A reference datatype cannot be divided for I/O: an element is read or written
+completely.
  *
  * <em>Create object references and write to a dataset</em>
  * \code
- *   dataset= H5Dcreate (fid1, “Dataset3”, H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   dataset= H5Dcreate (fid1, “Dataset3”, H5T_STD_REF_OBJ, sid1, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
  *
  *   // Create reference to dataset
  *   ret = H5Rcreate(&wbuf[0], fid1,“/Group1/Dataset1”, H5R_OBJECT, -1);
@@ -2967,7 +3448,8 @@ filled according to the value of this property. The padding can be:
  *   ret = H5Rcreate(&wbuf[3], fid1, “/Group1/Datatype1”, H5R_OBJECT, -1);
  *
  *   // Write selection to disk
- *   ret=H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+ *   ret=H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+wbuf);
  * \endcode
  *
  * <em>Read a dataset with a reference datatype</em>
@@ -2982,13 +3464,18 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * \subsubsection subsubsec_datatype_other_enum ENUM
- * The enum datatype implements a set of (name, value) pairs, similar to C/C++ enum. The values
- * are currently limited to native integer datatypes. Each name can be the name of only one value,
+ * The enum datatype implements a set of (name, value) pairs, similar to C/C++
+enum. The values
+ * are currently limited to native integer datatypes. Each name can be the name
+of only one value,
  * and each value can have only one name.
  *
- * The data elements of the ENUMERATION are stored according to the datatype. An example
- * would be as an array of integers. The example below shows an example of how to create an
- * enumeration with five elements. The elements map symbolic names to 2-byte integers. See the
+ * The data elements of the ENUMERATION are stored according to the datatype. An
+example
+ * would be as an array of integers. The example below shows an example of how
+to create an
+ * enumeration with five elements. The elements map symbolic names to 2-byte
+integers. See the
  * table below.
  * <em>Create an enumeration with five elements</em>
  * \code
@@ -3001,7 +3488,8 @@ filled according to the value of this property. The padding can be:
  *   H5Tenum_insert(hdf_en_colors, “BLUE”, (val=2, &val));
  *   H5Tenum_insert(hdf_en_colors, “WHITE”, (val=3, &val));
  *   H5Tenum_insert(hdf_en_colors, “BLACK”, (val=4, &val));
- *   H5Dcreate(fileid, datasetname, hdf_en_colors, spaceid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   H5Dcreate(fileid, datasetname, hdf_en_colors, spaceid, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
  * \endcode
  *
  * <table>
@@ -3032,10 +3520,14 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * The figure below shows how an array of eight values might be stored. Conceptually, the array is
- * an array of symbolic names [BLACK, RED, WHITE, BLUE, ...] See item a in the figure below.
- * These are stored as the values and are short integers. So, the first 2 bytes are the value associated
- * with “BLACK”, which is the number 4, and so on. See item b in the figure below.
+ * The figure below shows how an array of eight values might be stored.
+Conceptually, the array is
+ * an array of symbolic names [BLACK, RED, WHITE, BLUE, ...] See item a in the
+figure below.
+ * These are stored as the values and are short integers. So, the first 2 bytes
+are the value associated
+ * with “BLACK”, which is the number 4, and so on. See item b in the figure
+below.
  * <table>
  * <caption>Storing an enum array</caption>
  * <tr>
@@ -3050,7 +3542,8 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * <tr>
  * <td>
- * b) The storage layout. Total size of the array is 16 bytes, 2 bytes per element.
+ * b) The storage layout. Total size of the array is 16 bytes, 2 bytes per
+element.
  * </td>
  * </tr>
  * <tr>
@@ -3060,59 +3553,93 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * The order that members are inserted into an enumeration type is unimportant; the important part
- * is the associations between the symbol names and the values. Thus, two enumeration datatypes
- * will be considered equal if and only if both types have the same symbol/value associations and
- * both have equal underlying integer datatypes. Type equality is tested with the H5Tequal
+ * The order that members are inserted into an enumeration type is unimportant;
+the important part
+ * is the associations between the symbol names and the values. Thus, two
+enumeration datatypes
+ * will be considered equal if and only if both types have the same symbol/value
+associations and
+ * both have equal underlying integer datatypes. Type equality is tested with
+the H5Tequal
  * function.
  *
- * If a particular architecture type is required, a little-endian or big-endian datatype for example,
- * use a native integer datatype as the ENUM base datatype and use #H5Tconvert on values as they
+ * If a particular architecture type is required, a little-endian or big-endian
+datatype for example,
+ * use a native integer datatype as the ENUM base datatype and use #H5Tconvert
+on values as they
  * are read from or written to a dataset.
  *
  * \subsubsection subsubsec_datatype_other_opaque Opaque
- * In some cases, a user may have data objects that should be stored and retrieved as blobs with no
- * attempt to interpret them. For example, an application might wish to store an array of encrypted
+ * In some cases, a user may have data objects that should be stored and
+retrieved as blobs with no
+ * attempt to interpret them. For example, an application might wish to store an
+array of encrypted
  * certificates which are 100 bytes long.
  *
- * While an arbitrary block of data may always be stored as bytes, characters, integers, or whatever,
- * this might mislead programs about the meaning of the data. The opaque datatype defines data
+ * While an arbitrary block of data may always be stored as bytes, characters,
+integers, or whatever,
+ * this might mislead programs about the meaning of the data. The opaque
+datatype defines data
  * elements which are uninterpreted by HDF5. The opaque data may be labeled with
- * #H5Tset_tag with a string that might be used by an application. For example, the encrypted
- * certificates might have a tag to indicate the encryption and the certificate standard.
+ * #H5Tset_tag with a string that might be used by an application. For example,
+the encrypted
+ * certificates might have a tag to indicate the encryption and the certificate
+standard.
  *
  * \subsubsection subsubsec_datatype_other_bitfield Bitfield
- * Some data is represented as bits, where the number of bits is not an integral byte and the bits are
- * not necessarily interpreted as a standard type. Some examples might include readings from
- * machine registers (for example, switch positions), a cloud mask, or data structures with several
+ * Some data is represented as bits, where the number of bits is not an integral
+byte and the bits are
+ * not necessarily interpreted as a standard type. Some examples might include
+readings from
+ * machine registers (for example, switch positions), a cloud mask, or data
+structures with several
  * small integers that should be store in a single byte.
  *
- * This data could be stored as integers, strings, or enumerations. However, these storage methods
- * would likely result in considerable wasted space. For example, storing a cloud mask with one
- * byte per value would use up to eight times the space of a packed array of bits.
+ * This data could be stored as integers, strings, or enumerations. However,
+these storage methods
+ * would likely result in considerable wasted space. For example, storing a
+cloud mask with one
+ * byte per value would use up to eight times the space of a packed array of
+bits.
  *
- * The HDF5 bitfield datatype class defines a data element that is a contiguous sequence of bits,
- * which are stored on disk in a packed array. The programming model is the same as for unsigned
- * integers: the datatype object is created by copying a predefined datatype, and then the precision,
+ * The HDF5 bitfield datatype class defines a data element that is a contiguous
+sequence of bits,
+ * which are stored on disk in a packed array. The programming model is the same
+as for unsigned
+ * integers: the datatype object is created by copying a predefined datatype,
+and then the precision,
  * offset, and padding are set.
  *
- * While the use of the bitfield datatype will reduce storage space substantially, there will still be
- * wasted space if the bitfield as a whole does not match the 1-, 2-, 4-, or 8-byte unit in which it is
- * written. The remaining unused space can be removed by applying the N-bit filter to the dataset
- * containing the bitfield data. For more information, see "Using the N-bit Filter."
+ * While the use of the bitfield datatype will reduce storage space
+substantially, there will still be
+ * wasted space if the bitfield as a whole does not match the 1-, 2-, 4-, or
+8-byte unit in which it is
+ * written. The remaining unused space can be removed by applying the N-bit
+filter to the dataset
+ * containing the bitfield data. For more information, see "Using the N-bit
+Filter."
  *
  * \subsection subsec_datatype_fill Fill Values
- * The “fill value” for a dataset is the specification of the default value assigned to data elements
- * that have not yet been written. In the case of a dataset with an atomic datatype, the fill value is a
- * single value of the appropriate datatype, such as ‘0’ or ‘-1.0’. In the case of a dataset with a
- * composite datatype, the fill value is a single data element of the appropriate type. For example,
- * for an array or compound datatype, the fill value is a single data element with values for all the
+ * The “fill value” for a dataset is the specification of the default value
+assigned to data elements
+ * that have not yet been written. In the case of a dataset with an atomic
+datatype, the fill value is a
+ * single value of the appropriate datatype, such as ‘0’ or ‘-1.0’. In the case
+of a dataset with a
+ * composite datatype, the fill value is a single data element of the
+appropriate type. For example,
+ * for an array or compound datatype, the fill value is a single data element
+with values for all the
  * component elements of the array or compound datatype.
  *
- * The fill value is set (permanently) when the dataset is created. The fill value is set in the dataset
- * creation properties in the #H5Dcreate call. Note that the #H5Dcreate call must also include the
- * datatype of the dataset, and the value provided for the fill value will be interpreted as a single
- * element of this datatype. The example below shows code which creates a dataset of integers with
+ * The fill value is set (permanently) when the dataset is created. The fill
+value is set in the dataset
+ * creation properties in the #H5Dcreate call. Note that the #H5Dcreate call
+must also include the
+ * datatype of the dataset, and the value provided for the fill value will be
+interpreted as a single
+ * element of this datatype. The example below shows code which creates a
+dataset of integers with
  * fill value -1. Any unwritten data elements will be set to -1.
  *
  * <em>Create a dataset with a fill value of -1</em>
@@ -3125,7 +3652,8 @@ filled according to the value of this property. The padding can be:
  *   H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &filler);
  *
  *   // Create the dataset with fill value ‘-1’.
- *   dataset_id = H5Dcreate(file_id, “/dset”, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT, plist_id,
+ *   dataset_id = H5Dcreate(file_id, “/dset”, H5T_STD_I32BE, dataspace_id,
+H5P_DEFAULT, plist_id,
  *                          H5P_DEFAULT);
  * \endcode
  *
@@ -3151,17 +3679,24 @@ filled according to the value of this property. The padding can be:
  *
  *   // Create the dataset with fill value
  *   // (-1, ‘*’, -2.0).
- *   dataset = H5Dcreate(file, datasetname, s1_tid, space, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+ *   dataset = H5Dcreate(file, datasetname, s1_tid, space, H5P_DEFAULT,
+plist_id, H5P_DEFAULT);
  * \endcode
  *
- * The code above shows how to create a fill value for a compound datatype. The procedure is the
- * same as the previous example except the filler must be a structure with the correct fields. Each
+ * The code above shows how to create a fill value for a compound datatype. The
+procedure is the
+ * same as the previous example except the filler must be a structure with the
+correct fields. Each
  * field is initialized to the desired fill value.
  *
- * The fill value for a dataset can be retrieved by reading the dataset creation properties of the
- * dataset and then by reading the fill value with #H5Pget_fill_value. The data will be read into
- * memory using the storage layout specified by the datatype. This transfer will convert data in the
- * same way as #H5Dread. The example below shows how to get the fill value from the dataset
+ * The fill value for a dataset can be retrieved by reading the dataset creation
+properties of the
+ * dataset and then by reading the fill value with #H5Pget_fill_value. The data
+will be read into
+ * memory using the storage layout specified by the datatype. This transfer will
+convert data in the
+ * same way as #H5Dread. The example below shows how to get the fill value from
+the dataset
  * created in the example "Create a dataset with a fill value of -1".
  *
  * <em>Retrieve a fill value</em>
@@ -3177,11 +3712,16 @@ filled according to the value of this property. The padding can be:
  *   // filler has the fill value, ‘-1’
  * \endcode
  *
- * A similar procedure is followed for any datatype. The example below shows how to read the fill
- * value for the compound datatype created in an example above. Note that the program must pass
- * an element large enough to hold a fill value of the datatype indicated by the argument to
- * #H5Pget_fill_value. Also, the program must understand the datatype in order to interpret its
- * components. This may be difficult to determine without knowledge of the application that
+ * A similar procedure is followed for any datatype. The example below shows how
+to read the fill
+ * value for the compound datatype created in an example above. Note that the
+program must pass
+ * an element large enough to hold a fill value of the datatype indicated by the
+argument to
+ * #H5Pget_fill_value. Also, the program must understand the datatype in order
+to interpret its
+ * components. This may be difficult to determine without knowledge of the
+application that
  * created the dataset.
  *
  * <em>Read the fill value for a compound datatype</em>
@@ -3207,69 +3747,103 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * \subsection subsec_datatype_complex Complex Combinations of Datatypes
- * Several composite datatype classes define collections of other datatypes, including other
- * composite datatypes. In general, a datatype can be nested to any depth, with any combination of
+ * Several composite datatype classes define collections of other datatypes,
+including other
+ * composite datatypes. In general, a datatype can be nested to any depth, with
+any combination of
  * datatypes.
  *
- * For example, a compound datatype can have members that are other compound datatypes, arrays,
- * VL datatypes. An array can be an array of array, an array of compound, or an array of VL. And a
- * VL datatype can be a variable-length array of compound, array, or VL datatypes.
+ * For example, a compound datatype can have members that are other compound
+datatypes, arrays,
+ * VL datatypes. An array can be an array of array, an array of compound, or an
+array of VL. And a
+ * VL datatype can be a variable-length array of compound, array, or VL
+datatypes.
  *
- * These complicated combinations of datatypes form a logical tree, with a single root datatype, and
- * leaves which must be atomic datatypes (predefined or user-defined). The figure below shows an
- * example of a logical tree describing a compound datatype constructed from different datatypes.
+ * These complicated combinations of datatypes form a logical tree, with a
+single root datatype, and
+ * leaves which must be atomic datatypes (predefined or user-defined). The
+figure below shows an
+ * example of a logical tree describing a compound datatype constructed from
+different datatypes.
  *
- * Recall that the datatype is a description of the layout of storage. The complicated compound
- * datatype is constructed from component datatypes, each of which describes the layout of part of
- * the storage. Any datatype can be used as a component of a compound datatype, with the
+ * Recall that the datatype is a description of the layout of storage. The
+complicated compound
+ * datatype is constructed from component datatypes, each of which describes the
+layout of part of
+ * the storage. Any datatype can be used as a component of a compound datatype,
+with the
  * following restrictions:
- * <ul><li>1. No byte can be part of more than one component datatype (in other words, the fields cannot
+ * <ul><li>1. No byte can be part of more than one component datatype (in other
+words, the fields cannot
  * overlap within the compound datatype)</li>
- * <li>2. The total size of the components must be less than or equal to the total size of the compound
+ * <li>2. The total size of the components must be less than or equal to the
+total size of the compound
  * datatype</li></ul>
- * These restrictions are essentially the rules for C structures and similar record types familiar from
- * programming languages. Multiple typing, such as a C union, is not allowed in HDF5 datatypes.
+ * These restrictions are essentially the rules for C structures and similar
+record types familiar from
+ * programming languages. Multiple typing, such as a C union, is not allowed in
+HDF5 datatypes.
  *
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig18.gif "A compound datatype built with different datatypes"
+ * \image html Dtypes_fig18.gif "A compound datatype built with different
+datatypes"
  * </td>
  * </tr>
  * </table>
  *
- * \subsubsection subsubsec_datatype_complex_create Creating a Complicated Compound Datatype
- * To construct a complicated compound datatype, each component is constructed, and then added
- * to the enclosing datatype description. The example below shows how to create a compound
+ * \subsubsection subsubsec_datatype_complex_create Creating a Complicated
+Compound Datatype
+ * To construct a complicated compound datatype, each component is constructed,
+and then added
+ * to the enclosing datatype description. The example below shows how to create
+a compound
  * datatype with four members:
  * \li “T1”, a compound datatype with three members
  * \li “T2”, a compound datatype with two members
  * \li “T3”, a one-dimensional array of integers
  * \li “T4”, a string
  *
- * Below the example code is a figure that shows this datatype as a logical tree. The output of the
+ * Below the example code is a figure that shows this datatype as a logical
+tree. The output of the
  * h5dump utility is shown in the example below the figure.
  *
- * Each datatype is created as a separate datatype object. Figure "The storage layout for the
+ * Each datatype is created as a separate datatype object. Figure "The storage
+layout for the
  * four member datatypes" below shows the storage layout
- * for the four individual datatypes. Then the datatypes are inserted into the outer datatype at an
- * appropriate offset. Figure "The storage layout of the combined four members" below shows the
+ * for the four individual datatypes. Then the datatypes are inserted into the
+outer datatype at an
+ * appropriate offset. Figure "The storage layout of the combined four members"
+below shows the
  * resulting storage layout. The combined record is 89 bytes long.
  *
- * The Dataset is created using the combined compound datatype. The dataset is declared to be a 4
- * by 3 array of compound data. Each data element is an instance of the 89-byte compound
- * datatype. Figure "The layout of the dataset" below shows the layout of the dataset, and expands
- * one of the elements to show the relative position of the component data elements.
+ * The Dataset is created using the combined compound datatype. The dataset is
+declared to be a 4
+ * by 3 array of compound data. Each data element is an instance of the 89-byte
+compound
+ * datatype. Figure "The layout of the dataset" below shows the layout of the
+dataset, and expands
+ * one of the elements to show the relative position of the component data
+elements.
  *
- * Each data element is a compound datatype, which can be written or read as a record, or each
- * field may be read or written individually. The first field (“T1”) is itself a compound datatype
- * with three fields (“T1.a”, “T1.b”, and “T1.c”). “T1” can be read or written as a record, or
- * individual fields can be accessed. Similarly, the second filed is a compound datatype with two
+ * Each data element is a compound datatype, which can be written or read as a
+record, or each
+ * field may be read or written individually. The first field (“T1”) is itself a
+compound datatype
+ * with three fields (“T1.a”, “T1.b”, and “T1.c”). “T1” can be read or written
+as a record, or
+ * individual fields can be accessed. Similarly, the second filed is a compound
+datatype with two
  * fields (“T2.f1”, “T2.f2”).
  *
- * The third field (“T3”) is an array datatype. Thus, “T3” should be accessed as an array of 40
- * integers. Array data can only be read or written as a single element, so all 40 integers must be
- * read or written to the third field. The fourth field (“T4”) is a single string of length 25.
+ * The third field (“T3”) is an array datatype. Thus, “T3” should be accessed as
+an array of 40
+ * integers. Array data can only be read or written as a single element, so all
+40 integers must be
+ * read or written to the third field. The fourth field (“T4”) is a single
+string of length 25.
  *
  * <em>Create a compound datatype with four members</em>
  * \code
@@ -3304,23 +3878,27 @@ filled according to the value of this property. The padding can be:
  *
  *   // Create a compound datatype composed of one of each of these types.
  *   // The total size is the sum of the size of each.
- *   sz = H5Tget_size(s1_tid) + H5Tget_size(s2_tid) + H5Tget_size(s3_tid) + H5Tget_size(s4_tid);
+ *   sz = H5Tget_size(s1_tid) + H5Tget_size(s2_tid) + H5Tget_size(s3_tid) +
+H5Tget_size(s4_tid);
  *   s5_tid = H5Tcreate (H5T_COMPOUND, sz);
  *
  *   // Insert the component types at the appropriate offsets.
  *   H5Tinsert(s5_tid, “T1”, 0, s1_tid);
  *   H5Tinsert(s5_tid, “T2”, sizeof(s1_t), s2_tid);
  *   H5Tinsert(s5_tid, “T3”, sizeof(s1_t) + sizeof(s2_t), s3_tid);
- *   H5Tinsert(s5_tid, “T4”, (sizeof(s1_t) + sizeof(s2_t) + H5Tget_size(s3_tid)), s4_tid);
+ *   H5Tinsert(s5_tid, “T4”, (sizeof(s1_t) + sizeof(s2_t) +
+H5Tget_size(s3_tid)), s4_tid);
  *
  *   // Create the dataset with this datatype.
- *   dataset = H5Dcreate(file, DATASETNAME, s5_tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   dataset = H5Dcreate(file, DATASETNAME, s5_tid, space, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
  * \endcode
  *
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig19.gif "Logical tree for the compound datatype with four members"
+ * \image html Dtypes_fig19.gif "Logical tree for the compound datatype with
+four members"
  * </td>
  * </tr>
  * </table>
@@ -3394,7 +3972,8 @@ filled according to the value of this property. The padding can be:
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig21.gif "The storage layout of the combined four members"
+ * \image html Dtypes_fig21.gif "The storage layout of the combined four
+members"
  * </td>
  * </tr>
  * </table>
@@ -3409,15 +3988,22 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * \subsubsection subsubsec_datatype_complex_analyze Analyzing and Navigating a Compound Datatype
- * A complicated compound datatype can be analyzed piece by piece to discover the exact storage
- * layout. In the example above, the outer datatype is analyzed to discover that it is a compound
- * datatype with four members. Each member is analyzed in turn to construct a complete map of the
+ * \subsubsection subsubsec_datatype_complex_analyze Analyzing and Navigating a
+Compound Datatype
+ * A complicated compound datatype can be analyzed piece by piece to discover
+the exact storage
+ * layout. In the example above, the outer datatype is analyzed to discover that
+it is a compound
+ * datatype with four members. Each member is analyzed in turn to construct a
+complete map of the
  * storage layout.
  *
- * The example below shows an example of code that partially analyzes a nested compound
- * datatype. The name and overall offset and size of the component datatype is discovered, and then
- * its type is analyzed depending on the datatype class. Through this method, the complete storage
+ * The example below shows an example of code that partially analyzes a nested
+compound
+ * datatype. The name and overall offset and size of the component datatype is
+discovered, and then
+ * its type is analyzed depending on the datatype class. Through this method,
+the complete storage
  * layout can be discovered.
  *
  * <em> Output from h5dump for the compound datatype</em>
@@ -3438,56 +4024,87 @@ filled according to the value of this property. The padding can be:
  *       else if (H5Tget_class(s2_tid) == H5T_ARRAY) {
  *         sz2 = H5Tget_size(s2_tid);
  *         printf(“ %s: NESTED ARRAY DATATYPE offset %d size %d
- *                {\n”, H5Tget_member_name(s1_tid, i), H5Tget_member_offset(s1_tid, i), sz2);
+ *                {\n”, H5Tget_member_name(s1_tid, i),
+H5Tget_member_offset(s1_tid, i), sz2);
  *         H5Tget_array_dims(s2_tid, dim);
  *         s3_tid = H5Tget_super(s2_tid);
  *         // Etc., analyze the base type of the array
  *       }
  *       else {
  *         // analyze a simple type
- *         printf(“ %s: type code %d offset %d size %d\n”, H5Tget_member_name(s1_tid, i),
- *                H5Tget_class(s2_tid), H5Tget_member_offset(s1_tid, i), H5Tget_size(s2_tid));
+ *         printf(“ %s: type code %d offset %d size %d\n”,
+H5Tget_member_name(s1_tid, i),
+ *                H5Tget_class(s2_tid), H5Tget_member_offset(s1_tid, i),
+H5Tget_size(s2_tid));
  *       }
  *       // and so on....
  * \endcode
  *
  * \subsection subsec_datatype_life Life Cycle of the Datatype Object
- * Application programs access HDF5 datatypes through identifiers. Identifiers are obtained by
- * creating a new datatype or by copying or opening an existing datatype. The identifier can be used
- * until it is closed or until the library shuts down. See items a and b in the figure below. By default,
+ * Application programs access HDF5 datatypes through identifiers. Identifiers
+are obtained by
+ * creating a new datatype or by copying or opening an existing datatype. The
+identifier can be used
+ * until it is closed or until the library shuts down. See items a and b in the
+figure below. By default,
  * a datatype is transient, and it disappears when it is closed.
  *
- * When a dataset or attribute is created (#H5Dcreate or #H5Acreate), its datatype is stored in the
- * HDF5 file as part of the dataset or attribute object. See item c in the figure below. Once an object
- * created, its datatype cannot be changed or deleted. The datatype can be accessed by calling
- * #H5Dget_type, #H5Aget_type, #H5Tget_super, or #H5Tget_member_type. See item d in the figure
- * below. These calls return an identifier to a transient copy of the datatype of the dataset or
+ * When a dataset or attribute is created (#H5Dcreate or #H5Acreate), its
+datatype is stored in the
+ * HDF5 file as part of the dataset or attribute object. See item c in the
+figure below. Once an object
+ * created, its datatype cannot be changed or deleted. The datatype can be
+accessed by calling
+ * #H5Dget_type, #H5Aget_type, #H5Tget_super, or #H5Tget_member_type. See item d
+in the figure
+ * below. These calls return an identifier to a transient copy of the datatype
+of the dataset or
  * attribute unless the datatype is a committed datatype.
- * Note that when an object is created, the stored datatype is a copy of the transient datatype. If two
- * objects are created with the same datatype, the information is stored in each object with the same
+ * Note that when an object is created, the stored datatype is a copy of the
+transient datatype. If two
+ * objects are created with the same datatype, the information is stored in each
+object with the same
  * effect as if two different datatypes were created and used.
  *
- * A transient datatype can be stored using #H5Tcommit in the HDF5 file as an independent, named
- * object, called a committed datatype. Committed datatypes were formerly known as named
- * datatypes. See item e in the figure below. Subsequently, when a committed datatype is opened
- * with #H5Topen (item f), or is obtained with #H5Tget_member_type or similar call (item k), the return
- * is an identifier to a transient copy of the stored datatype. The identifier can be used in the
- * same way as other datatype identifiers except that the committed datatype cannot be modified. When a
- * committed datatype is copied with #H5Tcopy, the return is a new, modifiable, transient datatype
+ * A transient datatype can be stored using #H5Tcommit in the HDF5 file as an
+independent, named
+ * object, called a committed datatype. Committed datatypes were formerly known
+as named
+ * datatypes. See item e in the figure below. Subsequently, when a committed
+datatype is opened
+ * with #H5Topen (item f), or is obtained with #H5Tget_member_type or similar
+call (item k), the return
+ * is an identifier to a transient copy of the stored datatype. The identifier
+can be used in the
+ * same way as other datatype identifiers except that the committed datatype
+cannot be modified. When a
+ * committed datatype is copied with #H5Tcopy, the return is a new, modifiable,
+transient datatype
  * object (item f).
  *
- * When an object is created using a committed datatype (#H5Dcreate, #H5Acreate), the stored
- * datatype is used without copying it to the object. See item j in the figure below. In this case, if
- * multiple objects are created using the same committed datatype, they all share the exact same
- * datatype object. This saves space and makes clear that the datatype is shared. Note that a
- * committed datatype can be shared by objects within the same HDF5 file, but not by objects in
- * other files. For more information on copying committed datatypes to other HDF5 files, see the
- * “Copying Committed Datatypes with H5Ocopy” topic in the “Additional Resources” chapter.
+ * When an object is created using a committed datatype (#H5Dcreate,
+#H5Acreate), the stored
+ * datatype is used without copying it to the object. See item j in the figure
+below. In this case, if
+ * multiple objects are created using the same committed datatype, they all
+share the exact same
+ * datatype object. This saves space and makes clear that the datatype is
+shared. Note that a
+ * committed datatype can be shared by objects within the same HDF5 file, but
+not by objects in
+ * other files. For more information on copying committed datatypes to other
+HDF5 files, see the
+ * “Copying Committed Datatypes with H5Ocopy” topic in the “Additional
+Resources” chapter.
  *
- * A committed datatype can be deleted from the file by calling #H5Ldelete which replaces
- * #H5Gunlink. See item i in the figure below. If one or more objects are still using the datatype, the
- * committed datatype cannot be accessed with #H5Topen, but will not be removed from the file
- * until it is no longer used. #H5Tget_member_type and similar calls will return a transient copy of the
+ * A committed datatype can be deleted from the file by calling #H5Ldelete which
+replaces
+ * #H5Gunlink. See item i in the figure below. If one or more objects are still
+using the datatype, the
+ * committed datatype cannot be accessed with #H5Topen, but will not be removed
+from the file
+ * until it is no longer used. #H5Tget_member_type and similar calls will return
+a transient copy of the
  * datatype.
  *
  * <table>
@@ -3498,38 +4115,51 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * Transient datatypes are initially modifiable. Note that when a datatype is copied or when it is
- * written to the file (when an object is created) or the datatype is used to create a composite
- * datatype, a copy of the current state of the datatype is used. If the datatype is then modified, the
- * changes have no effect on datasets, attributes, or datatypes that have already been created. See
+ * Transient datatypes are initially modifiable. Note that when a datatype is
+copied or when it is
+ * written to the file (when an object is created) or the datatype is used to
+create a composite
+ * datatype, a copy of the current state of the datatype is used. If the
+datatype is then modified, the
+ * changes have no effect on datasets, attributes, or datatypes that have
+already been created. See
  * the figure below.
  *
- * A transient datatype can be made read-only (#H5Tlock). Note that the datatype is still transient,
- * and otherwise does not change. A datatype that is immutable is read-only but cannot be closed
- * except when the entire library is closed. The predefined types such as #H5T_NATIVE_INT are
+ * A transient datatype can be made read-only (#H5Tlock). Note that the datatype
+is still transient,
+ * and otherwise does not change. A datatype that is immutable is read-only but
+cannot be closed
+ * except when the entire library is closed. The predefined types such as
+#H5T_NATIVE_INT are
  * immutable transient types.
  *
  * <table>
  * <tr>
  * <td>
- * \image html Dtypes_fig24.gif "Transient datatype states: modifiable, read-only, and immutable"
+ * \image html Dtypes_fig24.gif "Transient datatype states: modifiable,
+read-only, and immutable"
  * </td>
  * </tr>
  * </table>
  *
- * To create two or more datasets that share a common datatype, first commit the datatype, and then
+ * To create two or more datasets that share a common datatype, first commit the
+datatype, and then
  * use that datatype to create the datasets. See the example below.
  * <em> Create a shareable datatype</em>
  * \code
  *   hid_t t1 = ...some transient type...;
  *   H5Tcommit (file, “shared_type”, t1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- *   hid_t dset1 = H5Dcreate (file, “dset1”, t1, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- *   hid_t dset2 = H5Dcreate (file, “dset2”, t1, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   hid_t dset1 = H5Dcreate (file, “dset1”, t1, space, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
+ *   hid_t dset2 = H5Dcreate (file, “dset2”, t1, space, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
  *
  *   hid_t dset1 = H5Dopen (file, “dset1”, H5P_DEFAULT);
  *   hid_t t2 = H5Dget_type (dset1);
- *   hid_t dset3 = H5Dcreate (file, “dset3”, t2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- *   hid_t dset4 = H5Dcreate (file, “dset4”, t2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ *   hid_t dset3 = H5Dcreate (file, “dset3”, t2, space, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
+ *   hid_t dset4 = H5Dcreate (file, “dset4”, t2, space, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT);
  * \endcode
  *
  * <table>
@@ -3545,21 +4175,27 @@ filled according to the value of this property. The padding can be:
  * \endcode
  * </td>
  * <td>
- * A committed datatype can be opened by calling this function, which returns a datatype identifier.
- * The identifier should eventually be released by calling #H5Tclose() to release resources. The
- * committed datatype returned by this function is read-only or a negative value is returned for failure.
+ * A committed datatype can be opened by calling this function, which returns a
+datatype identifier.
+ * The identifier should eventually be released by calling #H5Tclose() to
+release resources. The
+ * committed datatype returned by this function is read-only or a negative value
+is returned for failure.
  * The location is either a file or group identifier.
  * </td>
  * </tr>
  * <tr>
  * <td>
  * \code
- * herr_t H5Tcommit (hid_t location, const char *name, hid_t type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)
+ * herr_t H5Tcommit (hid_t location, const char *name, hid_t type, H5P_DEFAULT,
+H5P_DEFAULT, H5P_DEFAULT)
  * \endcode
  * </td>
  * <td>
- * A transient datatype (not immutable) can be written to a file and turned into a committed datatype by
- * calling this function. The location is either a file or group identifier and when combined with name
+ * A transient datatype (not immutable) can be written to a file and turned into
+a committed datatype by
+ * calling this function. The location is either a file or group identifier and
+when combined with name
  * refers to a new committed datatype.
  * </td>
  * </tr>
@@ -3570,34 +4206,52 @@ filled according to the value of this property. The padding can be:
  * \endcode
  * </td>
  * <td>
- * A type can be queried to determine if it is a committed type or a transient type. If this function
- * returns a positive value then the type is committed. Datasets which return committed datatypes with
- * #H5Dget_type() are able to share the datatype with other datasets in the same file.
+ * A type can be queried to determine if it is a committed type or a transient
+type. If this function
+ * returns a positive value then the type is committed. Datasets which return
+committed datatypes with
+ * #H5Dget_type() are able to share the datatype with other datasets in the same
+file.
  * </td>
  * </tr>
  * </table>
  *
- * \subsection subsec_datatype_transfer Data Transfer: Datatype Conversion and Selection
- * When data is transferred (write or read), the storage layout of the data elements may be different.
- * For example, an integer might be stored on disk in big-endian byte order and read into memory
- * with little-endian byte order. In this case, each data element will be transformed by the HDF5
+ * \subsection subsec_datatype_transfer Data Transfer: Datatype Conversion and
+Selection
+ * When data is transferred (write or read), the storage layout of the data
+elements may be different.
+ * For example, an integer might be stored on disk in big-endian byte order and
+read into memory
+ * with little-endian byte order. In this case, each data element will be
+transformed by the HDF5
  * Library during the data transfer.
  *
- * The conversion of data elements is controlled by specifying the datatype of the source and
- * specifying the intended datatype of the destination. The storage format on disk is the datatype
- * specified when the dataset is created. The datatype of memory must be specified in the library
+ * The conversion of data elements is controlled by specifying the datatype of
+the source and
+ * specifying the intended datatype of the destination. The storage format on
+disk is the datatype
+ * specified when the dataset is created. The datatype of memory must be
+specified in the library
  * call.
  *
- * In order to be convertible, the datatype of the source and destination must have the same
- * datatype class (with the exception of enumeration type). Thus, integers can be converted to other
- * integers, and floats to other floats, but integers cannot (yet) be converted to floats. For each
- * atomic datatype class, the possible conversions are defined. An enumeration datatype can be
+ * In order to be convertible, the datatype of the source and destination must
+have the same
+ * datatype class (with the exception of enumeration type). Thus, integers can
+be converted to other
+ * integers, and floats to other floats, but integers cannot (yet) be converted
+to floats. For each
+ * atomic datatype class, the possible conversions are defined. An enumeration
+datatype can be
  * converted to an integer or a floating-point number datatype.
  *
- * Basically, any datatype can be converted to another datatype of the same datatype class. The
- * HDF5 Library automatically converts all properties. If the destination is too small to hold the
- * source value then an overflow or underflow exception occurs. If a handler is defined with the
- * #H5Pset_type_conv_cb function, it will be called. Otherwise, a default action will be performed.
+ * Basically, any datatype can be converted to another datatype of the same
+datatype class. The
+ * HDF5 Library automatically converts all properties. If the destination is too
+small to hold the
+ * source value then an overflow or underflow exception occurs. If a handler is
+defined with the
+ * #H5Pset_type_conv_cb function, it will be called. Otherwise, a default action
+will be performed.
  * The table below summarizes the default actions.
  *
  * <table>
@@ -3629,17 +4283,22 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * For example, when reading data from a dataset, the source datatype is the datatype set when the
- * dataset was created, and the destination datatype is the description of the storage layout in
- * memory. The destination datatype must be specified in the #H5Dread call. The example below
- * shows an example of reading a dataset of 32-bit integers. The figure below the example shows
+ * For example, when reading data from a dataset, the source datatype is the
+datatype set when the
+ * dataset was created, and the destination datatype is the description of the
+storage layout in
+ * memory. The destination datatype must be specified in the #H5Dread call. The
+example below
+ * shows an example of reading a dataset of 32-bit integers. The figure below
+the example shows
  * the data transformation that is performed.
  * <em>Specify the destination datatype with H5Dread</em>
  * \code
  *   // Stored as H5T_STD_BE32
  *   // Use the native memory order in the destination
  *   mem_type_id = H5Tcopy(H5T_NATIVE_INT);
- *   status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+ *   status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+xfer_plist_id, buf);
  * \endcode
  *
  * <table>
@@ -3653,17 +4312,26 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * One thing to note in the example above is the use of the predefined native datatype
- * #H5T_NATIVE_INT. Recall that in this example, the data was stored as a 4-bytes in big-endian
- * order. The application wants to read this data into an array of integers in memory. Depending on
- * the system, the storage layout of memory might be either big or little-endian, so the data may
- * need to be transformed on some platforms and not on others. The #H5T_NATIVE_INT type is set
- * by the HDF5 Library to be the correct type to describe the storage layout of the memory on the
- * system. Thus, the code in the example above will work correctly on any platform, performing a
+ * One thing to note in the example above is the use of the predefined native
+datatype
+ * #H5T_NATIVE_INT. Recall that in this example, the data was stored as a
+4-bytes in big-endian
+ * order. The application wants to read this data into an array of integers in
+memory. Depending on
+ * the system, the storage layout of memory might be either big or
+little-endian, so the data may
+ * need to be transformed on some platforms and not on others. The
+#H5T_NATIVE_INT type is set
+ * by the HDF5 Library to be the correct type to describe the storage layout of
+the memory on the
+ * system. Thus, the code in the example above will work correctly on any
+platform, performing a
  * transformation when needed.
  *
- * There are predefined native types for most atomic datatypes, and these can be combined in
- * composite datatypes. In general, the predefined native datatypes should always be used for data
+ * There are predefined native types for most atomic datatypes, and these can be
+combined in
+ * composite datatypes. In general, the predefined native datatypes should
+always be used for data
  * stored in memory.
  * Predefined native datatypes describe the storage properties of memory.
  *
@@ -3680,7 +4348,8 @@ filled according to the value of this property. The padding can be:
  *   // Stored as H5T_STD_BE32
  *   // Use the native memory order in the destination
  *   mem_type_id = H5Tcopy(H5T_NATIVE_INT);
- *   status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+ *   status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+xfer_plist_id, buf);
  * \endcode
  *
  * <table>
@@ -3696,7 +4365,8 @@ filled according to the value of this property. The padding can be:
  *   // Stored as H5T_STD_BE32
  *   // Use the native memory order in the destination
  *   mem_type_id = H5Tcopy(H5T_NATIVE_INT);
- *   status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+ *   status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+xfer_plist_id, buf);
  * \endcode
  *
  * <table>
@@ -3707,36 +4377,51 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * \subsection subsec_datatype_text Text Descriptions of Datatypes: Conversion to and from
+ * \subsection subsec_datatype_text Text Descriptions of Datatypes: Conversion
+to and from
  *
- * HDF5 provides a means for generating a portable and human-readable text description of a
- * datatype and for generating a datatype from such a text description. This capability is particularly
- * useful for creating complex datatypes in a single step, for creating a text description of a datatype
- * for debugging purposes, and for creating a portable datatype definition that can then be used to
+ * HDF5 provides a means for generating a portable and human-readable text
+description of a
+ * datatype and for generating a datatype from such a text description. This
+capability is particularly
+ * useful for creating complex datatypes in a single step, for creating a text
+description of a datatype
+ * for debugging purposes, and for creating a portable datatype definition that
+can then be used to
  * recreate the datatype on many platforms or in other applications.
  *
- * These tasks are handled by two functions provided in the HDF5 Lite high-level library:
+ * These tasks are handled by two functions provided in the HDF5 Lite high-level
+library:
  * \li #H5LTtext_to_dtype Creates an HDF5 datatype in a single step.
  * \li #H5LTdtype_to_text Translates an HDF5 datatype into a text description.
  *
- * Note that this functionality requires that the HDF5 High-Level Library (H5LT) be installed.
+ * Note that this functionality requires that the HDF5 High-Level Library (H5LT)
+be installed.
  *
- * While #H5LTtext_to_dtype can be used to generate any sort of datatype, it is particularly useful
+ * While #H5LTtext_to_dtype can be used to generate any sort of datatype, it is
+particularly useful
  * for complex datatypes.
  *
- * #H5LTdtype_to_text is most likely to be used in two sorts of situations: when a datatype must be
- * closely examined for debugging purpose or to create a portable text description of the datatype
- * that can then be used to recreate the datatype on other platforms or in other applications.
+ * #H5LTdtype_to_text is most likely to be used in two sorts of situations: when
+a datatype must be
+ * closely examined for debugging purpose or to create a portable text
+description of the datatype
+ * that can then be used to recreate the datatype on other platforms or in other
+applications.
  *
- * These two functions work for all valid HDF5 datatypes except time, bitfield, and reference
+ * These two functions work for all valid HDF5 datatypes except time, bitfield,
+and reference
  * datatypes.
  *
- * The currently supported text format used by #H5LTtext_to_dtype and #H5LTdtype_to_text is the
- * data description language (DDL) and conforms to the \ref DDLBNF110. The portion of the
+ * The currently supported text format used by #H5LTtext_to_dtype and
+#H5LTdtype_to_text is the
+ * data description language (DDL) and conforms to the \ref DDLBNF110. The
+portion of the
  * \ref DDLBNF110 that defines HDF5 datatypes appears below.
  * <em>The definition of HDF5 datatypes from the HDF5 DDL</em>
  * \code
- *   <datatype> ::= <atomic_type> | <compound_type> | <variable_length_type> | <array_type>
+ *   <datatype> ::= <atomic_type> | <compound_type> | <variable_length_type> |
+<array_type>
  *
  *   <atomic_type> ::= <integer> | <float> | <time> | <string> |
  *                     <bitfield> | <opaque> | <reference> | <enum>
@@ -3798,7 +4483,8 @@ filled according to the value of this property. The padding can be:
  *                  <enum_base_type> <enum_def>+
  *              }
  *   <enum_base_type> ::= <integer>
- *   // Currently enums can only hold integer type data, but they may be expanded
+ *   // Currently enums can only hold integer type data, but they may be
+expanded
  *   // in the future to hold any datatype
  *   <enum_def> ::= <enum_symbol> <enum_val>;
  *   <enum_symbol> ::= <identifier>
@@ -3814,7 +4500,8 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * <h4>Examples</h4>
- * The code sample below illustrates the use of #H5LTtext_to_dtype to generate a variable-length
+ * The code sample below illustrates the use of #H5LTtext_to_dtype to generate a
+variable-length
  * string datatype.
  *
  * <em>Creating a variable-length string datatype from a text description</em>
@@ -3830,7 +4517,8 @@ filled according to the value of this property. The padding can be:
  *   goto out;
  * \endcode
  *
- * The code sample below illustrates the use of #H5LTtext_to_dtype to generate a complex array
+ * The code sample below illustrates the use of #H5LTtext_to_dtype to generate a
+complex array
  * datatype.
  *
  * <em>Creating a complex array datatype from a text description</em>
@@ -3928,7 +4616,8 @@ filled according to the value of this property. The padding can be:
  *          \li The datatype \c LLONG corresponds C's \Code{long long} and
  *              \c LDOUBLE is \Code{long double}. These types might be the same
  *              as \c LONG and \c DOUBLE, respectively.
- * \snippet{doc} tables/predefinedDatatypes.dox predefined_native_datatypes_table
+ * \snippet{doc} tables/predefinedDatatypes.dox
+ * predefined_native_datatypes_table
  *
  * \defgroup PDTC9x C9x Integer Datatypes
  * \ingroup PDTNAT
@@ -3937,7 +4626,8 @@ filled according to the value of this property. The padding can be:
  *
  * \defgroup PDTS Strings
  * \ingroup PDT
- * \snippet{doc} tables/predefinedDatatypes.dox predefined_string_datatypes_table
+ * \snippet{doc} tables/predefinedDatatypes.dox
+ * predefined_string_datatypes_table
  *
  */
 

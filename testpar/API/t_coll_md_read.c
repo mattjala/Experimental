@@ -29,216 +29,238 @@
  * an if (mpi_rank == 0) check.
  */
 #define PARTIAL_NO_SELECTION_NO_SEL_PROCESS (mpi_rank == mpi_size - 1)
-#define PARTIAL_NO_SELECTION_DATASET_NAME   "partial_no_selection_dset"
-#define PARTIAL_NO_SELECTION_DATASET_NDIMS  2
-#define PARTIAL_NO_SELECTION_Y_DIM_SCALE    5
-#define PARTIAL_NO_SELECTION_X_DIM_SCALE    5
+#define PARTIAL_NO_SELECTION_DATASET_NAME "partial_no_selection_dset"
+#define PARTIAL_NO_SELECTION_DATASET_NDIMS 2
+#define PARTIAL_NO_SELECTION_Y_DIM_SCALE 5
+#define PARTIAL_NO_SELECTION_X_DIM_SCALE 5
 
 #define MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS 2
 
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM 10000
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME    "linked_chunk_io_sort_chunk_issue"
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS            1
+#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME                            \
+  "linked_chunk_io_sort_chunk_issue"
+#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS 1
 
 #define COLL_GHEAP_WRITE_ATTR_NELEMS 10
-#define COLL_GHEAP_WRITE_ATTR_NAME   "coll_gheap_write_attr"
-#define COLL_GHEAP_WRITE_ATTR_DIMS   1
+#define COLL_GHEAP_WRITE_ATTR_NAME "coll_gheap_write_attr"
+#define COLL_GHEAP_WRITE_ATTR_DIMS 1
 
 /*
  * A test for issue HDFFV-10501. A parallel hang was reported which occurred
  * in linked-chunk I/O when collective metadata reads are enabled and some ranks
- * do not have any selection in a dataset's dataspace, while others do. The ranks
- * which have no selection during the read/write operation called H5D__chunk_addrmap()
- * to retrieve the lowest chunk address, since we require that the read/write be done
- * in strictly non-decreasing order of chunk address. For version 1 and 2 B-trees,
- * this caused the non-participating ranks to issue a collective MPI_Bcast() call
- * which the other ranks did not issue, thus causing a hang.
+ * do not have any selection in a dataset's dataspace, while others do. The
+ * ranks which have no selection during the read/write operation called
+ * H5D__chunk_addrmap() to retrieve the lowest chunk address, since we require
+ * that the read/write be done in strictly non-decreasing order of chunk
+ * address. For version 1 and 2 B-trees, this caused the non-participating ranks
+ * to issue a collective MPI_Bcast() call which the other ranks did not issue,
+ * thus causing a hang.
  *
- * However, since these ranks are not actually reading/writing anything, this call
- * can simply be removed and the address used for the read/write can be set to an
- * arbitrary number (0 was chosen).
+ * However, since these ranks are not actually reading/writing anything, this
+ * call can simply be removed and the address used for the read/write can be set
+ * to an arbitrary number (0 was chosen).
  */
-void
-test_partial_no_selection_coll_md_read(void)
-{
-    const char *filename;
-    hsize_t    *dataset_dims = NULL;
-    hsize_t     max_dataset_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS];
-    hsize_t     sel_dims[1];
-    hsize_t     chunk_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS] = {PARTIAL_NO_SELECTION_Y_DIM_SCALE,
-                                                              PARTIAL_NO_SELECTION_X_DIM_SCALE};
-    hsize_t     start[PARTIAL_NO_SELECTION_DATASET_NDIMS];
-    hsize_t     stride[PARTIAL_NO_SELECTION_DATASET_NDIMS];
-    hsize_t     count[PARTIAL_NO_SELECTION_DATASET_NDIMS];
-    hsize_t     block[PARTIAL_NO_SELECTION_DATASET_NDIMS];
-    hid_t       file_id   = H5I_INVALID_HID;
-    hid_t       fapl_id   = H5I_INVALID_HID;
-    hid_t       dset_id   = H5I_INVALID_HID;
-    hid_t       dcpl_id   = H5I_INVALID_HID;
-    hid_t       dxpl_id   = H5I_INVALID_HID;
-    hid_t       fspace_id = H5I_INVALID_HID;
-    hid_t       mspace_id = H5I_INVALID_HID;
-    int         mpi_rank, mpi_size;
-    void       *data     = NULL;
-    void       *read_buf = NULL;
+void test_partial_no_selection_coll_md_read(void) {
+  const char *filename;
+  hsize_t *dataset_dims = NULL;
+  hsize_t max_dataset_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS];
+  hsize_t sel_dims[1];
+  hsize_t chunk_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS] = {
+      PARTIAL_NO_SELECTION_Y_DIM_SCALE, PARTIAL_NO_SELECTION_X_DIM_SCALE};
+  hsize_t start[PARTIAL_NO_SELECTION_DATASET_NDIMS];
+  hsize_t stride[PARTIAL_NO_SELECTION_DATASET_NDIMS];
+  hsize_t count[PARTIAL_NO_SELECTION_DATASET_NDIMS];
+  hsize_t block[PARTIAL_NO_SELECTION_DATASET_NDIMS];
+  hid_t file_id = H5I_INVALID_HID;
+  hid_t fapl_id = H5I_INVALID_HID;
+  hid_t dset_id = H5I_INVALID_HID;
+  hid_t dcpl_id = H5I_INVALID_HID;
+  hid_t dxpl_id = H5I_INVALID_HID;
+  hid_t fspace_id = H5I_INVALID_HID;
+  hid_t mspace_id = H5I_INVALID_HID;
+  int mpi_rank, mpi_size;
+  void *data = NULL;
+  void *read_buf = NULL;
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or file flush aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file, dataset or file flush aren't "
+             "supported with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    filename = PARATESTFILE /* GetTestParameters() */;
+    return;
+  }
 
-    fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
-    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
+  filename = PARATESTFILE /* GetTestParameters() */;
 
-    /*
-     * Even though the testphdf5 framework currently sets collective metadata reads
-     * on the FAPL, we call it here just to be sure this is futureproof, since
-     * demonstrating this issue relies upon it.
-     */
-    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0), "Set collective metadata reads succeeded");
+  fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+  VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((file_id >= 0), "H5Fcreate succeeded");
+  /*
+   * Even though the testphdf5 framework currently sets collective metadata
+   * reads on the FAPL, we call it here just to be sure this is futureproof,
+   * since demonstrating this issue relies upon it.
+   */
+  VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0),
+       "Set collective metadata reads succeeded");
 
-    dataset_dims = malloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
-    VRFY((dataset_dims != NULL), "malloc succeeded");
+  file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+  VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    dataset_dims[0]     = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_size;
-    dataset_dims[1]     = (hsize_t)PARTIAL_NO_SELECTION_X_DIM_SCALE * (hsize_t)mpi_size;
-    max_dataset_dims[0] = H5S_UNLIMITED;
-    max_dataset_dims[1] = H5S_UNLIMITED;
+  dataset_dims =
+      malloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
+  VRFY((dataset_dims != NULL), "malloc succeeded");
 
-    fspace_id = H5Screate_simple(PARTIAL_NO_SELECTION_DATASET_NDIMS, dataset_dims, max_dataset_dims);
-    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+  dataset_dims[0] =
+      (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_size;
+  dataset_dims[1] =
+      (hsize_t)PARTIAL_NO_SELECTION_X_DIM_SCALE * (hsize_t)mpi_size;
+  max_dataset_dims[0] = H5S_UNLIMITED;
+  max_dataset_dims[1] = H5S_UNLIMITED;
 
-    /*
-     * Set up chunking on the dataset in order to reproduce the problem.
-     */
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
+  fspace_id = H5Screate_simple(PARTIAL_NO_SELECTION_DATASET_NDIMS, dataset_dims,
+                               max_dataset_dims);
+  VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
-    VRFY((H5Pset_chunk(dcpl_id, PARTIAL_NO_SELECTION_DATASET_NDIMS, chunk_dims) >= 0),
-         "H5Pset_chunk succeeded");
+  /*
+   * Set up chunking on the dataset in order to reproduce the problem.
+   */
+  dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+  VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
 
-    dset_id = H5Dcreate2(file_id, PARTIAL_NO_SELECTION_DATASET_NAME, H5T_NATIVE_INT, fspace_id, H5P_DEFAULT,
-                         dcpl_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+  VRFY((H5Pset_chunk(dcpl_id, PARTIAL_NO_SELECTION_DATASET_NDIMS, chunk_dims) >=
+        0),
+       "H5Pset_chunk succeeded");
 
-    /*
-     * Setup hyperslab selection to split the dataset among the ranks.
-     *
-     * The ranks will write rows across the dataset.
-     */
-    start[0]  = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_rank;
-    start[1]  = 0;
-    stride[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE;
-    stride[1] = PARTIAL_NO_SELECTION_X_DIM_SCALE;
-    count[0]  = 1;
-    count[1]  = (hsize_t)mpi_size;
-    block[0]  = PARTIAL_NO_SELECTION_Y_DIM_SCALE;
-    block[1]  = PARTIAL_NO_SELECTION_X_DIM_SCALE;
+  dset_id =
+      H5Dcreate2(file_id, PARTIAL_NO_SELECTION_DATASET_NAME, H5T_NATIVE_INT,
+                 fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+  VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
 
-    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "H5Sselect_hyperslab succeeded");
+  /*
+   * Setup hyperslab selection to split the dataset among the ranks.
+   *
+   * The ranks will write rows across the dataset.
+   */
+  start[0] = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_rank;
+  start[1] = 0;
+  stride[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE;
+  stride[1] = PARTIAL_NO_SELECTION_X_DIM_SCALE;
+  count[0] = 1;
+  count[1] = (hsize_t)mpi_size;
+  block[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE;
+  block[1] = PARTIAL_NO_SELECTION_X_DIM_SCALE;
 
-    sel_dims[0] = count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE);
+  VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count,
+                            block) >= 0),
+       "H5Sselect_hyperslab succeeded");
 
-    mspace_id = H5Screate_simple(1, sel_dims, NULL);
-    VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
+  sel_dims[0] = count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE *
+                            PARTIAL_NO_SELECTION_X_DIM_SCALE);
 
-    data = calloc(1, count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                         sizeof(int));
-    VRFY((data != NULL), "calloc succeeded");
+  mspace_id = H5Screate_simple(1, sel_dims, NULL);
+  VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
+  data = calloc(1, count[1] *
+                       (PARTIAL_NO_SELECTION_Y_DIM_SCALE *
+                        PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+                       sizeof(int));
+  VRFY((data != NULL), "calloc succeeded");
 
-    /*
-     * Enable collective access for the data transfer.
-     */
-    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
+  dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+  VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
 
-    VRFY((H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id, data) >= 0), "H5Dwrite succeeded");
+  /*
+   * Enable collective access for the data transfer.
+   */
+  VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0),
+       "H5Pset_dxpl_mpio succeeded");
 
-    VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
+  VRFY((H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id,
+                 data) >= 0),
+       "H5Dwrite succeeded");
 
-    /*
-     * Ensure that linked-chunk I/O is performed since this is
-     * the particular code path where the issue lies and we don't
-     * want the library doing multi-chunk I/O behind our backs.
-     */
-    VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
-         "H5Pset_dxpl_mpio_chunk_opt succeeded");
+  VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
 
-    read_buf = malloc(count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                      sizeof(int));
-    VRFY((read_buf != NULL), "malloc succeeded");
+  /*
+   * Ensure that linked-chunk I/O is performed since this is
+   * the particular code path where the issue lies and we don't
+   * want the library doing multi-chunk I/O behind our backs.
+   */
+  VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
+       "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    /*
-     * Make sure to call H5Sselect_none() on the non-participating process.
-     */
-    if (PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
-        VRFY((H5Sselect_none(fspace_id) >= 0), "H5Sselect_none succeeded");
-        VRFY((H5Sselect_none(mspace_id) >= 0), "H5Sselect_none succeeded");
-    }
+  read_buf = malloc(
+      count[1] *
+      (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+      sizeof(int));
+  VRFY((read_buf != NULL), "malloc succeeded");
 
-    /*
-     * Finally have each rank read their section of data back from the dataset.
-     */
-    VRFY((H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id, read_buf) >= 0),
-         "H5Dread succeeded");
+  /*
+   * Make sure to call H5Sselect_none() on the non-participating process.
+   */
+  if (PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
+    VRFY((H5Sselect_none(fspace_id) >= 0), "H5Sselect_none succeeded");
+    VRFY((H5Sselect_none(mspace_id) >= 0), "H5Sselect_none succeeded");
+  }
 
-    /*
-     * Check data integrity just to be sure.
-     */
-    if (!PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
-        VRFY((!memcmp(data, read_buf,
-                      count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                          sizeof(int))),
-             "memcmp succeeded");
-    }
+  /*
+   * Finally have each rank read their section of data back from the dataset.
+   */
+  VRFY((H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id,
+                read_buf) >= 0),
+       "H5Dread succeeded");
 
-    if (dataset_dims) {
-        free(dataset_dims);
-        dataset_dims = NULL;
-    }
+  /*
+   * Check data integrity just to be sure.
+   */
+  if (!PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
+    VRFY((!memcmp(data, read_buf,
+                  count[1] *
+                      (PARTIAL_NO_SELECTION_Y_DIM_SCALE *
+                       PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+                      sizeof(int))),
+         "memcmp succeeded");
+  }
 
-    if (data) {
-        free(data);
-        data = NULL;
-    }
+  if (dataset_dims) {
+    free(dataset_dims);
+    dataset_dims = NULL;
+  }
 
-    if (read_buf) {
-        free(read_buf);
-        read_buf = NULL;
-    }
+  if (data) {
+    free(data);
+    data = NULL;
+  }
 
-    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
-    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
-    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
-    VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+  if (read_buf) {
+    free(read_buf);
+    read_buf = NULL;
+  }
+
+  VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
+  VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
+  VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+  VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }
 
 /*
  * A test for HDFFV-10562 which attempts to verify that using multi-chunk
  * I/O with collective metadata reads enabled doesn't causes issues due to
- * collective metadata reads being made only by process 0 in H5D__chunk_addrmap().
+ * collective metadata reads being made only by process 0 in
+ *H5D__chunk_addrmap().
  *
  * Failure in this test may either cause a hang, or, due to how the MPI calls
  * pertaining to this issue might mistakenly match up, may cause an MPI error
@@ -247,121 +269,138 @@ test_partial_no_selection_coll_md_read(void)
  *  #008: H5Dmpio.c line 2546 in H5D__obtain_mpio_mode(): MPI_BCast failed
  *  major: Internal error (too specific to document in detail)
  *  minor: Some MPI function failed
- *  #009: H5Dmpio.c line 2546 in H5D__obtain_mpio_mode(): Message truncated, error stack:
- *PMPI_Bcast(1600)..................: MPI_Bcast(buf=0x1df98e0, count=18, MPI_BYTE, root=0, comm=0x84000006)
- *failed MPIR_Bcast_impl(1452).............: MPIR_Bcast(1476)..................:
+ *  #009: H5Dmpio.c line 2546 in H5D__obtain_mpio_mode(): Message truncated,
+ *error stack: PMPI_Bcast(1600)..................: MPI_Bcast(buf=0x1df98e0,
+ *count=18, MPI_BYTE, root=0, comm=0x84000006) failed
+ *MPIR_Bcast_impl(1452).............: MPIR_Bcast(1476)..................:
  *MPIR_Bcast_intra(1249)............:
  *MPIR_SMP_Bcast(1088)..............:
  *MPIR_Bcast_binomial(239)..........:
- *MPIDI_CH3U_Receive_data_found(131): Message from rank 0 and tag 2 truncated; 2616 bytes received but buffer
- *size is 18 major: Internal error (too specific to document in detail) minor: MPI Error String
+ *MPIDI_CH3U_Receive_data_found(131): Message from rank 0 and tag 2 truncated;
+ *2616 bytes received but buffer size is 18 major: Internal error (too specific
+ *to document in detail) minor: MPI Error String
  *
  */
-void
-test_multi_chunk_io_addrmap_issue(void)
-{
-    const char *filename;
-    hsize_t     start[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
-    hsize_t     stride[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
-    hsize_t     count[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
-    hsize_t     block[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
-    hsize_t     dims[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS]       = {10, 5};
-    hsize_t     chunk_dims[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS] = {5, 5};
-    hsize_t     max_dims[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS]   = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hid_t       file_id                                       = H5I_INVALID_HID;
-    hid_t       fapl_id                                       = H5I_INVALID_HID;
-    hid_t       dset_id                                       = H5I_INVALID_HID;
-    hid_t       dcpl_id                                       = H5I_INVALID_HID;
-    hid_t       dxpl_id                                       = H5I_INVALID_HID;
-    hid_t       space_id                                      = H5I_INVALID_HID;
-    void       *read_buf                                      = NULL;
-    int         mpi_rank;
-    int data[5][5] = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}};
+void test_multi_chunk_io_addrmap_issue(void) {
+  const char *filename;
+  hsize_t start[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
+  hsize_t stride[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
+  hsize_t count[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
+  hsize_t block[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
+  hsize_t dims[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS] = {10, 5};
+  hsize_t chunk_dims[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS] = {5, 5};
+  hsize_t max_dims[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS] = {H5S_UNLIMITED,
+                                                         H5S_UNLIMITED};
+  hid_t file_id = H5I_INVALID_HID;
+  hid_t fapl_id = H5I_INVALID_HID;
+  hid_t dset_id = H5I_INVALID_HID;
+  hid_t dcpl_id = H5I_INVALID_HID;
+  hid_t dxpl_id = H5I_INVALID_HID;
+  hid_t space_id = H5I_INVALID_HID;
+  void *read_buf = NULL;
+  int mpi_rank;
+  int data[5][5] = {{0, 1, 2, 3, 4},
+                    {0, 1, 2, 3, 4},
+                    {0, 1, 2, 3, 4},
+                    {0, 1, 2, 3, 4},
+                    {0, 1, 2, 3, 4}};
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or file flush aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file, dataset or file flush aren't "
+             "supported with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    filename = PARATESTFILE /* GetTestParameters() */;
+    return;
+  }
 
-    fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
-    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
+  filename = PARATESTFILE /* GetTestParameters() */;
 
-    /*
-     * Even though the testphdf5 framework currently sets collective metadata reads
-     * on the FAPL, we call it here just to be sure this is futureproof, since
-     * demonstrating this issue relies upon it.
-     */
-    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0), "Set collective metadata reads succeeded");
+  fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+  VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((file_id >= 0), "H5Fcreate succeeded");
+  /*
+   * Even though the testphdf5 framework currently sets collective metadata
+   * reads on the FAPL, we call it here just to be sure this is futureproof,
+   * since demonstrating this issue relies upon it.
+   */
+  VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0),
+       "Set collective metadata reads succeeded");
 
-    space_id = H5Screate_simple(MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS, dims, max_dims);
-    VRFY((space_id >= 0), "H5Screate_simple succeeded");
+  file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+  VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
+  space_id =
+      H5Screate_simple(MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS, dims, max_dims);
+  VRFY((space_id >= 0), "H5Screate_simple succeeded");
 
-    VRFY((H5Pset_chunk(dcpl_id, MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS, chunk_dims) >= 0),
-         "H5Pset_chunk succeeded");
+  dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+  VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
 
-    dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+  VRFY((H5Pset_chunk(dcpl_id, MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS, chunk_dims) >=
+        0),
+       "H5Pset_chunk succeeded");
 
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
+  dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
+                       dcpl_id, H5P_DEFAULT);
+  VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
 
-    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
-    VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_MULTI_IO) >= 0),
-         "H5Pset_dxpl_mpio_chunk_opt succeeded");
+  dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+  VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
 
-    start[1]  = 0;
-    stride[0] = stride[1] = 1;
-    count[0] = count[1] = 5;
-    block[0] = block[1] = 1;
+  VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0),
+       "H5Pset_dxpl_mpio succeeded");
+  VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_MULTI_IO) >= 0),
+       "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    if (mpi_rank == 0)
-        start[0] = 0;
-    else
-        start[0] = 5;
+  start[1] = 0;
+  stride[0] = stride[1] = 1;
+  count[0] = count[1] = 5;
+  block[0] = block[1] = 1;
 
-    VRFY((H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "H5Sselect_hyperslab succeeded");
-    if (mpi_rank != 0)
-        VRFY((H5Sselect_none(space_id) >= 0), "H5Sselect_none succeeded");
+  if (mpi_rank == 0)
+    start[0] = 0;
+  else
+    start[0] = 5;
 
-    VRFY((H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, space_id, dxpl_id, data) >= 0), "H5Dwrite succeeded");
+  VRFY((H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count,
+                            block) >= 0),
+       "H5Sselect_hyperslab succeeded");
+  if (mpi_rank != 0)
+    VRFY((H5Sselect_none(space_id) >= 0), "H5Sselect_none succeeded");
 
-    VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
+  VRFY((H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, space_id, dxpl_id, data) >=
+        0),
+       "H5Dwrite succeeded");
 
-    read_buf = malloc(50 * sizeof(int));
-    VRFY((read_buf != NULL), "malloc succeeded");
+  VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
 
-    VRFY((H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "H5Dread succeeded");
+  read_buf = malloc(50 * sizeof(int));
+  VRFY((read_buf != NULL), "malloc succeeded");
 
-    if (read_buf) {
-        free(read_buf);
-        read_buf = NULL;
-    }
+  VRFY((H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >=
+        0),
+       "H5Dread succeeded");
 
-    VRFY((H5Sclose(space_id) >= 0), "H5Sclose succeeded");
-    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
-    VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+  if (read_buf) {
+    free(read_buf);
+    read_buf = NULL;
+  }
+
+  VRFY((H5Sclose(space_id) >= 0), "H5Sclose succeeded");
+  VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+  VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }
 
 /*
@@ -376,168 +415,182 @@ test_multi_chunk_io_addrmap_issue(void)
  *  #008: H5Dmpio.c line 2338 in H5D__sort_chunk(): MPI_BCast failed
  *  major: Internal error (too specific to document in detail)
  *  minor: Some MPI function failed
- *  #009: H5Dmpio.c line 2338 in H5D__sort_chunk(): Other MPI error, error stack:
- *PMPI_Bcast(1600)........: MPI_Bcast(buf=0x7eae610, count=320000, MPI_BYTE, root=0, comm=0x84000006) failed
- *MPIR_Bcast_impl(1452)...:
+ *  #009: H5Dmpio.c line 2338 in H5D__sort_chunk(): Other MPI error, error
+ *stack: PMPI_Bcast(1600)........: MPI_Bcast(buf=0x7eae610, count=320000,
+ *MPI_BYTE, root=0, comm=0x84000006) failed MPIR_Bcast_impl(1452)...:
  *MPIR_Bcast(1476)........:
  *MPIR_Bcast_intra(1249)..:
  *MPIR_SMP_Bcast(1088)....:
- *MPIR_Bcast_binomial(250): message sizes do not match across processes in the collective routine: Received
- *2096 but expected 320000 major: Internal error (too specific to document in detail) minor: MPI Error String
+ *MPIR_Bcast_binomial(250): message sizes do not match across processes in the
+ *collective routine: Received 2096 but expected 320000 major: Internal error
+ *(too specific to document in detail) minor: MPI Error String
  */
-void
-test_link_chunk_io_sort_chunk_issue(void)
-{
-    const char *filename;
-    hsize_t     dataset_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     sel_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     chunk_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     start[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     stride[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     count[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     block[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hid_t       file_id   = H5I_INVALID_HID;
-    hid_t       fapl_id   = H5I_INVALID_HID;
-    hid_t       dset_id   = H5I_INVALID_HID;
-    hid_t       dcpl_id   = H5I_INVALID_HID;
-    hid_t       dxpl_id   = H5I_INVALID_HID;
-    hid_t       fspace_id = H5I_INVALID_HID;
-    hid_t       mspace_id = H5I_INVALID_HID;
-    int         mpi_rank, mpi_size;
-    void       *data     = NULL;
-    void       *read_buf = NULL;
+void test_link_chunk_io_sort_chunk_issue(void) {
+  const char *filename;
+  hsize_t dataset_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hsize_t sel_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hsize_t chunk_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hsize_t start[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hsize_t stride[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hsize_t count[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hsize_t block[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+  hid_t file_id = H5I_INVALID_HID;
+  hid_t fapl_id = H5I_INVALID_HID;
+  hid_t dset_id = H5I_INVALID_HID;
+  hid_t dcpl_id = H5I_INVALID_HID;
+  hid_t dxpl_id = H5I_INVALID_HID;
+  hid_t fspace_id = H5I_INVALID_HID;
+  hid_t mspace_id = H5I_INVALID_HID;
+  int mpi_rank, mpi_size;
+  void *data = NULL;
+  void *read_buf = NULL;
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or file flush aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file, dataset or file flush aren't "
+             "supported with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    filename = PARATESTFILE /* GetTestParameters() */;
+    return;
+  }
 
-    fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
-    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
+  filename = PARATESTFILE /* GetTestParameters() */;
 
-    /*
-     * Even though the testphdf5 framework currently sets collective metadata reads
-     * on the FAPL, we call it here just to be sure this is futureproof, since
-     * demonstrating this issue relies upon it.
-     */
-    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0), "Set collective metadata reads succeeded");
+  fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+  VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((file_id >= 0), "H5Fcreate succeeded");
+  /*
+   * Even though the testphdf5 framework currently sets collective metadata
+   * reads on the FAPL, we call it here just to be sure this is futureproof,
+   * since demonstrating this issue relies upon it.
+   */
+  VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0),
+       "Set collective metadata reads succeeded");
 
-    /*
-     * Create a one-dimensional dataset of exactly LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM
-     * chunks, where every rank writes to a piece of every single chunk to keep utilization high.
-     */
-    dataset_dims[0] = (hsize_t)mpi_size * (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM;
+  file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+  VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    fspace_id = H5Screate_simple(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, dataset_dims, NULL);
-    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+  /*
+   * Create a one-dimensional dataset of exactly
+   * LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM chunks, where every rank
+   * writes to a piece of every single chunk to keep utilization high.
+   */
+  dataset_dims[0] = (hsize_t)mpi_size *
+                    (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM;
 
-    /*
-     * Set up chunking on the dataset in order to reproduce the problem.
-     */
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
+  fspace_id =
+      H5Screate_simple(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, dataset_dims, NULL);
+  VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
-    /* Chunk size is equal to MPI size since each rank writes to a piece of every chunk */
-    chunk_dims[0] = (hsize_t)mpi_size;
+  /*
+   * Set up chunking on the dataset in order to reproduce the problem.
+   */
+  dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+  VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
 
-    VRFY((H5Pset_chunk(dcpl_id, LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, chunk_dims) >= 0),
-         "H5Pset_chunk succeeded");
+  /* Chunk size is equal to MPI size since each rank writes to a piece of every
+   * chunk */
+  chunk_dims[0] = (hsize_t)mpi_size;
 
-    dset_id = H5Dcreate2(file_id, LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME, H5T_NATIVE_INT, fspace_id,
-                         H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+  VRFY((H5Pset_chunk(dcpl_id, LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS,
+                     chunk_dims) >= 0),
+       "H5Pset_chunk succeeded");
 
-    /*
-     * Setup hyperslab selection to split the dataset among the ranks.
-     */
-    start[0]  = (hsize_t)mpi_rank;
-    stride[0] = (hsize_t)mpi_size;
-    count[0]  = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM;
-    block[0]  = 1;
+  dset_id =
+      H5Dcreate2(file_id, LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME,
+                 H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+  VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
 
-    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "H5Sselect_hyperslab succeeded");
+  /*
+   * Setup hyperslab selection to split the dataset among the ranks.
+   */
+  start[0] = (hsize_t)mpi_rank;
+  stride[0] = (hsize_t)mpi_size;
+  count[0] = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM;
+  block[0] = 1;
 
-    sel_dims[0] = count[0];
+  VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count,
+                            block) >= 0),
+       "H5Sselect_hyperslab succeeded");
 
-    mspace_id = H5Screate_simple(1, sel_dims, NULL);
-    VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
+  sel_dims[0] = count[0];
 
-    data = calloc(1, count[0] * sizeof(int));
-    VRFY((data != NULL), "calloc succeeded");
+  mspace_id = H5Screate_simple(1, sel_dims, NULL);
+  VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
+  data = calloc(1, count[0] * sizeof(int));
+  VRFY((data != NULL), "calloc succeeded");
 
-    /*
-     * Enable collective access for the data transfer.
-     */
-    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
+  dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+  VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
 
-    VRFY((H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id, data) >= 0), "H5Dwrite succeeded");
+  /*
+   * Enable collective access for the data transfer.
+   */
+  VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0),
+       "H5Pset_dxpl_mpio succeeded");
 
-    VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
+  VRFY((H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id,
+                 data) >= 0),
+       "H5Dwrite succeeded");
 
-    /*
-     * Ensure that linked-chunk I/O is performed since this is
-     * the particular code path where the issue lies and we don't
-     * want the library doing multi-chunk I/O behind our backs.
-     */
-    VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
-         "H5Pset_dxpl_mpio_chunk_opt succeeded");
+  VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
 
-    read_buf = malloc(count[0] * sizeof(int));
-    VRFY((read_buf != NULL), "malloc succeeded");
+  /*
+   * Ensure that linked-chunk I/O is performed since this is
+   * the particular code path where the issue lies and we don't
+   * want the library doing multi-chunk I/O behind our backs.
+   */
+  VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
+       "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "H5Sselect_hyperslab succeeded");
+  read_buf = malloc(count[0] * sizeof(int));
+  VRFY((read_buf != NULL), "malloc succeeded");
 
-    sel_dims[0] = count[0];
+  VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count,
+                            block) >= 0),
+       "H5Sselect_hyperslab succeeded");
 
-    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
+  sel_dims[0] = count[0];
 
-    mspace_id = H5Screate_simple(1, sel_dims, NULL);
-    VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
+  VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
 
-    /*
-     * Finally have each rank read their section of data back from the dataset.
-     */
-    VRFY((H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id, read_buf) >= 0),
-         "H5Dread succeeded");
+  mspace_id = H5Screate_simple(1, sel_dims, NULL);
+  VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    if (data) {
-        free(data);
-        data = NULL;
-    }
+  /*
+   * Finally have each rank read their section of data back from the dataset.
+   */
+  VRFY((H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id,
+                read_buf) >= 0),
+       "H5Dread succeeded");
 
-    if (read_buf) {
-        free(read_buf);
-        read_buf = NULL;
-    }
+  if (data) {
+    free(data);
+    data = NULL;
+  }
 
-    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
-    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
-    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
-    VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+  if (read_buf) {
+    free(read_buf);
+    read_buf = NULL;
+  }
+
+  VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
+  VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
+  VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+  VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }
 
 /*
@@ -549,76 +602,78 @@ test_link_chunk_io_sort_chunk_issue(void)
  * An assertion exists in the library that should be triggered if global
  * heap data is not correctly mapped as raw data.
  */
-void
-test_collective_global_heap_write(void)
-{
-    const char *filename;
-    hsize_t     attr_dims[COLL_GHEAP_WRITE_ATTR_DIMS];
-    hid_t       file_id   = H5I_INVALID_HID;
-    hid_t       fapl_id   = H5I_INVALID_HID;
-    hid_t       attr_id   = H5I_INVALID_HID;
-    hid_t       vl_type   = H5I_INVALID_HID;
-    hid_t       fspace_id = H5I_INVALID_HID;
-    hvl_t       vl_data;
-    int         mpi_rank, mpi_size;
-    int         data_buf[COLL_GHEAP_WRITE_ATTR_NELEMS];
+void test_collective_global_heap_write(void) {
+  const char *filename;
+  hsize_t attr_dims[COLL_GHEAP_WRITE_ATTR_DIMS];
+  hid_t file_id = H5I_INVALID_HID;
+  hid_t fapl_id = H5I_INVALID_HID;
+  hid_t attr_id = H5I_INVALID_HID;
+  hid_t vl_type = H5I_INVALID_HID;
+  hid_t fspace_id = H5I_INVALID_HID;
+  hvl_t vl_data;
+  int mpi_rank, mpi_size;
+  int data_buf[COLL_GHEAP_WRITE_ATTR_NELEMS];
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or file flush aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file, dataset or file flush aren't "
+             "supported with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    filename = PARATESTFILE /* GetTestParameters() */;
+    return;
+  }
 
-    fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
-    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
+  filename = PARATESTFILE /* GetTestParameters() */;
 
-    /*
-     * Even though the testphdf5 framework currently sets collective metadata
-     * writes on the FAPL, we call it here just to be sure this is futureproof,
-     * since demonstrating this issue relies upon it.
-     */
-    VRFY((H5Pset_coll_metadata_write(fapl_id, true) >= 0), "Set collective metadata writes succeeded");
+  fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+  VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((file_id >= 0), "H5Fcreate succeeded");
+  /*
+   * Even though the testphdf5 framework currently sets collective metadata
+   * writes on the FAPL, we call it here just to be sure this is futureproof,
+   * since demonstrating this issue relies upon it.
+   */
+  VRFY((H5Pset_coll_metadata_write(fapl_id, true) >= 0),
+       "Set collective metadata writes succeeded");
 
-    attr_dims[0] = 1;
+  file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+  VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    fspace_id = H5Screate_simple(COLL_GHEAP_WRITE_ATTR_DIMS, attr_dims, NULL);
-    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+  attr_dims[0] = 1;
 
-    vl_type = H5Tvlen_create(H5T_NATIVE_INT);
-    VRFY((vl_type >= 0), "H5Tvlen_create succeeded");
+  fspace_id = H5Screate_simple(COLL_GHEAP_WRITE_ATTR_DIMS, attr_dims, NULL);
+  VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
-    vl_data.len = COLL_GHEAP_WRITE_ATTR_NELEMS;
-    vl_data.p   = data_buf;
+  vl_type = H5Tvlen_create(H5T_NATIVE_INT);
+  VRFY((vl_type >= 0), "H5Tvlen_create succeeded");
 
-    /*
-     * Create a variable-length attribute that will get written to the global heap
-     */
-    attr_id = H5Acreate2(file_id, COLL_GHEAP_WRITE_ATTR_NAME, vl_type, fspace_id, H5P_DEFAULT, H5P_DEFAULT);
-    VRFY((attr_id >= 0), "H5Acreate2 succeeded");
+  vl_data.len = COLL_GHEAP_WRITE_ATTR_NELEMS;
+  vl_data.p = data_buf;
 
-    for (size_t i = 0; i < COLL_GHEAP_WRITE_ATTR_NELEMS; i++)
-        data_buf[i] = (int)i;
+  /*
+   * Create a variable-length attribute that will get written to the global heap
+   */
+  attr_id = H5Acreate2(file_id, COLL_GHEAP_WRITE_ATTR_NAME, vl_type, fspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT);
+  VRFY((attr_id >= 0), "H5Acreate2 succeeded");
 
-    VRFY((H5Awrite(attr_id, vl_type, &vl_data) >= 0), "H5Awrite succeeded");
+  for (size_t i = 0; i < COLL_GHEAP_WRITE_ATTR_NELEMS; i++)
+    data_buf[i] = (int)i;
 
-    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
-    VRFY((H5Tclose(vl_type) >= 0), "H5Sclose succeeded");
-    VRFY((H5Aclose(attr_id) >= 0), "H5Aclose succeeded");
-    VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+  VRFY((H5Awrite(attr_id, vl_type, &vl_data) >= 0), "H5Awrite succeeded");
+
+  VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
+  VRFY((H5Tclose(vl_type) >= 0), "H5Sclose succeeded");
+  VRFY((H5Aclose(attr_id) >= 0), "H5Aclose succeeded");
+  VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
+  VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }
