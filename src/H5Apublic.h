@@ -16,20 +16,20 @@
 #ifndef H5Apublic_H
 #define H5Apublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
 #include "H5Opublic.h" /* Object Headers                           */
 #include "H5Tpublic.h" /* Datatypes                                */
+#include "H5public.h"  /* Generic Functions                        */
 
 //! <!-- [H5A_info_t_snip] -->
 /**
  * Information struct for H5Aget_info() / H5Aget_info_by_idx()
  */
 typedef struct {
-    hbool_t           corder_valid; /**< Indicate if creation order is valid */
-    H5O_msg_crt_idx_t corder;       /**< Creation order                 */
-    H5T_cset_t        cset;         /**< Character set of attribute name */
-    hsize_t           data_size;    /**< Size of raw data		  */
+  hbool_t corder_valid;     /**< Indicate if creation order is valid */
+  H5O_msg_crt_idx_t corder; /**< Creation order                 */
+  H5T_cset_t cset;          /**< Character set of attribute name */
+  hsize_t data_size;        /**< Size of raw data		  */
 } H5A_info_t;
 //! <!-- [H5A_info_t_snip] -->
 
@@ -52,8 +52,10 @@ typedef struct {
  *              indicating failure. The iterator can be restarted at the next
  *              attribute.
  */
-typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
-                                  const H5A_info_t *ainfo /*in*/, void *op_data /*in,out*/);
+typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/,
+                                  const char *attr_name /*in*/,
+                                  const H5A_info_t *ainfo /*in*/,
+                                  void *op_data /*in,out*/);
 //! <!-- [H5A_operator2_t_snip] -->
 
 /********************/
@@ -94,8 +96,8 @@ H5_DLL herr_t H5Aclose(hid_t attr_id);
  * \async_variant_of{H5Aclose}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
-                             hid_t es_id);
+H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t attr_id, hid_t es_id);
 #else
 H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
 #endif
@@ -138,20 +140,23 @@ H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
  * \see H5Aclose()
  *
  */
-H5_DLL hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
-                        hid_t aapl_id);
+H5_DLL hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
+                        hid_t space_id, hid_t acpl_id, hid_t aapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup ASYNC
  * \async_variant_of{H5Acreate}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                             const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
-                             hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Acreate_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t loc_id,
+                             const char *attr_name, hid_t type_id,
+                             hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+                             hid_t es_id);
 #else
-H5_DLL hid_t  H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
-                              hid_t acpl_id, hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id,
+                             hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+                             hid_t es_id);
 #endif
 
 /*--------------------------------------------------------------------------*/
@@ -192,22 +197,27 @@ H5_DLL hid_t  H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id
  * \since 1.8.0
  *
  */
-H5_DLL hid_t H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
-                               hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
+H5_DLL hid_t H5Acreate_by_name(hid_t loc_id, const char *obj_name,
+                               const char *attr_name, hid_t type_id,
+                               hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+                               hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup ASYNC
  * \async_variant_of{H5Acreate_by_name}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                     hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
-                                     hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id,
-                                     hid_t es_id);
+H5_DLL hid_t H5Acreate_by_name_async(const char *app_file, const char *app_func,
+                                     unsigned app_line, hid_t loc_id,
+                                     const char *obj_name,
+                                     const char *attr_name, hid_t type_id,
+                                     hid_t space_id, hid_t acpl_id,
+                                     hid_t aapl_id, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t H5Acreate_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
-                                     hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id,
-                                     hid_t es_id);
+H5_DLL hid_t H5Acreate_by_name_async(hid_t loc_id, const char *obj_name,
+                                     const char *attr_name, hid_t type_id,
+                                     hid_t space_id, hid_t acpl_id,
+                                     hid_t aapl_id, hid_t lapl_id, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------*/
@@ -274,7 +284,8 @@ H5_DLL herr_t H5Adelete(hid_t loc_id, const char *attr_name);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
+H5_DLL herr_t H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
+                               H5_index_t idx_type, H5_iter_order_t order,
                                hsize_t n, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
 /**
@@ -301,7 +312,8 @@ H5_DLL herr_t H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t id
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id);
+H5_DLL herr_t H5Adelete_by_name(hid_t loc_id, const char *obj_name,
+                                const char *attr_name, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -327,10 +339,13 @@ H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
  * \async_variant_of{H5Aexists}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                              const char *attr_name, hbool_t *exists, hid_t es_id);
+H5_DLL herr_t H5Aexists_async(const char *app_file, const char *app_func,
+                              unsigned app_line, hid_t obj_id,
+                              const char *attr_name, hbool_t *exists,
+                              hid_t es_id);
 #else
-H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name, hbool_t *exists, hid_t es_id);
+H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name,
+                              hbool_t *exists, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------*/
@@ -363,19 +378,23 @@ H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name, hbool_t *exis
  * \since 1.8.0
  *
  */
-H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *attr_name, hid_t lapl_id);
+H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
+                                const char *attr_name, hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup ASYNC
  * \async_variant_of{H5Aexists_by_name}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                      hid_t loc_id, const char *obj_name, const char *attr_name,
-                                      hbool_t *exists, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Aexists_by_name_async(const char *app_file,
+                                      const char *app_func, unsigned app_line,
+                                      hid_t loc_id, const char *obj_name,
+                                      const char *attr_name, hbool_t *exists,
+                                      hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name,
-                                      hbool_t *exists, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name,
+                                      const char *attr_name, hbool_t *exists,
+                                      hid_t lapl_id, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------*/
@@ -452,8 +471,10 @@ H5_DLL herr_t H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                 H5_iter_order_t order, hsize_t n, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
+H5_DLL herr_t H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
+                                 H5_index_t idx_type, H5_iter_order_t order,
+                                 hsize_t n, H5A_info_t *ainfo /*out*/,
+                                 hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -481,7 +502,8 @@ H5_DLL herr_t H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t 
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
+H5_DLL herr_t H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
+                                  const char *attr_name,
                                   H5A_info_t *ainfo /*out*/, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
 /**
@@ -553,8 +575,9 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  * \since 1.8.0
  *
  */
-H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t n, char *name /*out*/, size_t size,
+H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t n, char *name /*out*/, size_t size,
                                   hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
 /**
@@ -670,7 +693,8 @@ H5_DLL hid_t H5Aget_type(hid_t attr_id);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
+H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
+                          H5_iter_order_t order, hsize_t *idx,
                           H5A_operator2_t op, void *op_data);
 /*--------------------------------------------------------------------------*/
 /**
@@ -730,9 +754,10 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                 H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
-                                 hid_t lapl_id);
+H5_DLL herr_t H5Aiterate_by_name(hid_t loc_id, const char *obj_name,
+                                 H5_index_t idx_type, H5_iter_order_t order,
+                                 hsize_t *idx, H5A_operator2_t op,
+                                 void *op_data, hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -772,10 +797,12 @@ H5_DLL hid_t H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
  * \async_variant_of{H5Aopen}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
+H5_DLL hid_t H5Aopen_async(const char *app_file, const char *app_func,
+                           unsigned app_line, hid_t obj_id,
                            const char *attr_name, hid_t aapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id,
+                           hid_t es_id);
 #endif
 /*--------------------------------------------------------------------------*/
 /**
@@ -818,7 +845,8 @@ H5_DLL hid_t  H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id, 
  * \since 1.8.0
  *
  */
-H5_DLL hid_t H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
+H5_DLL hid_t H5Aopen_by_idx(hid_t loc_id, const char *obj_name,
+                            H5_index_t idx_type, H5_iter_order_t order,
                             hsize_t n, hid_t aapl_id, hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
@@ -826,13 +854,16 @@ H5_DLL hid_t H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_t
  * \async_variant_of{H5Aopen_by_idx}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Aopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                                  const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+H5_DLL hid_t H5Aopen_by_idx_async(const char *app_file, const char *app_func,
+                                  unsigned app_line, hid_t loc_id,
+                                  const char *obj_name, H5_index_t idx_type,
+                                  H5_iter_order_t order, hsize_t n,
                                   hid_t aapl_id, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                   H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id,
-                                   hid_t es_id);
+H5_DLL hid_t H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t n, hid_t aapl_id, hid_t lapl_id,
+                                  hid_t es_id);
 #endif
 /*--------------------------------------------------------------------------*/
 /**
@@ -873,7 +904,8 @@ H5_DLL hid_t  H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_
  * \since 1.8.0
  *
  */
-H5_DLL hid_t H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
+H5_DLL hid_t H5Aopen_by_name(hid_t loc_id, const char *obj_name,
+                             const char *attr_name, hid_t aapl_id,
                              hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
 /**
@@ -881,12 +913,14 @@ H5_DLL hid_t H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *att
  * \async_variant_of{H5Aopen_by_name}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Aopen_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                   hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
-                                   hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Aopen_by_name_async(const char *app_file, const char *app_func,
+                                   unsigned app_line, hid_t loc_id,
+                                   const char *obj_name, const char *attr_name,
+                                   hid_t aapl_id, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Aopen_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
-                                    hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Aopen_by_name_async(hid_t loc_id, const char *obj_name,
+                                   const char *attr_name, hid_t aapl_id,
+                                   hid_t lapl_id, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------- */
@@ -926,10 +960,12 @@ H5_DLL herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
  * \async_variant_of{H5Aread}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
-                            hid_t dtype_id, void *buf, hid_t es_id);
+H5_DLL herr_t H5Aread_async(const char *app_file, const char *app_func,
+                            unsigned app_line, hid_t attr_id, hid_t dtype_id,
+                            void *buf, hid_t es_id);
 #else
-H5_DLL herr_t H5Aread_async(chid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id);
+H5_DLL herr_t H5Aread_async(chid_t attr_id, hid_t dtype_id, void *buf,
+                            hid_t es_id);
 #endif
 /*-------------------------------------------------------------------------*/
 /**
@@ -952,17 +988,21 @@ H5_DLL herr_t H5Aread_async(chid_t attr_id, hid_t dtype_id, void *buf, hid_t es_
  * \since 1.6.0
  *
  */
-H5_DLL herr_t H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
+H5_DLL herr_t H5Arename(hid_t loc_id, const char *old_name,
+                        const char *new_name);
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup ASYNC
  * \async_variant_of{H5Arename}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Arename_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                              const char *old_name, const char *new_name, hid_t es_id);
+H5_DLL herr_t H5Arename_async(const char *app_file, const char *app_func,
+                              unsigned app_line, hid_t loc_id,
+                              const char *old_name, const char *new_name,
+                              hid_t es_id);
 #else
-H5_DLL herr_t H5Arename_async(hid_t loc_id, const char *old_name, const char *new_name, hid_t es_id);
+H5_DLL herr_t H5Arename_async(hid_t loc_id, const char *old_name,
+                              const char *new_name, hid_t es_id);
 #endif
 /*--------------------------------------------------------------------------*/
 /**
@@ -970,12 +1010,17 @@ H5_DLL herr_t H5Arename_async(hid_t loc_id, const char *old_name, const char *ne
  * \async_variant_of{H5Arename_by_name}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                      hid_t loc_id, const char *obj_name, const char *old_attr_name,
-                                      const char *new_attr_name, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Arename_by_name_async(const char *app_file,
+                                      const char *app_func, unsigned app_line,
+                                      hid_t loc_id, const char *obj_name,
+                                      const char *old_attr_name,
+                                      const char *new_attr_name, hid_t lapl_id,
+                                      hid_t es_id);
 #else
-H5_DLL herr_t H5Arename_by_name_async(hid_t loc_id, const char *obj_name, const char *old_attr_name,
-                                      const char *new_attr_name, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Arename_by_name_async(hid_t loc_id, const char *obj_name,
+                                      const char *old_attr_name,
+                                      const char *new_attr_name, hid_t lapl_id,
+                                      hid_t es_id);
 #endif
 /*--------------------------------------------------------------------------*/
 /**
@@ -1012,10 +1057,12 @@ H5_DLL herr_t H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
  * \async_variant_of{H5Awrite}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Awrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
-                             hid_t type_id, const void *buf, hid_t es_id);
+H5_DLL herr_t H5Awrite_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t attr_id, hid_t type_id,
+                             const void *buf, hid_t es_id);
 #else
-H5_DLL herr_t H5Awrite_async(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id);
+H5_DLL herr_t H5Awrite_async(hid_t attr_id, hid_t type_id, const void *buf,
+                             hid_t es_id);
 #endif
 /*-------------------------------------------------------------------------*/
 /**
@@ -1040,7 +1087,8 @@ H5_DLL herr_t H5Awrite_async(hid_t attr_id, hid_t type_id, const void *buf, hid_
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name,
+                                const char *old_attr_name,
                                 const char *new_attr_name, hid_t lapl_id);
 
 /// \cond DEV
@@ -1048,34 +1096,46 @@ H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5A_MODULE
-#define H5Acreate_async(...)         H5Acreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Acreate_by_name_async(...) H5Acreate_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aopen_async(...)           H5Aopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aopen_by_name_async(...)   H5Aopen_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aopen_by_idx_async(...)    H5Aopen_by_idx_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Awrite_async(...)          H5Awrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aread_async(...)           H5Aread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Arename_async(...)         H5Arename_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Arename_by_name_async(...) H5Arename_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aexists_async(...)         H5Aexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aexists_by_name_async(...) H5Aexists_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Aclose_async(...)          H5Aclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Acreate_async(...)                                                   \
+  H5Acreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Acreate_by_name_async(...)                                           \
+  H5Acreate_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aopen_async(...)                                                     \
+  H5Aopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aopen_by_name_async(...)                                             \
+  H5Aopen_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aopen_by_idx_async(...)                                              \
+  H5Aopen_by_idx_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Awrite_async(...)                                                    \
+  H5Awrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aread_async(...)                                                     \
+  H5Aread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Arename_async(...)                                                   \
+  H5Arename_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Arename_by_name_async(...)                                           \
+  H5Arename_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aexists_async(...)                                                   \
+  H5Aexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aexists_by_name_async(...)                                           \
+  H5Aexists_by_name_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Aclose_async(...)                                                    \
+  H5Aclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5Acreate_async_wrap         H5_NO_EXPAND(H5Acreate_async)
+#define H5Acreate_async_wrap H5_NO_EXPAND(H5Acreate_async)
 #define H5Acreate_by_name_async_wrap H5_NO_EXPAND(H5Acreate_by_name_async)
-#define H5Aopen_async_wrap           H5_NO_EXPAND(H5Aopen_async)
-#define H5Aopen_by_name_async_wrap   H5_NO_EXPAND(H5Aopen_by_name_async)
-#define H5Aopen_by_idx_async_wrap    H5_NO_EXPAND(H5Aopen_by_idx_async)
-#define H5Awrite_async_wrap          H5_NO_EXPAND(H5Awrite_async)
-#define H5Aread_async_wrap           H5_NO_EXPAND(H5Aread_async)
-#define H5Arename_async_wrap         H5_NO_EXPAND(H5Arename_async)
+#define H5Aopen_async_wrap H5_NO_EXPAND(H5Aopen_async)
+#define H5Aopen_by_name_async_wrap H5_NO_EXPAND(H5Aopen_by_name_async)
+#define H5Aopen_by_idx_async_wrap H5_NO_EXPAND(H5Aopen_by_idx_async)
+#define H5Awrite_async_wrap H5_NO_EXPAND(H5Awrite_async)
+#define H5Aread_async_wrap H5_NO_EXPAND(H5Aread_async)
+#define H5Arename_async_wrap H5_NO_EXPAND(H5Arename_async)
 #define H5Arename_by_name_async_wrap H5_NO_EXPAND(H5Arename_by_name_async)
-#define H5Aexists_async_wrap         H5_NO_EXPAND(H5Aexists_async)
+#define H5Aexists_async_wrap H5_NO_EXPAND(H5Aexists_async)
 #define H5Aexists_by_name_async_wrap H5_NO_EXPAND(H5Aexists_by_name_async)
-#define H5Aclose_async_wrap          H5_NO_EXPAND(H5Aclose_async)
+#define H5Aclose_async_wrap H5_NO_EXPAND(H5Aclose_async)
 #endif /* H5A_MODULE */
 /// \endcond
 
@@ -1108,7 +1168,8 @@ H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *
  *              indicating failure. The iterator can be restarted at the next
  *              attribute.
  */
-typedef herr_t (*H5A_operator1_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
+typedef herr_t (*H5A_operator1_t)(hid_t location_id /*in*/,
+                                  const char *attr_name /*in*/,
                                   void *operator_data /*in,out*/);
 //! <!-- [H5A_operator1_t_snip] -->
 
@@ -1147,7 +1208,8 @@ typedef herr_t (*H5A_operator1_t)(hid_t location_id /*in*/, const char *attr_nam
  * \see H5Aclose()
  *
  */
-H5_DLL hid_t H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id);
+H5_DLL hid_t H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
+                        hid_t space_id, hid_t acpl_id);
 /* --------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -1159,7 +1221,8 @@ H5_DLL hid_t H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  * \return Returns the number of attributes if successful; otherwise, returns
  *         a negative value.
  *
- * \deprecation_note{H5Oget_info(), H5Oget_info_by_name(), and H5Oget_info_by_idx()}
+ * \deprecation_note{H5Oget_info(), H5Oget_info_by_name(), and
+ * H5Oget_info_by_idx()}
  *
  * \details H5Aget_num_attrs() returns the number of attributes attached to
  *          the object specified by its identifier, \p loc_id.
@@ -1202,7 +1265,8 @@ H5_DLL int H5Aget_num_attrs(hid_t loc_id);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Aiterate1(hid_t loc_id, unsigned *idx, H5A_operator1_t op, void *op_data);
+H5_DLL herr_t H5Aiterate1(hid_t loc_id, unsigned *idx, H5A_operator1_t op,
+                          void *op_data);
 /* --------------------------------------------------------------------------*/
 /**
  * \ingroup H5A

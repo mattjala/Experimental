@@ -22,12 +22,12 @@
  * by hand.
  */
 #if !defined(__has_attribute) && defined(__GNUC__) && (__GNUC__ >= 4)
-#define __has_attribute(x)                          __GCC4_has_attribute_##x
-#define __GCC4_has_attribute___visibility__         1
+#define __has_attribute(x) __GCC4_has_attribute_##x
+#define __GCC4_has_attribute___visibility__ 1
 #define __GCC4_has_attribute___warn_unused_result__ 1
-#define __GCC4_has_attribute___unused__             1
-#define __GCC4_has_attribute___format__             1
-#define __GCC4_has_attribute___fallthrough__        0
+#define __GCC4_has_attribute___unused__ 1
+#define __GCC4_has_attribute___format__ 1
+#define __GCC4_has_attribute___fallthrough__ 0
 #endif
 
 /* Visibility of symbols */

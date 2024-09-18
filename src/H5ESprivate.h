@@ -23,8 +23,8 @@
 #define H5ESprivate_H
 
 /* Include package's public headers */
-#include "H5ESpublic.h"
 #include "H5ESdevelop.h"
+#include "H5ESpublic.h"
 
 /* Private headers needed by this file */
 #include "H5VLprivate.h" /* Virtual Object Layer        */
@@ -47,8 +47,8 @@ typedef struct H5ES_t H5ES_t;
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-herr_t H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args,
-                   ...);
+herr_t H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
+                   const char *caller, const char *caller_args, ...);
 H5_DLL herr_t H5ES_init(void);
 
 #endif /* H5ESprivate_H */

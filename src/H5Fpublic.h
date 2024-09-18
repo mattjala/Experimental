@@ -16,11 +16,12 @@
 #ifndef H5Fpublic_H
 #define H5Fpublic_H
 
-#include "H5public.h"   /* Generic Functions                        */
 #include "H5ACpublic.h" /* Metadata Cache                           */
 #include "H5Ipublic.h"  /* Identifiers                              */
+#include "H5public.h"   /* Generic Functions                        */
 
-/* When this header is included from a private header, don't make calls to H5check() */
+/* When this header is included from a private header, don't make calls to
+ * H5check() */
 #undef H5CHECK
 #ifndef H5private_H
 #define H5CHECK H5check(),
@@ -28,7 +29,8 @@
 #define H5CHECK
 #endif /* H5private_H */
 
-/* When this header is included from a private HDF5 header, don't make calls to H5open() */
+/* When this header is included from a private HDF5 header, don't make calls to
+ * H5open() */
 #undef H5OPEN
 #ifndef H5private_H
 #define H5OPEN H5open(),
@@ -45,42 +47,49 @@
  * We're assuming that these constants are used rather early in the hdf5
  * session.
  */
-#define H5F_ACC_RDONLY (H5CHECK H5OPEN 0x0000u) /**< Absence of RDWR: read-only */
-#define H5F_ACC_RDWR   (H5CHECK H5OPEN 0x0001u) /**< Open for read and write    */
-#define H5F_ACC_TRUNC  (H5CHECK H5OPEN 0x0002u) /**< Overwrite existing files   */
-#define H5F_ACC_EXCL   (H5CHECK H5OPEN 0x0004u) /**< Fail if file already exists*/
+#define H5F_ACC_RDONLY                                                         \
+  (H5CHECK H5OPEN 0x0000u)                    /**< Absence of RDWR: read-only */
+#define H5F_ACC_RDWR (H5CHECK H5OPEN 0x0001u) /**< Open for read and write */
+#define H5F_ACC_TRUNC                                                          \
+  (H5CHECK H5OPEN 0x0002u)                    /**< Overwrite existing files   */
+#define H5F_ACC_EXCL (H5CHECK H5OPEN 0x0004u) /**< Fail if file already        \
+                                                 exists*/
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
-#define H5F_ACC_CREAT (H5CHECK H5OPEN 0x0010u) /**< Create non-existing files  */
-#define H5F_ACC_SWMR_WRITE                                                                                   \
-    (H5CHECK 0x0020u) /**< Indicate that this file is open for writing in a                                  \
-                       *   single-writer/multi-reader (SWMR)  scenario.                                      \
-                       *   Note that the process(es) opening the file for reading                            \
-                       *   must open the file with #H5F_ACC_RDONLY and use the                               \
-                       *   #H5F_ACC_SWMR_READ access flag. */
-#define H5F_ACC_SWMR_READ                                                                                    \
-    (H5CHECK 0x0040u) /**< Indicate that this file is open for reading in a                                  \
-                       * single-writer/multi-reader (SWMR) scenario. Note that                               \
-                       * the process(es) opening the file for SWMR reading must                              \
-                       * also open the file with the #H5F_ACC_RDONLY flag.  */
+#define H5F_ACC_CREAT                                                          \
+  (H5CHECK H5OPEN 0x0010u) /**< Create non-existing files  */
+#define H5F_ACC_SWMR_WRITE                                                     \
+  (H5CHECK 0x0020u) /**< Indicate that this file is open for writing in a      \
+                     *   single-writer/multi-reader (SWMR)  scenario.          \
+                     *   Note that the process(es) opening the file for        \
+                     * reading must open the file with #H5F_ACC_RDONLY and use                               \
+                     * the #H5F_ACC_SWMR_READ access flag. */
+#define H5F_ACC_SWMR_READ                                                      \
+  (H5CHECK 0x0040u) /**< Indicate that this file is open for reading in a      \
+                     * single-writer/multi-reader (SWMR) scenario. Note that   \
+                     * the process(es) opening the file for SWMR reading must  \
+                     * also open the file with the #H5F_ACC_RDONLY flag.  */
 
 /**
  * Default property list identifier
  *
- * \internal Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the parent file.
- * \internal ignore setting on lapl
+ * \internal Value passed to H5Pset_elink_acc_flags to cause flags to be taken
+ * from the parent file. \internal ignore setting on lapl
  */
 #define H5F_ACC_DEFAULT (H5CHECK H5OPEN 0xffffu)
 
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
-#define H5F_OBJ_FILE     (0x0001u) /**< File objects */
-#define H5F_OBJ_DATASET  (0x0002u) /**< Dataset objects */
-#define H5F_OBJ_GROUP    (0x0004u) /**< Group objects */
+#define H5F_OBJ_FILE (0x0001u)     /**< File objects */
+#define H5F_OBJ_DATASET (0x0002u)  /**< Dataset objects */
+#define H5F_OBJ_GROUP (0x0004u)    /**< Group objects */
 #define H5F_OBJ_DATATYPE (0x0008u) /**< Named datatype objects */
-#define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects */
-#define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
-#define H5F_OBJ_LOCAL                                                                                        \
-    (0x0020u) /**< Restrict search to objects opened through current file ID                                 \
-                   (as opposed to objects opened through any file ID accessing this file) */
+#define H5F_OBJ_ATTR (0x0010u)     /**< Attribute objects */
+#define H5F_OBJ_ALL                                                            \
+  (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE |         \
+   H5F_OBJ_ATTR)
+#define H5F_OBJ_LOCAL                                                          \
+  (0x0020u) /**< Restrict search to objects opened through current file ID     \
+                 (as opposed to objects opened through any file ID accessing   \
+               this file) */
 
 #define H5F_FAMILY_DEFAULT 0 /* (hsize_t) */
 
@@ -99,8 +108,8 @@
  * a single file vs. a set of mounted files
  */
 typedef enum H5F_scope_t {
-    H5F_SCOPE_LOCAL  = 0, /**< The specified file handle only */
-    H5F_SCOPE_GLOBAL = 1  /**< The entire virtual file        */
+  H5F_SCOPE_LOCAL = 0, /**< The specified file handle only */
+  H5F_SCOPE_GLOBAL = 1 /**< The entire virtual file        */
 } H5F_scope_t;
 
 /**
@@ -112,10 +121,13 @@ typedef enum H5F_scope_t {
  * How does file close behave?
  */
 typedef enum H5F_close_degree_t {
-    H5F_CLOSE_DEFAULT = 0, /**< Use the degree pre-defined by underlying VFD */
-    H5F_CLOSE_WEAK    = 1, /**< File closes only after all opened objects are closed */
-    H5F_CLOSE_SEMI    = 2, /**< If no opened objects, file is closed; otherwise, file close fails */
-    H5F_CLOSE_STRONG  = 3  /**< If there are opened objects, close them first, then close file */
+  H5F_CLOSE_DEFAULT = 0, /**< Use the degree pre-defined by underlying VFD */
+  H5F_CLOSE_WEAK =
+      1, /**< File closes only after all opened objects are closed */
+  H5F_CLOSE_SEMI = 2, /**< If no opened objects, file is closed; otherwise, file
+                         close fails */
+  H5F_CLOSE_STRONG =
+      3 /**< If there are opened objects, close them first, then close file */
 } H5F_close_degree_t;
 
 /**
@@ -123,21 +135,22 @@ typedef enum H5F_close_degree_t {
  */
 //! <!-- [H5F_info2_t_snip] -->
 typedef struct H5F_info2_t {
-    struct {
-        unsigned version;        /**< Superblock version number */
-        hsize_t  super_size;     /**< Superblock size */
-        hsize_t  super_ext_size; /**< Superblock extension size */
-    } super;
-    struct {
-        unsigned version;   /**< Version number of file free space management */
-        hsize_t  meta_size; /**< Free space manager metadata size */
-        hsize_t  tot_space; /**< Amount of free space in the file */
-    } free;
-    struct {
-        unsigned     version;   /**< Version number of shared object header info */
-        hsize_t      hdr_size;  /**< Shared object header message header size */
-        H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
-    } sohm;
+  struct {
+    unsigned version;       /**< Superblock version number */
+    hsize_t super_size;     /**< Superblock size */
+    hsize_t super_ext_size; /**< Superblock extension size */
+  } super;
+  struct {
+    unsigned version;  /**< Version number of file free space management */
+    hsize_t meta_size; /**< Free space manager metadata size */
+    hsize_t tot_space; /**< Amount of free space in the file */
+  } free;
+  struct {
+    unsigned version; /**< Version number of shared object header info */
+    hsize_t hdr_size; /**< Shared object header message header size */
+    H5_ih_info_t
+        msgs_info; /**< Shared object header message index & heap size */
+  } sohm;
 } H5F_info2_t;
 //! <!-- [H5F_info2_t_snip] -->
 
@@ -150,22 +163,22 @@ typedef struct H5F_info2_t {
  *           enumeration.
  */
 typedef enum H5F_mem_t {
-    H5FD_MEM_NOLIST = -1, /**< Data should not appear in the free list.
-                           * Must be negative.
-                           */
-    H5FD_MEM_DEFAULT = 0, /**< Value not yet set.  Can also be the
-                           * datatype set in a larger allocation
-                           * that will be suballocated by the library.
-                           * Must be zero.
-                           */
-    H5FD_MEM_SUPER = 1,   /**< Superblock data */
-    H5FD_MEM_BTREE = 2,   /**< B-tree data */
-    H5FD_MEM_DRAW  = 3,   /**< Raw data (content of datasets, etc.) */
-    H5FD_MEM_GHEAP = 4,   /**< Global heap data */
-    H5FD_MEM_LHEAP = 5,   /**< Local heap data */
-    H5FD_MEM_OHDR  = 6,   /**< Object header data */
+  H5FD_MEM_NOLIST = -1, /**< Data should not appear in the free list.
+                         * Must be negative.
+                         */
+  H5FD_MEM_DEFAULT = 0, /**< Value not yet set.  Can also be the
+                         * datatype set in a larger allocation
+                         * that will be suballocated by the library.
+                         * Must be zero.
+                         */
+  H5FD_MEM_SUPER = 1,   /**< Superblock data */
+  H5FD_MEM_BTREE = 2,   /**< B-tree data */
+  H5FD_MEM_DRAW = 3,    /**< Raw data (content of datasets, etc.) */
+  H5FD_MEM_GHEAP = 4,   /**< Global heap data */
+  H5FD_MEM_LHEAP = 5,   /**< Local heap data */
+  H5FD_MEM_OHDR = 6,    /**< Object header data */
 
-    H5FD_MEM_NTYPES /**< Sentinel value - must be last */
+  H5FD_MEM_NTYPES /**< Sentinel value - must be last */
 } H5F_mem_t;
 
 /**
@@ -173,8 +186,8 @@ typedef enum H5F_mem_t {
  */
 //! <!-- [H5F_sect_info_t_snip] -->
 typedef struct H5F_sect_info_t {
-    haddr_t addr; /**< Address of free space section */
-    hsize_t size; /**< Size of free space section */
+  haddr_t addr; /**< Address of free space section */
+  hsize_t size; /**< Size of free space section */
 } H5F_sect_info_t;
 //! <!-- [H5F_sect_info_t_snip] -->
 
@@ -182,13 +195,14 @@ typedef struct H5F_sect_info_t {
  * Library's format versions
  */
 typedef enum H5F_libver_t {
-    H5F_LIBVER_ERROR    = -1,
-    H5F_LIBVER_EARLIEST = 0, /**< Use the earliest possible format for storing objects */
-    H5F_LIBVER_V18      = 1, /**< Use the latest v18 format for storing objects */
-    H5F_LIBVER_V110     = 2, /**< Use the latest v110 format for storing objects */
-    H5F_LIBVER_V112     = 3, /**< Use the latest v112 format for storing objects */
-    H5F_LIBVER_V114     = 4, /**< Use the latest v114 format for storing objects */
-    H5F_LIBVER_NBOUNDS       /**< Sentinel */
+  H5F_LIBVER_ERROR = -1,
+  H5F_LIBVER_EARLIEST =
+      0, /**< Use the earliest possible format for storing objects */
+  H5F_LIBVER_V18 = 1,  /**< Use the latest v18 format for storing objects */
+  H5F_LIBVER_V110 = 2, /**< Use the latest v110 format for storing objects */
+  H5F_LIBVER_V112 = 3, /**< Use the latest v112 format for storing objects */
+  H5F_LIBVER_V114 = 4, /**< Use the latest v114 format for storing objects */
+  H5F_LIBVER_NBOUNDS   /**< Sentinel */
 } H5F_libver_t;
 
 #define H5F_LIBVER_LATEST H5F_LIBVER_V114
@@ -198,13 +212,16 @@ typedef enum H5F_libver_t {
  */
 //! <!-- [H5F_fspace_strategy_t_snip] -->
 typedef enum H5F_fspace_strategy_t {
-    H5F_FSPACE_STRATEGY_FSM_AGGR = 0, /**< Mechanisms: free-space managers, aggregators, and virtual file
-                                         drivers This is the library default when not set */
-    H5F_FSPACE_STRATEGY_PAGE =
-        1, /**< Mechanisms: free-space managers with embedded paged aggregation and virtual file drivers */
-    H5F_FSPACE_STRATEGY_AGGR = 2, /**< Mechanisms: aggregators and virtual file drivers */
-    H5F_FSPACE_STRATEGY_NONE = 3, /**< Mechanisms: virtual file drivers */
-    H5F_FSPACE_STRATEGY_NTYPES    /**< Sentinel */
+  H5F_FSPACE_STRATEGY_FSM_AGGR =
+      0, /**< Mechanisms: free-space managers, aggregators, and virtual file
+            drivers This is the library default when not set */
+  H5F_FSPACE_STRATEGY_PAGE =
+      1, /**< Mechanisms: free-space managers with embedded paged aggregation
+            and virtual file drivers */
+  H5F_FSPACE_STRATEGY_AGGR =
+      2, /**< Mechanisms: aggregators and virtual file drivers */
+  H5F_FSPACE_STRATEGY_NONE = 3, /**< Mechanisms: virtual file drivers */
+  H5F_FSPACE_STRATEGY_NTYPES    /**< Sentinel */
 } H5F_fspace_strategy_t;
 //! <!-- [H5F_fspace_strategy_t_snip] -->
 
@@ -214,25 +231,27 @@ typedef enum H5F_fspace_strategy_t {
  * \deprecated 1.10.1
  */
 typedef enum H5F_file_space_type_t {
-    H5F_FILE_SPACE_DEFAULT     = 0, /**< Default (or current) free space strategy setting */
-    H5F_FILE_SPACE_ALL_PERSIST = 1, /**< Persistent free space managers, aggregators, virtual file driver */
-    H5F_FILE_SPACE_ALL         = 2, /**< Non-persistent free space managers, aggregators, virtual file driver
-                                         This is the library default */
-    H5F_FILE_SPACE_AGGR_VFD = 3,    /**< Aggregators, Virtual file driver */
-    H5F_FILE_SPACE_VFD      = 4,    /**< Virtual file driver */
-    H5F_FILE_SPACE_NTYPES           /**< Sentinel */
+  H5F_FILE_SPACE_DEFAULT =
+      0, /**< Default (or current) free space strategy setting */
+  H5F_FILE_SPACE_ALL_PERSIST = 1, /**< Persistent free space managers,
+                                     aggregators, virtual file driver */
+  H5F_FILE_SPACE_ALL = 2, /**< Non-persistent free space managers, aggregators,
+                             virtual file driver This is the library default */
+  H5F_FILE_SPACE_AGGR_VFD = 3, /**< Aggregators, Virtual file driver */
+  H5F_FILE_SPACE_VFD = 4,      /**< Virtual file driver */
+  H5F_FILE_SPACE_NTYPES        /**< Sentinel */
 } H5F_file_space_type_t;
 
 //! <!-- [H5F_retry_info_t_snip] -->
 #define H5F_NUM_METADATA_READ_RETRY_TYPES 21
 
 /**
- * Data structure to report the collection of read retries for metadata items with checksum as
- * used by H5Fget_metadata_read_retry_info()
+ * Data structure to report the collection of read retries for metadata items
+ * with checksum as used by H5Fget_metadata_read_retry_info()
  */
 typedef struct H5F_retry_info_t {
-    unsigned  nbins;
-    uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
+  unsigned nbins;
+  uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
 } H5F_retry_info_t;
 //! <!-- [H5F_retry_info_t_snip] -->
 
@@ -322,8 +341,8 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  *       OR operator (\c |), but it is used only by HDF5 library developers;
  *       \Emph{it is neither tested nor supported for use in applications}.
  *
- * \attention \Bold{Special case — File creation in the case of an already-open file:}
- *            If a file being created is already opened, by either a previous
+ * \attention \Bold{Special case — File creation in the case of an already-open
+ * file:} If a file being created is already opened, by either a previous
  *            H5Fopen() or H5Fcreate() call, the HDF5 library may or may not
  *            detect that the open file and the new file are the same physical
  *            file. (See H5Fopen() regarding the limitations in detecting the
@@ -349,17 +368,21 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  * \see H5Fopen(), H5Fclose()
  *
  */
-H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
+                       hid_t fapl_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Fcreate}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
-                             const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
+H5_DLL hid_t H5Fcreate_async(const char *app_file, const char *app_func,
+                             unsigned app_line, const char *filename,
+                             unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+                             hid_t es_id);
 #else
-H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
+H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags,
+                             hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5F
@@ -448,7 +471,8 @@ H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id
  *            open call must include the file close degree setting
  *            #H5F_CLOSE_WEAK or the open will fail.
  *
- * \version 1.10.0 The #H5F_ACC_SWMR_WRITE and #H5F_ACC_SWMR_READ flags were added.
+ * \version 1.10.0 The #H5F_ACC_SWMR_WRITE and #H5F_ACC_SWMR_READ flags were
+ * added.
  *
  * \see H5Fclose()
  *
@@ -460,10 +484,12 @@ H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
  * \async_variant_of{H5Fopen}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
-                           const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
+H5_DLL hid_t H5Fopen_async(const char *app_file, const char *app_func,
+                           unsigned app_line, const char *filename,
+                           unsigned flags, hid_t access_plist, hid_t es_id);
 #else
-H5_DLL hid_t H5Fopen_async(const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
+H5_DLL hid_t H5Fopen_async(const char *filename, unsigned flags,
+                           hid_t access_plist, hid_t es_id);
 #endif
 /**
  * \ingroup H5F
@@ -497,8 +523,8 @@ H5_DLL hid_t H5Freopen(hid_t file_id);
  * \async_variant_of{H5Freopen}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
-                             hid_t es_id);
+H5_DLL hid_t H5Freopen_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t file_id, hid_t es_id);
 #else
 H5_DLL hid_t H5Freopen_async(hid_t file_id, hid_t es_id);
 #endif
@@ -528,10 +554,9 @@ H5_DLL hid_t H5Freopen_async(hid_t file_id, hid_t es_id);
  * \snippet H5F_examples.c flush
  *
  * \attention HDF5 does not possess full control over buffering. H5Fflush()
- *            flushes the internal HDF5 buffers and then asks the operating system
- *            (the OS) to flush the system buffers for the open files. After
- *            that, the OS is responsible for ensuring that the data is
- *            actually flushed to disk.
+ *            flushes the internal HDF5 buffers and then asks the operating
+ * system (the OS) to flush the system buffers for the open files. After that,
+ * the OS is responsible for ensuring that the data is actually flushed to disk.
  *
  */
 H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
@@ -541,7 +566,8 @@ H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
  * \async_variant_of{H5Fflush}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
+H5_DLL herr_t H5Fflush_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t object_id,
                              H5F_scope_t scope, hid_t es_id);
 #else
 H5_DLL herr_t H5Fflush_async(hid_t object_id, H5F_scope_t scope, hid_t es_id);
@@ -596,8 +622,8 @@ H5_DLL herr_t H5Fclose(hid_t file_id);
  * \async_variant_of{H5Fclose}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
-                             hid_t es_id);
+H5_DLL herr_t H5Fclose_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t file_id, hid_t es_id);
 #else
 H5_DLL herr_t H5Fclose_async(hid_t file_id, hid_t es_id);
 #endif
@@ -789,7 +815,8 @@ H5_DLL ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
  * \since 1.6.0
  *
  */
-H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
+H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs,
+                              hid_t *obj_id_list);
 /**
  * \ingroup H5F
  *
@@ -880,10 +907,10 @@ H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
  *          H5Fget_freespace() returns the amount of space that is unused by
  *          any objects in the file.
  *
- *          The interpretation of this number depends on the configured free space
- *          management strategy. For example, if the HDF5 library only tracks free
- *          space in a file from a file open or create until that file is closed,
- *          then this routine will report the free space that has been created
+ *          The interpretation of this number depends on the configured free
+ * space management strategy. For example, if the HDF5 library only tracks free
+ *          space in a file from a file open or create until that file is
+ * closed, then this routine will report the free space that has been created
  *          during that interval.
  *
  * \since 1.6.1
@@ -1004,21 +1031,18 @@ H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
  * \brief Obtains current metadata cache configuration for target file
  *
  * \file_id
- * \param[in,out] config_ptr Pointer to the H5AC_cache_config_t instance in which
- *                        the current metadata cache configuration is to be
- *                        reported. The fields of this structure are discussed
- *                        \ref H5AC-cache-config-t "here".
- * \return \herr_t
+ * \param[in,out] config_ptr Pointer to the H5AC_cache_config_t instance in
+ * which the current metadata cache configuration is to be reported. The fields
+ * of this structure are discussed \ref H5AC-cache-config-t "here". \return
+ * \herr_t
  *
  * \note The \c in direction applies only to the H5AC_cache_config_t::version
  *       field. All other fields are out parameters.
  *
  * \details H5Fget_mdc_config() loads the current metadata cache configuration
- *          into the instance of H5AC_cache_config_t pointed to by the \p config_ptr
- *          parameter.\n
- *          The fields of the H5AC_cache_config_t structure are shown below:
- *          \snippet H5ACpublic.h H5AC_cache_config_t_snip
- *          \click4more
+ *          into the instance of H5AC_cache_config_t pointed to by the \p
+ * config_ptr parameter.\n The fields of the H5AC_cache_config_t structure are
+ * shown below: \snippet H5ACpublic.h H5AC_cache_config_t_snip \click4more
  *
  * \since 1.8.0
  *
@@ -1044,28 +1068,32 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,
+                                const H5AC_cache_config_t *config_ptr);
 /**
  * \ingroup MDC
  *
  * \brief Obtains target file's metadata cache hit rate
  *
  * \file_id
- * \param[out] hit_rate_ptr Pointer to the double in which the hit rate is returned. Note that
- *                          \p hit_rate_ptr is undefined if the API call fails
+ * \param[out] hit_rate_ptr Pointer to the double in which the hit rate is
+ * returned. Note that \p hit_rate_ptr is undefined if the API call fails
  * \return \herr_t
  *
- * \details H5Fget_mdc_hit_rate() queries the metadata cache of the target file to obtain its hit rate
- *          \Code{(cache hits / (cache hits + cache misses))} since the last time hit rate statistics
- *          were reset. If the cache has not been accessed since the last time the hit rate stats were
- *          reset, the hit rate is defined to be 0.0.
+ * \details H5Fget_mdc_hit_rate() queries the metadata cache of the target file
+ * to obtain its hit rate \Code{(cache hits / (cache hits + cache misses))}
+ * since the last time hit rate statistics were reset. If the cache has not been
+ * accessed since the last time the hit rate stats were reset, the hit rate is
+ * defined to be 0.0.
  *
- *          The hit rate stats can be reset either manually (via H5Freset_mdc_hit_rate_stats()), or
- *          automatically. If the cache's adaptive resize code is enabled, the hit rate stats will be
- *          reset once per epoch. If they are reset manually as well, the cache may behave oddly.
+ *          The hit rate stats can be reset either manually (via
+ * H5Freset_mdc_hit_rate_stats()), or automatically. If the cache's adaptive
+ * resize code is enabled, the hit rate stats will be reset once per epoch. If
+ * they are reset manually as well, the cache may behave oddly.
  *
- *          See the overview of the metadata cache in the special topics section of the user manual for
- *          details on the metadata cache and its adaptive resize algorithms.
+ *          See the overview of the metadata cache in the special topics section
+ * of the user manual for details on the metadata cache and its adaptive resize
+ * algorithms.
  *
  */
 H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
@@ -1075,32 +1103,36 @@ H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr);
  * \brief Obtains current metadata cache size data for specified file
  *
  * \file_id
- * \param[out] max_size_ptr Pointer to the location in which the current cache maximum size is to be
- *                          returned, or NULL if this datum is not desired
- * \param[out] min_clean_size_ptr Pointer to the location in which the current cache minimum clean
- *                                size is to be returned, or NULL if that datum is not desired
- * \param[out] cur_size_ptr Pointer to the location in which the current cache size is to be returned,
- *                          or NULL if that datum is not desired
- * \param[out] cur_num_entries_ptr Pointer to the location in which the current number of entries in
- *                                 the cache is to be returned, or NULL if that datum is not desired
- * \returns \herr_t
+ * \param[out] max_size_ptr Pointer to the location in which the current cache
+ * maximum size is to be returned, or NULL if this datum is not desired
+ * \param[out] min_clean_size_ptr Pointer to the location in which the current
+ * cache minimum clean size is to be returned, or NULL if that datum is not
+ * desired \param[out] cur_size_ptr Pointer to the location in which the current
+ * cache size is to be returned, or NULL if that datum is not desired
+ * \param[out] cur_num_entries_ptr Pointer to the location in which the current
+ * number of entries in the cache is to be returned, or NULL if that datum is
+ * not desired \returns \herr_t
  *
- * \details H5Fget_mdc_size()  queries the metadata cache of the target file for the desired size
- *          information, and returns this information in the locations indicated by the pointer
- *          parameters. If any pointer parameter is NULL, the associated data is not returned.
+ * \details H5Fget_mdc_size()  queries the metadata cache of the target file for
+ * the desired size information, and returns this information in the locations
+ * indicated by the pointer parameters. If any pointer parameter is NULL, the
+ * associated data is not returned.
  *
- *          If the API call fails, the values returned via the pointer parameters are undefined.
+ *          If the API call fails, the values returned via the pointer
+ * parameters are undefined.
  *
- *          If adaptive cache resizing is enabled, the cache maximum size and minimum clean size
- *          may change at the end of each epoch. Current size and current number of entries can
- *          change on each cache access.
+ *          If adaptive cache resizing is enabled, the cache maximum size and
+ * minimum clean size may change at the end of each epoch. Current size and
+ * current number of entries can change on each cache access.
  *
- *          Current size can exceed maximum size under certain conditions. See the overview of the
- *          metadata cache in the special topics section of the user manual for a discussion of this.
+ *          Current size can exceed maximum size under certain conditions. See
+ * the overview of the metadata cache in the special topics section of the user
+ * manual for a discussion of this.
  *
  */
-H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
-                              size_t *cur_size_ptr, int *cur_num_entries_ptr);
+H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr,
+                              size_t *min_clean_size_ptr, size_t *cur_size_ptr,
+                              int *cur_num_entries_ptr);
 /**
  * \ingroup MDC
  *
@@ -1111,21 +1143,21 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
  *
  * \details
  * \parblock
- * H5Freset_mdc_hit_rate_stats() resets the hit rate statistics counters in the metadata cache
- * associated with the specified file.
+ * H5Freset_mdc_hit_rate_stats() resets the hit rate statistics counters in the
+ * metadata cache associated with the specified file.
  *
- * If the adaptive cache resizing code is enabled, the hit rate statistics are reset at the beginning
- * of each epoch. This API call allows you to do the same thing from your program.
+ * If the adaptive cache resizing code is enabled, the hit rate statistics are
+ * reset at the beginning of each epoch. This API call allows you to do the same
+ * thing from your program.
  *
- * The adaptive cache resizing code may behave oddly if you use this call when adaptive cache resizing
- * is enabled. However, the call should be useful if you choose to control metadata cache size from your
- * program.
+ * The adaptive cache resizing code may behave oddly if you use this call when
+ * adaptive cache resizing is enabled. However, the call should be useful if you
+ * choose to control metadata cache size from your program.
  *
- * See \ref_mdc_in_hdf5 for details about the metadata cache and the adaptive cache resizing
- * algorithms. If you have not read, understood, and thought about the material covered in that
- * documentation,
- * you should not be using this API call.
- * \endparblock
+ * See \ref_mdc_in_hdf5 for details about the metadata cache and the adaptive
+ * cache resizing algorithms. If you have not read, understood, and thought
+ * about the material covered in that documentation, you should not be using
+ * this API call. \endparblock
  *
  */
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
@@ -1199,8 +1231,8 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
  *
  *          The \c sohm sub-struct contains shared object header message
  *          information as follows:
- *          \li \c vers is the version number of the shared object header information.
- *          \li \c hdr_size is the size of the shared object header message.
+ *          \li \c vers is the version number of the shared object header
+ * information. \li \c hdr_size is the size of the shared object header message.
  *          \li \c msgs_info is an H5_ih_info_t struct defined in H5public.h as
  *              follows: \snippet H5public.h H5_ih_info_t_snip
  *          \li \p index_size is the summed size of all the shared object
@@ -1216,44 +1248,41 @@ H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
 /**
  * \ingroup SWMR
  *
- * \brief Retrieves the collection of read retries for metadata entries with checksum
+ * \brief Retrieves the collection of read retries for metadata entries with
+ * checksum
  *
  * \file_id
- * \param[out] info Struct containing the collection of read retries for metadata
- *                  entries with checksum
- * \return \herr_t\n
+ * \param[out] info Struct containing the collection of read retries for
+ * metadata entries with checksum \return \herr_t\n
  *
  * \details \Bold{Failure Modes:}
  *       \li When the input identifier is not a file identifier.
  *       \li When the pointer to the output structure is NULL.
  *       \li When the memory allocation for \p retries failed.
  *
- * \details H5Fget_metadata_read_retry_info() retrieves information regarding the number
- *          of read retries for metadata entries with checksum for the file \p file_id.
- *          This information is reported in the H5F_retry_info_t struct defined in
- *          H5Fpublic.h as follows:
- *          \snippet this H5F_retry_info_t_snip
- *          \c nbins is the number of bins for each \c retries[i] of metadata entry \c i.
- *          It is calculated based on the current number of read attempts used in the
- *          library and logarithmic base 10.
+ * \details H5Fget_metadata_read_retry_info() retrieves information regarding
+ * the number of read retries for metadata entries with checksum for the file \p
+ * file_id. This information is reported in the H5F_retry_info_t struct defined
+ * in H5Fpublic.h as follows: \snippet this H5F_retry_info_t_snip \c nbins is
+ * the number of bins for each \c retries[i] of metadata entry \c i. It is
+ * calculated based on the current number of read attempts used in the library
+ * and logarithmic base 10.
  *
- *          If read retries are incurred for a metadata entry \c i, the library will
- *          allocate memory for \Code{retries[i] (nbins * sizeof(uint32_t)} and store
- *          the collection of retries there. If there are no retries for a metadata entry
- *          \c i, \Code{retries[i]} will be NULL. After a call to this routine, users should
- *          free each \Code{retries[i]} that is non-NULL, otherwise resource leak will occur.
+ *          If read retries are incurred for a metadata entry \c i, the library
+ * will allocate memory for \Code{retries[i] (nbins * sizeof(uint32_t)} and
+ * store the collection of retries there. If there are no retries for a metadata
+ * entry \c i, \Code{retries[i]} will be NULL. After a call to this routine,
+ * users should free each \Code{retries[i]} that is non-NULL, otherwise resource
+ * leak will occur.
  *
- *          For the library default read attempts of 100 for SWMR access, nbins will be 2
- *          as depicted below:
- *          \li \Code{retries[i][0]} is the number of 1 to 9 read retries.
- *          \li \Code{retries[i][1]} is the number of 10 to 99 read retries.
- *          For the library default read attempts of 1 for non-SWMR access, \c nbins will
- *          be 0 and each \Code{retries[i]} will be NULL.
+ *          For the library default read attempts of 100 for SWMR access, nbins
+ * will be 2 as depicted below: \li \Code{retries[i][0]} is the number of 1 to 9
+ * read retries. \li \Code{retries[i][1]} is the number of 10 to 99 read
+ * retries. For the library default read attempts of 1 for non-SWMR access, \c
+ * nbins will be 0 and each \Code{retries[i]} will be NULL.
  *
- *          The following table lists the 21 metadata entries of \Code{retries[]}:
- *          <table>
- *          <tr>
- *          <th>Index for \Code{retries[]}</th>
+ *          The following table lists the 21 metadata entries of
+ * \Code{retries[]}: <table> <tr> <th>Index for \Code{retries[]}</th>
  *          <th>Metadata entries<sup>*</sup></th>
  *          </tr>
  *          <tr><td>0</td><td>Object header (version 2)</td></tr>
@@ -1262,8 +1291,8 @@ H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
  *          <tr><td>3</td><td>B-tree internal node (version 2)</td></tr>
  *          <tr><td>4</td><td>B-tree leaf node (version 2)</td></tr>
  *          <tr><td>5</td><td>Fractal heap header</td></tr>
- *          <tr><td>6</td><td>Fractal heap direct block (optional checksum)</td></tr>
- *          <tr><td>7</td><td>Fractal heap indirect block</td></tr>
+ *          <tr><td>6</td><td>Fractal heap direct block (optional
+ * checksum)</td></tr> <tr><td>7</td><td>Fractal heap indirect block</td></tr>
  *          <tr><td>8</td><td>Free-space header</td></tr>
  *          <tr><td>9</td><td>Free-space sections</td></tr>
  *          <tr><td>10</td><td>Shared object header message table</td></tr>
@@ -1277,27 +1306,29 @@ H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
  *          <tr><td>18</td><td>Fixed array data block</td></tr>
  *          <tr><td>19</td><td>Fixed array data block page</td></tr>
  *          <tr><td>20</td><td>File's superblock (version 2)</td></tr>
- *          <tr><td colspan=2><sup>*</sup> All entries are of version 0 (zero) unless indicated
- *          otherwise.</td></tr>
+ *          <tr><td colspan=2><sup>*</sup> All entries are of version 0 (zero)
+ * unless indicated otherwise.</td></tr>
  *          </table>
  *
- * \note   On a system that is not atomic, the library might possibly read inconsistent
- *         metadata with checksum when performing single-writer/multiple-reader (SWMR)
- *         operations for an HDF5 file. Upon encountering such situations, the library
- *         will try reading the metadata again for a set number of times to attempt to
- *         obtain consistent data. The maximum number of read attempts used by the library
- *         will be either the value set via H5Pset_metadata_read_attempts() or the library
- *         default value when a value is not set.\n
- *         When the current number of metadata read attempts used in the library is unable
- *         to remedy the reading of inconsistent metadata on a system, the user can assess
- *         the information obtained via this routine to derive a different maximum value.
- *         The information can also be helpful for debugging purposes to identify potential
- *         issues with metadata flush dependencies and SWMR implementation in general.
+ * \note   On a system that is not atomic, the library might possibly read
+ * inconsistent metadata with checksum when performing
+ * single-writer/multiple-reader (SWMR) operations for an HDF5 file. Upon
+ * encountering such situations, the library will try reading the metadata again
+ * for a set number of times to attempt to obtain consistent data. The maximum
+ * number of read attempts used by the library will be either the value set via
+ * H5Pset_metadata_read_attempts() or the library default value when a value is
+ * not set.\n When the current number of metadata read attempts used in the
+ * library is unable to remedy the reading of inconsistent metadata on a system,
+ * the user can assess the information obtained via this routine to derive a
+ * different maximum value. The information can also be helpful for debugging
+ * purposes to identify potential issues with metadata flush dependencies and
+ * SWMR implementation in general.
  *
  * \since 1.10.0
  *
  */
-H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
+H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id,
+                                              H5F_retry_info_t *info);
 /**
  * \ingroup SWMR
  *
@@ -1324,8 +1355,8 @@ H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *i
  *
  *          Library objects are groups, datasets, and committed datatypes. For
  *          the current implementation, groups and datasets can remain open when
- *          activating SWMR writing mode, but not committed datatypes. Attributes
- *          attached to objects cannot remain open either.
+ *          activating SWMR writing mode, but not committed datatypes.
+ * Attributes attached to objects cannot remain open either.
  *
  * \since 1.10.0
  *
@@ -1358,8 +1389,8 @@ H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
  *          \snippet this H5F_sect_info_t_snip
  *
  *          This routine retrieves free-space section information for \p nsects
- *          sections or, at most, the maximum number of sections in the specified
- *          free-space manager. If the number of sections is not known, a
+ *          sections or, at most, the maximum number of sections in the
+ * specified free-space manager. If the number of sections is not known, a
  *          preliminary H5Fget_free_sections() call can be made by setting \p
  *          sect_info to NULL and the total number of free-space sections for
  *          the specified free-space manager will be returned. Users can then
@@ -1378,7 +1409,8 @@ H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
  * \since 1.10.0
  *
  */
-H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
+H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
+                                    size_t nsects,
                                     H5F_sect_info_t *sect_info /*out*/);
 /**
  * \ingroup H5F
@@ -1428,7 +1460,8 @@ H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
+H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low,
+                                   H5F_libver_t high);
 /**
  * \ingroup MDC
  *
@@ -1447,33 +1480,32 @@ H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t
  *          as datasets via H5A API calls.
  *
  *          Due to the complexity of the cache, a trace/logging feature has been
- *          created that can be used by HDF5 developers for debugging and performance
- *          analysis. The functions that control this functionality will normally be
- *          of use to a very limited number of developers outside of The HDF Group.
- *          The functions have been documented to help users create logs that can
+ *          created that can be used by HDF5 developers for debugging and
+ * performance analysis. The functions that control this functionality will
+ * normally be of use to a very limited number of developers outside of The HDF
+ * Group. The functions have been documented to help users create logs that can
  *          be sent with bug reports.
  *
- *          Control of the log functionality is straightforward. Logging is enabled
- *          via the H5Pset_mdc_log_options() function, which will modify the file
- *          access property list used to open or create a file. This function has
- *          a flag that determines whether logging begins at file open or starts
- *          in a paused state. Log messages can then be controlled via the
+ *          Control of the log functionality is straightforward. Logging is
+ * enabled via the H5Pset_mdc_log_options() function, which will modify the file
+ *          access property list used to open or create a file. This function
+ * has a flag that determines whether logging begins at file open or starts in a
+ * paused state. Log messages can then be controlled via the
  *          H5Fstart_mdc_logging() and H5Fstop_mdc_logging() functions.
- *          H5Pget_mdc_log_options() can be used to examine a file access property
- *          list, and H5Fget_mdc_logging_status() will return the current state of
- *          the logging flags.
+ *          H5Pget_mdc_log_options() can be used to examine a file access
+ * property list, and H5Fget_mdc_logging_status() will return the current state
+ * of the logging flags.
  *
  *          The log format is described in the \ref_mdc_logging document.
  *
- * \note Logging can only be started or stopped if metadata cache logging was enabled
- *       via H5Pset_mdc_log_options().\n
- *       When enabled and currently logging, the overhead of the logging feature will
- *       almost certainly be significant.\n
- *       The log file is opened when the HDF5 file is opened or created and not when
- *       this function is called for the first time.\n
- *       This function opens the log file and starts logging metadata cache operations
- *       for a particular file. Calling this function when logging has already been
- *       enabled will be considered an error.
+ * \note Logging can only be started or stopped if metadata cache logging was
+ * enabled via H5Pset_mdc_log_options().\n When enabled and currently logging,
+ * the overhead of the logging feature will almost certainly be significant.\n
+ *       The log file is opened when the HDF5 file is opened or created and not
+ * when this function is called for the first time.\n This function opens the
+ * log file and starts logging metadata cache operations for a particular file.
+ * Calling this function when logging has already been enabled will be
+ * considered an error.
  *
  * \since 1.10.0
  *
@@ -1482,7 +1514,8 @@ H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
 /**
  * \ingroup MDC
  *
- * \brief Stops logging metadata cache events if logging was previously enabled and is currently ongoing
+ * \brief Stops logging metadata cache events if logging was previously enabled
+ * and is currently ongoing
  *
  * \file_id
  *
@@ -1497,28 +1530,28 @@ H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
  *          as datasets via H5A API calls.
  *
  *          Due to the complexity of the cache, a trace/logging feature has been
- *          created that can be used by HDF5 developers for debugging and performance
- *          analysis. The functions that control this functionality will normally be
- *          of use to a very limited number of developers outside of The HDF Group.
- *          The functions have been documented to help users create logs that can
+ *          created that can be used by HDF5 developers for debugging and
+ * performance analysis. The functions that control this functionality will
+ * normally be of use to a very limited number of developers outside of The HDF
+ * Group. The functions have been documented to help users create logs that can
  *          be sent with bug reports.
  *
- *          Control of the log functionality is straightforward. Logging is enabled
- *          via the H5Pset_mdc_log_options() function, which will modify the file
- *          access property list used to open or create a file. This function has
- *          a flag that determines whether logging begins at file open or starts
- *          in a paused state. Log messages can then be controlled via the
+ *          Control of the log functionality is straightforward. Logging is
+ * enabled via the H5Pset_mdc_log_options() function, which will modify the file
+ *          access property list used to open or create a file. This function
+ * has a flag that determines whether logging begins at file open or starts in a
+ * paused state. Log messages can then be controlled via the
  *          H5Fstart_mdc_logging() and H5Fstop_mdc_logging() functions.
- *          H5Pget_mdc_log_options() can be used to examine a file access property
- *          list, and H5Fget_mdc_logging_status() will return the current state of
- *          the logging flags.
+ *          H5Pget_mdc_log_options() can be used to examine a file access
+ * property list, and H5Fget_mdc_logging_status() will return the current state
+ * of the logging flags.
  *
  *          The log format is described in the \ref_mdc_logging document.
  *
- * \note Logging can only be started or stopped if metadata cache logging was enabled
- *       via H5Pset_mdc_log_options().\n
- *       This function only suspends the logging operations. The log file will remain
- *       open and will not be closed until the HDF5 file is closed.
+ * \note Logging can only be started or stopped if metadata cache logging was
+ * enabled via H5Pset_mdc_log_options().\n This function only suspends the
+ * logging operations. The log file will remain open and will not be closed
+ * until the HDF5 file is closed.
  *
  * \since 1.10.0
  *
@@ -1543,30 +1576,31 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
  *          as datasets via H5A API calls.
  *
  *          Due to the complexity of the cache, a trace/logging feature has been
- *          created that can be used by HDF5 developers for debugging and performance
- *          analysis. The functions that control this functionality will normally be
- *          of use to a very limited number of developers outside of The HDF Group.
- *          The functions have been documented to help users create logs that can
+ *          created that can be used by HDF5 developers for debugging and
+ * performance analysis. The functions that control this functionality will
+ * normally be of use to a very limited number of developers outside of The HDF
+ * Group. The functions have been documented to help users create logs that can
  *          be sent with bug reports.
  *
- *          Control of the log functionality is straightforward. Logging is enabled
- *          via the H5Pset_mdc_log_options() function, which will modify the file
- *          access property list used to open or create a file. This function has
- *          a flag that determines whether logging begins at file open or starts
- *          in a paused state. Log messages can then be controlled via the
+ *          Control of the log functionality is straightforward. Logging is
+ * enabled via the H5Pset_mdc_log_options() function, which will modify the file
+ *          access property list used to open or create a file. This function
+ * has a flag that determines whether logging begins at file open or starts in a
+ * paused state. Log messages can then be controlled via the
  *          H5Fstart_mdc_logging() and H5Fstop_mdc_logging() functions.
- *          H5Pget_mdc_log_options() can be used to examine a file access property
- *          list, and H5Fget_mdc_logging_status() will return the current state of
- *          the logging flags.
+ *          H5Pget_mdc_log_options() can be used to examine a file access
+ * property list, and H5Fget_mdc_logging_status() will return the current state
+ * of the logging flags.
  *
  *          The log format is described in the \ref_mdc_logging document.
  *
- * \note Unlike H5Fstart_mdc_logging() and H5Fstop_mdc_logging(), this function can
- *       be called on any open file identifier.
+ * \note Unlike H5Fstart_mdc_logging() and H5Fstop_mdc_logging(), this function
+ * can be called on any open file identifier.
  *
  * \since 1.10.0
  */
-H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hbool_t *is_currently_logging);
+H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
+                                        hbool_t *is_currently_logging);
 /**
  * \ingroup H5F
  *
@@ -1610,17 +1644,19 @@ H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
  * \since 1.10.1
  *
  */
-H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2],
-                                          unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
+H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
+                                          unsigned hits[2], unsigned misses[2],
+                                          unsigned evictions[2],
+                                          unsigned bypasses[2]);
 /**
  * \ingroup MDC
  *
  * \brief Obtains information about a cache image if it exists
  *
  * \file_id
- * \param[out] image_addr Offset of the cache image if it exists, or #HADDR_UNDEF if it does not
- * \param[out] image_size Length of the cache image if it exists, or 0 if it does not
- * \returns \herr_t
+ * \param[out] image_addr Offset of the cache image if it exists, or
+ * #HADDR_UNDEF if it does not \param[out] image_size Length of the cache image
+ * if it exists, or 0 if it does not \returns \herr_t
  *
  * \details
  * \parblock
@@ -1632,17 +1668,18 @@ H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], u
  * allocation / deallocation, or read of free space manager status, whichever
  * comes first).
  *
- * Thus, if the file is opened Read/Write, H5Fget_mdc_image_info() should be called
- * immediately after file open and before any other operation. If H5Fget_mdc_image_info()
- * is called after the cache image is loaded, it will correctly report that no cache image
- * exists, as the image will have already been read and deleted from the file. In the Read Only
- * case, the function may be called at any time, as any cache image will not be deleted
- * from the file.
+ * Thus, if the file is opened Read/Write, H5Fget_mdc_image_info() should be
+ * called immediately after file open and before any other operation. If
+ * H5Fget_mdc_image_info() is called after the cache image is loaded, it will
+ * correctly report that no cache image exists, as the image will have already
+ * been read and deleted from the file. In the Read Only case, the function may
+ * be called at any time, as any cache image will not be deleted from the file.
  * \endparblock
  *
  * \since 1.10.1
  */
-H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr,
+                                    hsize_t *image_size);
 /**
  * \ingroup H5F
  *
@@ -1711,50 +1748,52 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * \returns \herr_t
  *
  * \par Motivation
- * H5Fset_mpi_atomicity() is applicable only in parallel environments using MPI I/O.
- * The function is one of the tools used to ensure sequential consistency. This means
- * that a set of operations will behave as though they were performed in a serial
- * order consistent with the program order.
+ * H5Fset_mpi_atomicity() is applicable only in parallel environments using MPI
+ * I/O. The function is one of the tools used to ensure sequential consistency.
+ * This means that a set of operations will behave as though they were performed
+ * in a serial order consistent with the program order.
  *
  * \details
  * \parblock
- * H5Fset_mpi_atomicity() sets MPI consistency semantics for data access to the file,
- * \p file_id.
+ * H5Fset_mpi_atomicity() sets MPI consistency semantics for data access to the
+ * file, \p file_id.
  *
- * If \p flag is set to \c 1, all file access operations will appear atomic, guaranteeing
- * sequential consistency. If \p flag is set to \c 0, enforcement of atomic file access
- * will be turned off.
+ * If \p flag is set to \c 1, all file access operations will appear atomic,
+ * guaranteeing sequential consistency. If \p flag is set to \c 0, enforcement
+ * of atomic file access will be turned off.
  *
- * H5Fset_mpi_atomicity() is a collective function and all participating processes must
- * pass the same values for \p file_id and \p flag.
+ * H5Fset_mpi_atomicity() is a collective function and all participating
+ * processes must pass the same values for \p file_id and \p flag.
  *
- * This function is available only when the HDF5 library is configured with parallel support
- * (\Code{--enable-parallel}). It is useful only when used with the #H5FD_MPIO driver
- * (see H5Pset_fapl_mpio()).
- * \endparblock
+ * This function is available only when the HDF5 library is configured with
+ * parallel support
+ * (\Code{--enable-parallel}). It is useful only when used with the #H5FD_MPIO
+ * driver (see H5Pset_fapl_mpio()). \endparblock
  *
  * \attention
  * \parblock
- * H5Fset_mpi_atomicity() calls \Code{MPI_File_set_atomicity} underneath and is not supported
- * if the execution platform does not support \Code{MPI_File_set_atomicity}. When it is
- * supported and used, the performance of data access operations may drop significantly.
+ * H5Fset_mpi_atomicity() calls \Code{MPI_File_set_atomicity} underneath and is
+ * not supported if the execution platform does not support
+ * \Code{MPI_File_set_atomicity}. When it is supported and used, the performance
+ * of data access operations may drop significantly.
  *
- * In certain scenarios, even when \Code{MPI_File_set_atomicity} is supported, setting
- * atomicity with H5Fset_mpi_atomicity() and \p flag set to 1 does not always yield
- * strictly atomic updates. For example, some H5Dwrite() calls translate to multiple
- * \Code{MPI_File_write_at} calls. This happens in all cases where the high-level file
- * access routine translates to multiple lower level file access routines.
- * The following scenarios will raise this issue:
+ * In certain scenarios, even when \Code{MPI_File_set_atomicity} is supported,
+ * setting atomicity with H5Fset_mpi_atomicity() and \p flag set to 1 does not
+ * always yield strictly atomic updates. For example, some H5Dwrite() calls
+ * translate to multiple \Code{MPI_File_write_at} calls. This happens in all
+ * cases where the high-level file access routine translates to multiple lower
+ * level file access routines. The following scenarios will raise this issue:
  * \li Non-contiguous file access using independent I/O
  * \li Partial collective I/O using chunked access
  * \li Collective I/O using filters or when data conversion is required
  *
- * This issue arises because MPI atomicity is a matter of MPI file access operations rather
- * than HDF5 access operations. But the user is normally seeking atomicity at the HDF5 level.
- * To accomplish this, the application must set a barrier after a write, H5Dwrite(), but before
- * the next read, H5Dread(), in addition to calling H5Fset_mpi_atomicity().The barrier will
- * guarantee that all underlying write operations execute atomically before the read
- * operations starts. This ensures additional ordering semantics and will normally produce
+ * This issue arises because MPI atomicity is a matter of MPI file access
+ * operations rather than HDF5 access operations. But the user is normally
+ * seeking atomicity at the HDF5 level. To accomplish this, the application must
+ * set a barrier after a write, H5Dwrite(), but before the next read, H5Dread(),
+ * in addition to calling H5Fset_mpi_atomicity().The barrier will guarantee that
+ * all underlying write operations execute atomically before the read operations
+ * starts. This ensures additional ordering semantics and will normally produce
  * the desired behavior.
  * \endparblock
  *
@@ -1775,11 +1814,11 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  *                  \li 0 -- MPI file access is set to nonatomic mode.
  * \returns \herr_t
  *
- * \details H5Fget_mpi_atomicity() retrieves the current consistency semantics mode for
- *          data access for the file \p file_id.
+ * \details H5Fget_mpi_atomicity() retrieves the current consistency semantics
+ * mode for data access for the file \p file_id.
  *
- *          Upon successful return, \p flag will be set to \c 1 if file access is set
- *          to atomic mode and \c 0 if file access is set to nonatomic mode.
+ *          Upon successful return, \p flag will be set to \c 1 if file access
+ * is set to atomic mode and \c 0 if file access is set to nonatomic mode.
  *
  * \see \ref_cons_semantics
  *
@@ -1799,20 +1838,25 @@ H5_DLL herr_t H5Fformat_convert(hid_t fid);
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5F_MODULE
-#define H5Fcreate_async(...) H5Fcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Fopen_async(...)   H5Fopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Freopen_async(...) H5Freopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Fflush_async(...)  H5Fflush_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Fclose_async(...)  H5Fclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fcreate_async(...)                                                   \
+  H5Fcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fopen_async(...)                                                     \
+  H5Fopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Freopen_async(...)                                                   \
+  H5Freopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fflush_async(...)                                                    \
+  H5Fflush_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fclose_async(...)                                                    \
+  H5Fclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
 #define H5Fcreate_async_wrap H5_NO_EXPAND(H5Fcreate_async)
-#define H5Fopen_async_wrap   H5_NO_EXPAND(H5Fopen_async)
+#define H5Fopen_async_wrap H5_NO_EXPAND(H5Fopen_async)
 #define H5Freopen_async_wrap H5_NO_EXPAND(H5Freopen_async)
-#define H5Fflush_async_wrap  H5_NO_EXPAND(H5Fflush_async)
-#define H5Fclose_async_wrap  H5_NO_EXPAND(H5Fclose_async)
+#define H5Fflush_async_wrap H5_NO_EXPAND(H5Fflush_async)
+#define H5Fclose_async_wrap H5_NO_EXPAND(H5Fclose_async)
 #endif /* H5F_MODULE */
 /// \endcond
 
@@ -1823,7 +1867,9 @@ H5_DLL herr_t H5Fformat_convert(hid_t fid);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
-#define H5F_ACC_DEBUG (H5CHECK H5OPEN 0x0000u) /**< Print debug info \deprecated In which version? */
+#define H5F_ACC_DEBUG                                                          \
+  (H5CHECK                                                                     \
+       H5OPEN 0x0000u) /**< Print debug info \deprecated In which version? */
 
 /* Typedefs */
 
@@ -1832,11 +1878,12 @@ H5_DLL herr_t H5Fformat_convert(hid_t fid);
  */
 //! <!-- [H5F_info1_t_snip] -->
 typedef struct H5F_info1_t {
-    hsize_t super_ext_size; /**< Superblock extension size */
-    struct {
-        hsize_t      hdr_size;  /**< Shared object header message header size */
-        H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
-    } sohm;
+  hsize_t super_ext_size; /**< Superblock extension size */
+  struct {
+    hsize_t hdr_size; /**< Shared object header message header size */
+    H5_ih_info_t
+        msgs_info; /**< Shared object header message index & heap size */
+  } sohm;
 } H5F_info1_t;
 //! <!-- [H5F_info1_t_snip] -->
 

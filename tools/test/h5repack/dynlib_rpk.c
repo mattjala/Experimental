@@ -13,14 +13,15 @@
  * Purpose:    Tests the plugin module (H5PL)
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "H5PLextern.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #define H5Z_FILTER_DYNLIB1 257
 
-static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                 size_t nbytes, size_t *buf_size, void **buf);
+static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+                                 const unsigned int *cd_values, size_t nbytes,
+                                 size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 static const H5Z_class2_t H5Z_DYNLIB1[1] = {{
@@ -33,16 +34,8 @@ static const H5Z_class2_t H5Z_DYNLIB1[1] = {{
     H5Z_filter_dynlib1, /* The actual filter function    */
 }};
 
-H5PL_type_t
-H5PLget_plugin_type(void)
-{
-    return H5PL_TYPE_FILTER;
-}
-const void *
-H5PLget_plugin_info(void)
-{
-    return H5Z_DYNLIB1;
-}
+H5PL_type_t H5PLget_plugin_type(void) { return H5PL_TYPE_FILTER; }
+const void *H5PLget_plugin_info(void) { return H5Z_DYNLIB1; }
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_filter_dynlib1
@@ -58,38 +51,37 @@ H5PLget_plugin_info(void)
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
-                   size_t *buf_size, void **buf)
-{
-    int   *int_ptr  = (int *)*buf; /* Pointer to the data values */
-    size_t buf_left = *buf_size;   /* Amount of data buffer left to process */
-    int    add_on   = 0;
+static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+                                 const unsigned int *cd_values, size_t nbytes,
+                                 size_t *buf_size, void **buf) {
+  int *int_ptr = (int *)*buf;  /* Pointer to the data values */
+  size_t buf_left = *buf_size; /* Amount of data buffer left to process */
+  int add_on = 0;
 
-    /* Check for the correct number of parameters */
-    if (cd_nelmts == 0)
-        return 0;
+  /* Check for the correct number of parameters */
+  if (cd_nelmts == 0)
+    return 0;
 
-    /* Check that permanent parameters are set correctly */
-    if (cd_values[0] > 9)
-        return 0;
+  /* Check that permanent parameters are set correctly */
+  if (cd_values[0] > 9)
+    return 0;
 
-    add_on = (int)cd_values[0];
+  add_on = (int)cd_values[0];
 
-    if (flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Subtract the "add on" value to all the data values */
-        while (buf_left > 0) {
-            *int_ptr++ -= add_on;
-            buf_left -= sizeof(int);
-        }  /* end while */
-    }      /* end if */
-    else { /*write*/
-        /* Add the "add on" value to all the data values */
-        while (buf_left > 0) {
-            *int_ptr++ += add_on;
-            buf_left -= sizeof(int);
-        } /* end while */
-    }     /* end else */
+  if (flags & H5Z_FLAG_REVERSE) { /*read*/
+    /* Subtract the "add on" value to all the data values */
+    while (buf_left > 0) {
+      *int_ptr++ -= add_on;
+      buf_left -= sizeof(int);
+    }    /* end while */
+  }      /* end if */
+  else { /*write*/
+    /* Add the "add on" value to all the data values */
+    while (buf_left > 0) {
+      *int_ptr++ += add_on;
+      buf_left -= sizeof(int);
+    } /* end while */
+  }   /* end else */
 
-    return nbytes;
+  return nbytes;
 } /* end H5Z_filter_dynlib1() */

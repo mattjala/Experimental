@@ -27,17 +27,17 @@
 #define COMPRESSION_LEVEL 7
 
 /* Booleans */
-#define TRUE  1
+#define TRUE 1
 #define FALSE 0
 
 /* Testing macros */
 #define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
-#define UC_ERROR                                                                                             \
-    {                                                                                                        \
-        puts("*ERROR*");                                                                                     \
-        fflush(stdout);                                                                                      \
-        AT();                                                                                                \
-        goto error;                                                                                          \
-    }
+#define UC_ERROR                                                               \
+  {                                                                            \
+    puts("*ERROR*");                                                           \
+    fflush(stdout);                                                            \
+    AT();                                                                      \
+    goto error;                                                                \
+  }
 
 #endif /* USE_CASE_COMMON_H */

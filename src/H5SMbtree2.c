@@ -20,11 +20,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object Headers                       */
 #include "H5SMpkg.h"     /* Shared object header messages        */
+#include "H5private.h"   /* Generic Functions			*/
 
 /****************/
 /* Local Macros */
@@ -39,10 +39,11 @@
 /********************/
 
 /* v2 B-tree callbacks */
-static void  *H5SM__bt2_crt_context(void *udata);
+static void *H5SM__bt2_crt_context(void *udata);
 static herr_t H5SM__bt2_dst_context(void *ctx);
 static herr_t H5SM__bt2_store(void *native, const void *udata);
-static herr_t H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const void *_udata);
+static herr_t H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
+                              const void *record, const void *_udata);
 
 /*****************************/
 /* Library Private Variables */
@@ -79,30 +80,29 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5SM__bt2_crt_context(void *_f)
-{
-    H5F_t          *f = (H5F_t *)_f;  /* User data for building callback context */
-    H5SM_bt2_ctx_t *ctx;              /* Callback context structure */
-    void           *ret_value = NULL; /* Return value */
+static void *H5SM__bt2_crt_context(void *_f) {
+  H5F_t *f = (H5F_t *)_f; /* User data for building callback context */
+  H5SM_bt2_ctx_t *ctx;    /* Callback context structure */
+  void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    assert(f);
+  /* Sanity check */
+  assert(f);
 
-    /* Allocate callback context */
-    if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context");
+  /* Allocate callback context */
+  if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL,
+                "can't allocate callback context");
 
-    /* Determine the size of addresses & lengths in the file */
-    ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);
+  /* Determine the size of addresses & lengths in the file */
+  ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
-    /* Set return value */
-    ret_value = ctx;
+  /* Set return value */
+  ret_value = ctx;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5SM__bt2_crt_context() */
 
 /*-------------------------------------------------------------------------
@@ -115,20 +115,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5SM__bt2_dst_context(void *_ctx)
-{
-    H5SM_bt2_ctx_t *ctx = (H5SM_bt2_ctx_t *)_ctx; /* Callback context structure */
+static herr_t H5SM__bt2_dst_context(void *_ctx) {
+  H5SM_bt2_ctx_t *ctx = (H5SM_bt2_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Sanity check */
-    assert(ctx);
+  /* Sanity check */
+  assert(ctx);
 
-    /* Release callback context */
-    ctx = H5FL_FREE(H5SM_bt2_ctx_t, ctx);
+  /* Release callback context */
+  ctx = H5FL_FREE(H5SM_bt2_ctx_t, ctx);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5SM__bt2_dst_context() */
 
 /*-------------------------------------------------------------------------
@@ -143,17 +141,15 @@ H5SM__bt2_dst_context(void *_ctx)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5SM__bt2_store(void *native, const void *udata)
-{
-    const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *)udata;
+static herr_t H5SM__bt2_store(void *native, const void *udata) {
+  const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *)udata;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Copy the source message to the B-tree */
-    *(H5SM_sohm_t *)native = key->message;
+  /* Copy the source message to the B-tree */
+  *(H5SM_sohm_t *)native = key->message;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__bt2_store */
 
 /*-------------------------------------------------------------------------
@@ -166,23 +162,25 @@ H5SM__bt2_store(void *native, const void *udata)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const void H5_ATTR_UNUSED *_udata)
-{
-    const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
+static herr_t H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
+                              const void *record,
+                              const void H5_ATTR_UNUSED *_udata) {
+  const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    if (sohm->location == H5SM_IN_HEAP)
-        fprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
-                "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
-                sohm->u.heap_loc.ref_count);
-    else {
-        assert(sohm->location == H5SM_IN_OH);
-        fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
-                "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
-                sohm->u.mesg_loc.index);
-    } /* end else */
+  if (sohm->location == H5SM_IN_HEAP)
+    fprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n",
+            indent, "", fwidth,
+            "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val,
+            sohm->hash, sohm->u.heap_loc.ref_count);
+  else {
+    assert(sohm->location == H5SM_IN_OH);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n",
+            indent, "", fwidth,
+            "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash,
+            sohm->msg_type_id, sohm->u.mesg_loc.index);
+  } /* end else */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__bt2_debug */

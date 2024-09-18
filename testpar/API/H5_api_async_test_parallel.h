@@ -23,7 +23,7 @@ int H5_api_async_test_parallel(void);
  *                                                      *
  ********************************************************/
 
-#define PAR_ASYNC_API_TEST_FILE        "H5_api_async_test_parallel.h5"
+#define PAR_ASYNC_API_TEST_FILE "H5_api_async_test_parallel.h5"
 #define PAR_ASYNC_API_TEST_FILE_PRINTF "H5_api_async_test_parallel_%d.h5"
 
 #endif /* H5_API_ASYNC_TEST_PARALLEL_H_ */

@@ -21,47 +21,45 @@ int nerrors = 0; /* errors count */
 
 static const char *FILENAME[] = {"after_mpi_fin", NULL};
 
-int
-main(int argc, char **argv)
-{
-    int      mpi_size, mpi_rank;
-    MPI_Comm comm = MPI_COMM_WORLD;
+int main(int argc, char **argv) {
+  int mpi_size, mpi_rank;
+  MPI_Comm comm = MPI_COMM_WORLD;
 
-    /* Initialize and finalize MPI */
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);
+  /* Initialize and finalize MPI */
+  MPI_Init(&argc, &argv);
+  MPI_Comm_size(comm, &mpi_size);
+  MPI_Comm_rank(comm, &mpi_rank);
 
-    if (MAINPROCESS)
-        TESTING("Usage of Serial HDF5 after MPI_Finalize() is called");
+  if (MAINPROCESS)
+    TESTING("Usage of Serial HDF5 after MPI_Finalize() is called");
 
-    MPI_Finalize();
+  MPI_Finalize();
 
-    nerrors += GetTestNumErrs();
+  nerrors += GetTestNumErrs();
 
-    /* test if we can initialize the library with MPI being finalized
-       and create a file serially */
-    H5open();
+  /* test if we can initialize the library with MPI being finalized
+     and create a file serially */
+  H5open();
 
-    if (mpi_rank == 0) {
-        char  filename[1024];
-        hid_t file_id;
+  if (mpi_rank == 0) {
+    char filename[1024];
+    hid_t file_id;
 
-        h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-        VRFY((file_id >= 0), "H5Fcreate succeeded");
-        H5Fclose(file_id);
-        file_id = -1;
-    }
+    h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+    H5Fclose(file_id);
+    file_id = -1;
+  }
 
-    H5close();
+  H5close();
 
-    if (MAINPROCESS) {
-        if (0 == nerrors)
-            PASSED();
-        else
-            H5_FAILED();
-    }
+  if (MAINPROCESS) {
+    if (0 == nerrors)
+      PASSED();
+    else
+      H5_FAILED();
+  }
 
-    return (nerrors != 0);
+  return (nerrors != 0);
 }

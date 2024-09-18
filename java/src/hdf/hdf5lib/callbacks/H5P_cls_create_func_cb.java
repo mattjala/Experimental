@@ -17,23 +17,25 @@ package hdf.hdf5lib.callbacks;
  *
  */
 public interface H5P_cls_create_func_cb extends Callbacks {
-    /**
-     * @ingroup JCALL
-     *
-     *  application callback for each property list
-     *
-     *  @param prop_id       the ID for the property list class being iterated over
-     *  @param create_data   the function to call when each property list in this class is created
-     *
-     *  @return operation status
-     *      A. Zero causes the iterator to continue, returning zero when all
-     *          attributes have been processed.
-     *      B. Positive causes the iterator to immediately return that positive
-     *          value, indicating short-circuit success.  The iterator can be
-     *          restarted at the next attribute.
-     *      C. Negative causes the iterator to immediately return that value,
-     *          indicating failure.  The iterator can be restarted at the next
-     *          attribute.
-     */
-    int callback(long prop_id, H5P_cls_create_func_t create_data);
+  /**
+   * @ingroup JCALL
+   *
+   *  application callback for each property list
+   *
+   *  @param prop_id       the ID for the property list class being iterated
+   * over
+   *  @param create_data   the function to call when each property list in this
+   * class is created
+   *
+   *  @return operation status
+   *      A. Zero causes the iterator to continue, returning zero when all
+   *          attributes have been processed.
+   *      B. Positive causes the iterator to immediately return that positive
+   *          value, indicating short-circuit success.  The iterator can be
+   *          restarted at the next attribute.
+   *      C. Negative causes the iterator to immediately return that value,
+   *          indicating failure.  The iterator can be restarted at the next
+   *          attribute.
+   */
+  int callback(long prop_id, H5P_cls_create_func_t create_data);
 }

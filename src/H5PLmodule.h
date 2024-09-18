@@ -23,7 +23,7 @@
  *      reporting macros.
  */
 #define H5PL_MODULE
-#define H5_MY_PKG     H5PL
+#define H5_MY_PKG H5PL
 #define H5_MY_PKG_ERR H5E_PLUGIN
 
 /** \page H5PL_UG The HDF5 Plugins

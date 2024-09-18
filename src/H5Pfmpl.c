@@ -28,11 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
 #include "H5Eprivate.h" /* Error handling		  	*/
 #include "H5Fprivate.h" /* Files		  	        */
 #include "H5Iprivate.h" /* IDs			  		*/
 #include "H5Ppkg.h"     /* Property lists		  	*/
+#include "H5private.h"  /* Generic Functions			*/
 
 /****************/
 /* Local Macros */
@@ -41,7 +41,7 @@
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
 #define H5F_MNT_SYM_LOCAL_SIZE sizeof(hbool_t)
-#define H5F_MNT_SYM_LOCAL_DEF  FALSE
+#define H5F_MNT_SYM_LOCAL_DEF FALSE
 
 /******************/
 /* Local Typedefs */
@@ -90,7 +90,8 @@ const H5P_libclass_t H5P_CLS_FMNT[1] = {{
 /*******************/
 
 /* Property value defaults */
-static const hbool_t H5F_def_local_g = H5F_MNT_SYM_LOCAL_DEF; /* Whether symlinks are local to file */
+static const hbool_t H5F_def_local_g =
+    H5F_MNT_SYM_LOCAL_DEF; /* Whether symlinks are local to file */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__fmnt_reg_prop
@@ -101,18 +102,18 @@ static const hbool_t H5F_def_local_g = H5F_MNT_SYM_LOCAL_DEF; /* Whether symlink
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5P__fmnt_reg_prop(H5P_genclass_t *pclass)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+static herr_t H5P__fmnt_reg_prop(H5P_genclass_t *pclass) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Register property of whether symlinks is local to file */
-    if (H5P__register_real(pclass, H5F_MNT_SYM_LOCAL_NAME, H5F_MNT_SYM_LOCAL_SIZE, &H5F_def_local_g, NULL,
-                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+  /* Register property of whether symlinks is local to file */
+  if (H5P__register_real(pclass, H5F_MNT_SYM_LOCAL_NAME, H5F_MNT_SYM_LOCAL_SIZE,
+                         &H5F_def_local_g, NULL, NULL, NULL, NULL, NULL, NULL,
+                         NULL, NULL, NULL) < 0)
+    HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                "can't insert property into class");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__fmnt_reg_prop() */

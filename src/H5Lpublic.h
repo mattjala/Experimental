@@ -21,10 +21,10 @@
 #ifndef H5Lpublic_H
 #define H5Lpublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
 #include "H5Opublic.h" /* Object Headers                           */
 #include "H5Tpublic.h" /* Datatypes                                */
+#include "H5public.h"  /* Generic Functions                        */
 
 /*****************/
 /* Public Macros */
@@ -61,11 +61,11 @@ extern "C" {
  * in HDF5 files.
  */
 typedef enum {
-    H5L_TYPE_ERROR    = (-1), /**< Invalid link type id         */
-    H5L_TYPE_HARD     = 0,    /**< Hard link id                 */
-    H5L_TYPE_SOFT     = 1,    /**< Soft link id                 */
-    H5L_TYPE_EXTERNAL = 64,   /**< External link id             */
-    H5L_TYPE_MAX      = 255   /**< Maximum link type id         */
+  H5L_TYPE_ERROR = (-1),  /**< Invalid link type id         */
+  H5L_TYPE_HARD = 0,      /**< Hard link id                 */
+  H5L_TYPE_SOFT = 1,      /**< Soft link id                 */
+  H5L_TYPE_EXTERNAL = 64, /**< External link id             */
+  H5L_TYPE_MAX = 255      /**< Maximum link type id         */
 } H5L_type_t;
 /**
  * \brief  Maximum value link value for "built-in" link types
@@ -85,14 +85,14 @@ typedef enum {
  */
 //! <!-- [H5L_info2_t_snip] -->
 typedef struct {
-    H5L_type_t type;         /**< Type of link                   */
-    hbool_t    corder_valid; /**< Indicate if creation order is valid */
-    int64_t    corder;       /**< Creation order                 */
-    H5T_cset_t cset;         /**< Character set of link name     */
-    union {
-        H5O_token_t token;    /**< Token of location that hard link points to */
-        size_t      val_size; /**< Size of a soft link or user-defined link value */
-    } u;
+  H5L_type_t type;      /**< Type of link                   */
+  hbool_t corder_valid; /**< Indicate if creation order is valid */
+  int64_t corder;       /**< Creation order                 */
+  H5T_cset_t cset;      /**< Character set of link name     */
+  union {
+    H5O_token_t token; /**< Token of location that hard link points to */
+    size_t val_size;   /**< Size of a soft link or user-defined link value */
+  } u;
 } H5L_info2_t;
 //! <!-- [H5L_info2_t_snip] -->
 
@@ -102,15 +102,19 @@ typedef struct {
  * The H5O_token_t version is used in the VOL layer and future public API calls.
  */
 //! <!-- [H5L_iterate2_t_snip] -->
-typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
+typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name,
+                                 const H5L_info2_t *info, void *op_data);
 //! <!-- [H5L_iterate2_t_snip] -->
 
 /**
  * \brief Callback for external link traversal
  */
-typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name, const char *parent_group_name,
-                                       const char *child_file_name, const char *child_object_name,
-                                       unsigned *acc_flags, hid_t fapl_id, void *op_data);
+typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
+                                       const char *parent_group_name,
+                                       const char *child_file_name,
+                                       const char *child_object_name,
+                                       unsigned *acc_flags, hid_t fapl_id,
+                                       void *op_data);
 
 /********************/
 /* Public Variables */
@@ -175,8 +179,8 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name, const char 
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id,
-                      hid_t lapl_id);
+H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
+                      const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
  * \ingroup H5L
  *
@@ -235,8 +239,8 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id,
-                      hid_t lapl_id);
+H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
+                      const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
  * \ingroup H5L
  *
@@ -283,20 +287,24 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc, const char *dst_name,
-                             hid_t lcpl_id, hid_t lapl_id);
+H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc,
+                             const char *dst_name, hid_t lcpl_id,
+                             hid_t lapl_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Lcreate_hard}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_line,
-                                   hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
-                                   const char *new_name, hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Lcreate_hard_async(const char *app_file, const char *app_func,
+                                   unsigned app_line, hid_t cur_loc_id,
+                                   const char *cur_name, hid_t new_loc_id,
+                                   const char *new_name, hid_t lcpl_id,
+                                   hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
-                                   const char *new_name, hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name,
+                                   hid_t new_loc_id, const char *new_name,
+                                   hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5L
@@ -321,12 +329,14 @@ H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t
  *
  *          \p link_loc_id and \p link_name specify the location and name,
  *          respectively, of the new soft link. \p link_name is interpreted
- *          relative to \p link_loc_id and must contain only the name of the soft
+ *          relative to \p link_loc_id and must contain only the name of the
+ soft
  *          link; \p link_name may not contain any additional path elements.
  *
  *          If \p link_loc_id is a group identifier, the object pointed to by
  *          \p link_name will be accessed as a member of that group. If
- *          \p link_loc_id is a file identifier, the object will be accessed as a
+ *          \p link_loc_id is a file identifier, the object will be accessed as
+ a
  *          member of the file's root group.
  *
  *          \p lcpl_id and \p lapl_id are the link creation and access property
@@ -360,7 +370,8 @@ H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t
  *
 
  */
-H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id,
+H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
+                             const char *link_name, hid_t lcpl_id,
                              hid_t lapl_id);
 /**
  * --------------------------------------------------------------------------
@@ -368,12 +379,14 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const c
  * \async_variant_of{H5Lcreate_soft}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Lcreate_soft_async(const char *app_file, const char *app_func, unsigned app_line,
-                                   const char *link_target, hid_t link_loc_id, const char *link_name,
+H5_DLL herr_t H5Lcreate_soft_async(const char *app_file, const char *app_func,
+                                   unsigned app_line, const char *link_target,
+                                   hid_t link_loc_id, const char *link_name,
                                    hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Lcreate_soft_async(const char *link_target, hid_t link_loc_id, const char *link_name,
-                                   hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Lcreate_soft_async(const char *link_target, hid_t link_loc_id,
+                                   const char *link_name, hid_t lcpl_id,
+                                   hid_t lapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5L
@@ -418,10 +431,12 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
  * \async_variant_of{H5Ldelete}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Ldelete_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                              const char *name, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Ldelete_async(const char *app_file, const char *app_func,
+                              unsigned app_line, hid_t loc_id, const char *name,
+                              hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Ldelete_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Ldelete_async(hid_t loc_id, const char *name, hid_t lapl_id,
+                              hid_t es_id);
 #endif
 /**
  * \ingroup H5L
@@ -449,20 +464,24 @@ H5_DLL herr_t H5Ldelete_async(hid_t loc_id, const char *name, hid_t lapl_id, hid
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                               H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
+                               H5_index_t idx_type, H5_iter_order_t order,
+                               hsize_t n, hid_t lapl_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Ldelete_by_idx}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func, unsigned app_line,
-                                     hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                     H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func,
+                                     unsigned app_line, hid_t loc_id,
+                                     const char *group_name,
+                                     H5_index_t idx_type, H5_iter_order_t order,
+                                     hsize_t n, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Ldelete_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                     H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Ldelete_by_idx_async(hid_t loc_id, const char *group_name,
+                                     H5_index_t idx_type, H5_iter_order_t order,
+                                     hsize_t n, hid_t lapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5L
@@ -517,11 +536,13 @@ H5_DLL herr_t H5Ldelete_by_idx_async(hid_t loc_id, const char *group_name, H5_in
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t lapl_id);
+H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/,
+                         size_t size, hid_t lapl_id);
 /**
  * \ingroup H5L
  *
- * \brief Retrieves value of the \Emph{n}-th link in a group, according to the order within an index
+ * \brief Retrieves value of the \Emph{n}-th link in a group, according to the
+ * order within an index
  *
  * \fgdta_loc_id
  * \param[in] group_name Group name
@@ -573,8 +594,9 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                H5_iter_order_t order, hsize_t n, void *buf /*out*/, size_t size,
+H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
+                                H5_index_t idx_type, H5_iter_order_t order,
+                                hsize_t n, void *buf /*out*/, size_t size,
                                 hid_t lapl_id);
 /**
  * \ingroup H5L
@@ -601,8 +623,9 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          existence of a link with a relative or absolute path.
  *
  *          \Bold{Example:} Use the following steps to verify the existence of
- *          the link \c datasetD in the \c group group1/group2/softlink_to_group3/,
- *          where \c group1 is a member of the group specified by \c loc_id:
+ *          the link \c datasetD in the \c group
+ * group1/group2/softlink_to_group3/, where \c group1 is a member of the group
+ * specified by \c loc_id:
  *
  *          1. First, use H5Lexists() to verify that the \c group1 exists.
  *          2. If \c group1 exists, use H5Lexists() again, this time with name
@@ -668,10 +691,12 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  * \async_variant_of{H5Lexists}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                              const char *name, hbool_t *exists, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Lexists_async(const char *app_file, const char *app_func,
+                              unsigned app_line, hid_t loc_id, const char *name,
+                              hbool_t *exists, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists,
+                              hid_t lapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5L
@@ -741,7 +766,8 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo, hid_t lapl_id);
+H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo,
+                           hid_t lapl_id);
 /**
  * \ingroup H5L
  *
@@ -793,8 +819,9 @@ H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo, h
  * \see H5Lget_info2()
  *
  */
-H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo, hid_t lapl_id);
+H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t n, H5L_info2_t *linfo, hid_t lapl_id);
 /**
  * \ingroup H5L
  *
@@ -814,8 +841,8 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *         negative value.
  *
  * \details H5get_name_by_idx() retrieves the name of the \Emph{n}-th link in a
- *          group, according to the specified order, \p order, within a specified
- *          field or index, \p idx_type.
+ *          group, according to the specified order, \p order, within a
+ * specified field or index, \p idx_type.
  *
  *          \p idx_type specifies the index that is used. Valid values include
  *          the following:
@@ -846,8 +873,9 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  * \since 1.8.0
  *
  */
-H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t n, char *name /*out*/, size_t size,
+H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t n, char *name /*out*/, size_t size,
                                   hid_t lapl_id);
 /**
  * \ingroup TRAV
@@ -917,7 +945,8 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
  * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
  *
  */
-H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
+H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
+                          H5_iter_order_t order, hsize_t *idx,
                           H5L_iterate2_t op, void *op_data);
 /**
  * --------------------------------------------------------------------------
@@ -925,16 +954,20 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *
  * \warning The returned value of the callback routine op will not be set
  *          in the return value for H5Literate_async(), so the \p herr_t value
- *          should not be used for determining the return state of the callback routine.
+ *          should not be used for determining the return state of the callback
+ * routine.
  *
  * \async_variant_of{H5Literate}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Literate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
-                               H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
-                               void *op_data, hid_t es_id);
+H5_DLL herr_t H5Literate_async(const char *app_file, const char *app_func,
+                               unsigned app_line, hid_t group_id,
+                               H5_index_t idx_type, H5_iter_order_t order,
+                               hsize_t *idx_p, H5L_iterate2_t op, void *op_data,
+                               hid_t es_id);
 #else
-H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
+H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type,
+                               H5_iter_order_t order, hsize_t *idx_p,
                                H5L_iterate2_t op, void *op_data, hid_t es_id);
 #endif
 /**
@@ -947,7 +980,8 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  * \idx_type
  * \order
  * \param[in,out] idx iteration position at which to start (\Emph{IN}) or
- *                    position at which an interrupted iteration may be restarted
+ *                    position at which an interrupted iteration may be
+ * restarted
  *                    (\Emph{OUT})
  * \op
  * \op_data
@@ -1001,9 +1035,10 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  * \see H5Literate(), H5Lvisit()
  *
  */
-H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data,
-                                  hid_t lapl_id);
+H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t *idx, H5L_iterate2_t op,
+                                  void *op_data, hid_t lapl_id);
 /**
  * \ingroup TRAV
  *
@@ -1051,9 +1086,8 @@ H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index
  *          following:
  *          \orders
  *
- *          \p op is a callback function of type \ref H5L_iterate2_t that is invoked
- *          for each link encountered.
- *          \snippet this H5L_iterate2_t_snip
+ *          \p op is a callback function of type \ref H5L_iterate2_t that is
+ * invoked for each link encountered. \snippet this H5L_iterate2_t_snip
  *
  *          The \ref H5L_info2_t struct is defined (in H5Lpublic.h) as follows:
  *          \snippet this H5L_info2_t_snip
@@ -1085,7 +1119,8 @@ H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index
  * \see H5Literate()
  *
  */
-H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate2_t op,
+H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type,
+                        H5_iter_order_t order, H5L_iterate2_t op,
                         void *op_data);
 /**
  * \ingroup TRAV
@@ -1168,8 +1203,10 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                H5_iter_order_t order, H5L_iterate2_t op, void *op_data, hid_t lapl_id);
+H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name,
+                                H5_index_t idx_type, H5_iter_order_t order,
+                                H5L_iterate2_t op, void *op_data,
+                                hid_t lapl_id);
 /* UD link functions */
 /**
  * \ingroup H5L
@@ -1212,7 +1249,8 @@ H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, const void *udata,
+H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
+                           H5L_type_t link_type, const void *udata,
                            size_t udata_size, hid_t lcpl_id, hid_t lapl_id);
 /**
  * \ingroup H5LA
@@ -1279,12 +1317,15 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_size, unsigned *flags,
-                                  const char **filename /*out*/, const char **obj_path /*out*/);
+H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/,
+                                  size_t link_size, unsigned *flags,
+                                  const char **filename /*out*/,
+                                  const char **obj_path /*out*/);
 /**
  * \ingroup H5L
  *
- * \brief Creates an external link, a soft link to an object in a different file.
+ * \brief Creates an external link, a soft link to an object in a different
+ * file.
  *
  * \param[in] file_name   Name of the target file containing the target object.
  * \param[in] obj_name    Path within the target file to the target object
@@ -1408,30 +1449,37 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  *
  * \since 1.8.0
  */
-H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id,
-                                 const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
+                                 hid_t link_loc_id, const char *link_name,
+                                 hid_t lcpl_id, hid_t lapl_id);
 
 /// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5L_MODULE
-#define H5Lcreate_hard_async(...)   H5Lcreate_hard_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Lcreate_soft_async(...)   H5Lcreate_soft_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Ldelete_async(...)        H5Ldelete_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Ldelete_by_idx_async(...) H5Ldelete_by_idx_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Lexists_async(...)        H5Lexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Literate_async(...)       H5Literate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Lcreate_hard_async(...)                                              \
+  H5Lcreate_hard_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Lcreate_soft_async(...)                                              \
+  H5Lcreate_soft_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ldelete_async(...)                                                   \
+  H5Ldelete_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ldelete_by_idx_async(...)                                            \
+  H5Ldelete_by_idx_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Lexists_async(...)                                                   \
+  H5Lexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Literate_async(...)                                                  \
+  H5Literate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5Lcreate_hard_async_wrap   H5_NO_EXPAND(H5Lcreate_hard_async)
-#define H5Lcreate_soft_async_wrap   H5_NO_EXPAND(H5Lcreate_soft_async)
-#define H5Ldelete_async_wrap        H5_NO_EXPAND(H5Ldelete_async)
+#define H5Lcreate_hard_async_wrap H5_NO_EXPAND(H5Lcreate_hard_async)
+#define H5Lcreate_soft_async_wrap H5_NO_EXPAND(H5Lcreate_soft_async)
+#define H5Ldelete_async_wrap H5_NO_EXPAND(H5Ldelete_async)
 #define H5Ldelete_by_idx_async_wrap H5_NO_EXPAND(H5Ldelete_by_idx_async)
-#define H5Lexists_async_wrap        H5_NO_EXPAND(H5Lexists_async)
-#define H5Literate_async_wrap       H5_NO_EXPAND(H5Literate_async)
+#define H5Lexists_async_wrap H5_NO_EXPAND(H5Lexists_async)
+#define H5Literate_async_wrap H5_NO_EXPAND(H5Literate_async)
 #endif /* H5L_MODULE */
 /// \endcond
 
@@ -1450,20 +1498,21 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hi
  * Information struct for link (for H5Lget_info1() and H5Lget_info_by_idx1())
  */
 typedef struct {
-    H5L_type_t type;         /**< Type of link                   */
-    hbool_t    corder_valid; /**< Indicate if creation order is valid */
-    int64_t    corder;       /**< Creation order                 */
-    H5T_cset_t cset;         /**< Character set of link name     */
-    union {
-        haddr_t address;  /**< Address hard link points to    */
-        size_t  val_size; /**< Size of a soft link or UD link value */
-    } u;
+  H5L_type_t type;      /**< Type of link                   */
+  hbool_t corder_valid; /**< Indicate if creation order is valid */
+  int64_t corder;       /**< Creation order                 */
+  H5T_cset_t cset;      /**< Character set of link name     */
+  union {
+    haddr_t address; /**< Address hard link points to    */
+    size_t val_size; /**< Size of a soft link or UD link value */
+  } u;
 } H5L_info1_t;
 //! <!-- [H5L_info1_t_snip] -->
 
 /** Prototype for H5Literate1() / H5Literate_by_name1() operator */
 //! <!-- [H5L_iterate1_t_snip] -->
-typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info, void *op_data);
+typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name,
+                                 const H5L_info1_t *info, void *op_data);
 //! <!-- [H5L_iterate1_t_snip] -->
 
 /* Function prototypes */
@@ -1544,7 +1593,8 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t lapl_id);
+H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name,
+                           H5L_info1_t *linfo /*out*/, hid_t lapl_id);
 /**
  * \ingroup H5L
  *
@@ -1596,15 +1646,16 @@ H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*
  *          If \p loc_id specifies the group in which the link resides,
  *          \p group_name can be a dot (\c .).
  *
- * \version 1.12.0 Function was renamed to H5Lget_index_by_idx1() and deprecated.
- * \version 1.8.4 Fortran subroutine syntax changed in this release.
+ * \version 1.12.0 Function was renamed to H5Lget_index_by_idx1() and
+ * deprecated. \version 1.8.4 Fortran subroutine syntax changed in this release.
  * \version 1.8.2 Fortran subroutine added in this release.
  *
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t n, H5L_info1_t *linfo /*out*/,
+H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t n, H5L_info1_t *linfo /*out*/,
                                   hid_t lapl_id);
 /**
  * \ingroup TRAV
@@ -1676,7 +1727,8 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
  *
  */
-H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
+H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type,
+                          H5_iter_order_t order, hsize_t *idx,
                           H5L_iterate1_t op, void *op_data);
 /**
  * \ingroup TRAV
@@ -1749,9 +1801,10 @@ H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t *idx, H5L_iterate1_t op, void *op_data,
-                                  hid_t lapl_id);
+H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name,
+                                  H5_index_t idx_type, H5_iter_order_t order,
+                                  hsize_t *idx, H5L_iterate1_t op,
+                                  void *op_data, hid_t lapl_id);
 /**
  * \ingroup TRAV
  *
@@ -1803,9 +1856,8 @@ H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index
  *          following:
  *          \orders
  *
- *          \p op is a callback function of type \ref H5L_iterate1_t that is invoked
- *          for each link encountered.
- *          \snippet this H5L_iterate1_t_snip
+ *          \p op is a callback function of type \ref H5L_iterate1_t that is
+ * invoked for each link encountered. \snippet this H5L_iterate1_t_snip
  *
  *          The \ref H5L_info1_t struct is defined (in H5Lpublic.h) as follows:
  *          \snippet this H5L_info1_t_snip
@@ -1838,7 +1890,8 @@ H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate1_t op,
+H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type,
+                        H5_iter_order_t order, H5L_iterate1_t op,
                         void *op_data);
 /**
  * \ingroup TRAV
@@ -1931,8 +1984,10 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                H5_iter_order_t order, H5L_iterate1_t op, void *op_data, hid_t lapl_id);
+H5_DLL herr_t H5Lvisit_by_name1(hid_t loc_id, const char *group_name,
+                                H5_index_t idx_type, H5_iter_order_t order,
+                                H5L_iterate1_t op, void *op_data,
+                                hid_t lapl_id);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

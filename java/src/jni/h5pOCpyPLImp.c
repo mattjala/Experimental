@@ -20,10 +20,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdlib.h>
-#include "hdf5.h"
-#include "h5jni.h"
 #include "h5pOCpyPLImp.h"
+#include "h5jni.h"
+#include "hdf5.h"
+#include <stdlib.h>
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.
@@ -35,18 +35,18 @@ extern "C" {
  * Method:    H5Pset_copy_object
  * Signature: (JI)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1copy_1object(JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1copy_1object(
+    JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Pset_copy_object((hid_t)ocp_plist_id, (unsigned)copy_options)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal =
+           H5Pset_copy_object((hid_t)ocp_plist_id, (unsigned)copy_options)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return;
+  return;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1copy_1object */
 
 /*
@@ -54,18 +54,17 @@ done:
  * Method:    H5Pget_copy_object
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(JNIEnv *env, jclass clss, jlong ocp_plist_id)
-{
-    unsigned copy_options = 0;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(
+    JNIEnv *env, jclass clss, jlong ocp_plist_id) {
+  unsigned copy_options = 0;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (H5Pget_copy_object((hid_t)ocp_plist_id, &copy_options) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Pget_copy_object((hid_t)ocp_plist_id, &copy_options) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)copy_options;
+  return (jint)copy_options;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1copy_1object */
 
 /*

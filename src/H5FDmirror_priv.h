@@ -28,25 +28,25 @@ extern "C" {
  * = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  */
 
-/* Define the maximum allowed size for a receiving buffer when accepting bytes to
- * write. Writes larger than this size are performed by multiple accept-write
+/* Define the maximum allowed size for a receiving buffer when accepting bytes
+ * to write. Writes larger than this size are performed by multiple accept-write
  * steps by the Writer. */
 #define H5FD_MIRROR_DATA_BUFFER_MAX (1024 * 1024 * 1024) /* 1 Gigabyte */
 
 #define H5FD_MIRROR_XMIT_CURR_VERSION 1
-#define H5FD_MIRROR_XMIT_MAGIC        0x87F8005B
+#define H5FD_MIRROR_XMIT_MAGIC 0x87F8005B
 
-#define H5FD_MIRROR_OP_OPEN     1
-#define H5FD_MIRROR_OP_CLOSE    2
-#define H5FD_MIRROR_OP_WRITE    3
+#define H5FD_MIRROR_OP_OPEN 1
+#define H5FD_MIRROR_OP_CLOSE 2
+#define H5FD_MIRROR_OP_WRITE 3
 #define H5FD_MIRROR_OP_TRUNCATE 4
-#define H5FD_MIRROR_OP_REPLY    5
-#define H5FD_MIRROR_OP_SET_EOA  6
-#define H5FD_MIRROR_OP_LOCK     7
-#define H5FD_MIRROR_OP_UNLOCK   8
+#define H5FD_MIRROR_OP_REPLY 5
+#define H5FD_MIRROR_OP_SET_EOA 6
+#define H5FD_MIRROR_OP_LOCK 7
+#define H5FD_MIRROR_OP_UNLOCK 8
 
-#define H5FD_MIRROR_STATUS_OK          0
-#define H5FD_MIRROR_STATUS_ERROR       1
+#define H5FD_MIRROR_STATUS_OK 0
+#define H5FD_MIRROR_STATUS_ERROR 1
 #define H5FD_MIRROR_STATUS_MESSAGE_MAX 256 /* Dedicated error message size */
 
 /* Maximum length of a path/filename string, including the NULL-terminator.
@@ -60,16 +60,20 @@ extern "C" {
  * must be reflected here.
  * */
 #define H5FD_MIRROR_XMIT_HEADER_SIZE 14
-#define H5FD_MIRROR_XMIT_EOA_SIZE    (H5FD_MIRROR_XMIT_HEADER_SIZE + 9)
-#define H5FD_MIRROR_XMIT_LOCK_SIZE   (H5FD_MIRROR_XMIT_HEADER_SIZE + 8)
-#define H5FD_MIRROR_XMIT_OPEN_SIZE   (H5FD_MIRROR_XMIT_HEADER_SIZE + 20 + H5FD_MIRROR_XMIT_FILEPATH_MAX)
-#define H5FD_MIRROR_XMIT_REPLY_SIZE  (H5FD_MIRROR_XMIT_HEADER_SIZE + 4 + H5FD_MIRROR_STATUS_MESSAGE_MAX)
-#define H5FD_MIRROR_XMIT_WRITE_SIZE  (H5FD_MIRROR_XMIT_HEADER_SIZE + 17)
+#define H5FD_MIRROR_XMIT_EOA_SIZE (H5FD_MIRROR_XMIT_HEADER_SIZE + 9)
+#define H5FD_MIRROR_XMIT_LOCK_SIZE (H5FD_MIRROR_XMIT_HEADER_SIZE + 8)
+#define H5FD_MIRROR_XMIT_OPEN_SIZE                                             \
+  (H5FD_MIRROR_XMIT_HEADER_SIZE + 20 + H5FD_MIRROR_XMIT_FILEPATH_MAX)
+#define H5FD_MIRROR_XMIT_REPLY_SIZE                                            \
+  (H5FD_MIRROR_XMIT_HEADER_SIZE + 4 + H5FD_MIRROR_STATUS_MESSAGE_MAX)
+#define H5FD_MIRROR_XMIT_WRITE_SIZE (H5FD_MIRROR_XMIT_HEADER_SIZE + 17)
 
 /* Maximum length of any xmit. */
-#define H5FD_MIRROR_XMIT_BUFFER_MAX                                                                          \
-    MAX2(MAX3(H5FD_MIRROR_XMIT_HEADER_SIZE, H5FD_MIRROR_XMIT_EOA_SIZE, H5FD_MIRROR_XMIT_LOCK_SIZE),          \
-         MAX3(H5FD_MIRROR_XMIT_OPEN_SIZE, H5FD_MIRROR_XMIT_REPLY_SIZE, H5FD_MIRROR_XMIT_WRITE_SIZE))
+#define H5FD_MIRROR_XMIT_BUFFER_MAX                                            \
+  MAX2(MAX3(H5FD_MIRROR_XMIT_HEADER_SIZE, H5FD_MIRROR_XMIT_EOA_SIZE,           \
+            H5FD_MIRROR_XMIT_LOCK_SIZE),                                       \
+       MAX3(H5FD_MIRROR_XMIT_OPEN_SIZE, H5FD_MIRROR_XMIT_REPLY_SIZE,           \
+            H5FD_MIRROR_XMIT_WRITE_SIZE))
 
 /* ---------------------------------------------------------------------------
  * Structure:   H5FD_mirror_xmit_t
@@ -105,11 +109,11 @@ extern "C" {
  * ---------------------------------------------------------------------------
  */
 typedef struct H5FD_mirror_xmit_t {
-    uint32_t magic;
-    uint8_t  version;
-    uint32_t session_token;
-    uint32_t xmit_count;
-    uint8_t  op;
+  uint32_t magic;
+  uint8_t version;
+  uint32_t session_token;
+  uint32_t xmit_count;
+  uint8_t op;
 } H5FD_mirror_xmit_t;
 
 /* ---------------------------------------------------------------------------
@@ -132,9 +136,9 @@ typedef struct H5FD_mirror_xmit_t {
  * ---------------------------------------------------------------------------
  */
 typedef struct H5FD_mirror_xmit_eoa_t {
-    H5FD_mirror_xmit_t pub;
-    uint8_t            type;
-    uint64_t           eoa_addr;
+  H5FD_mirror_xmit_t pub;
+  uint8_t type;
+  uint64_t eoa_addr;
 } H5FD_mirror_xmit_eoa_t;
 
 /* ---------------------------------------------------------------------------
@@ -153,8 +157,8 @@ typedef struct H5FD_mirror_xmit_eoa_t {
  * ---------------------------------------------------------------------------
  */
 typedef struct H5FD_mirror_xmit_lock_t {
-    H5FD_mirror_xmit_t pub;
-    uint64_t           rw;
+  H5FD_mirror_xmit_t pub;
+  uint64_t rw;
 } H5FD_mirror_xmit_lock_t;
 
 /* ---------------------------------------------------------------------------
@@ -195,11 +199,11 @@ typedef struct H5FD_mirror_xmit_lock_t {
  * ---------------------------------------------------------------------------
  */
 typedef struct H5FD_mirror_xmit_open_t {
-    H5FD_mirror_xmit_t pub;
-    uint32_t           flags;
-    uint64_t           maxaddr;
-    uint64_t           size_t_blob;
-    char               filename[H5FD_MIRROR_XMIT_FILEPATH_MAX];
+  H5FD_mirror_xmit_t pub;
+  uint32_t flags;
+  uint64_t maxaddr;
+  uint64_t size_t_blob;
+  char filename[H5FD_MIRROR_XMIT_FILEPATH_MAX];
 } H5FD_mirror_xmit_open_t;
 
 /* ---------------------------------------------------------------------------
@@ -227,9 +231,9 @@ typedef struct H5FD_mirror_xmit_open_t {
  * ---------------------------------------------------------------------------
  */
 typedef struct H5FD_mirror_xmit_reply_t {
-    H5FD_mirror_xmit_t pub;
-    uint32_t           status;
-    char               message[H5FD_MIRROR_STATUS_MESSAGE_MAX];
+  H5FD_mirror_xmit_t pub;
+  uint32_t status;
+  char message[H5FD_MIRROR_STATUS_MESSAGE_MAX];
 } H5FD_mirror_xmit_reply_t;
 
 /* ---------------------------------------------------------------------------
@@ -261,10 +265,10 @@ typedef struct H5FD_mirror_xmit_reply_t {
  * ---------------------------------------------------------------------------
  */
 typedef struct H5FD_mirror_xmit_write_t {
-    H5FD_mirror_xmit_t pub;
-    uint8_t            type;
-    uint64_t           offset;
-    uint64_t           size;
+  H5FD_mirror_xmit_t pub;
+  uint8_t type;
+  uint64_t offset;
+  uint64_t size;
 } H5FD_mirror_xmit_write_t;
 
 /* Encode/decode routines are required to "pack" the xmit data into a known
@@ -277,28 +281,44 @@ typedef struct H5FD_mirror_xmit_write_t {
  * All components must be packed with zero padding between.
  */
 
-H5_DLL size_t H5FD__mirror_xmit_decode_uint16(uint16_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD__mirror_xmit_decode_uint64(uint64_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD__mirror_xmit_decode_uint8(uint8_t *out, const unsigned char *buf);
+H5_DLL size_t H5FD__mirror_xmit_decode_uint16(uint16_t *out,
+                                              const unsigned char *buf);
+H5_DLL size_t H5FD__mirror_xmit_decode_uint32(uint32_t *out,
+                                              const unsigned char *buf);
+H5_DLL size_t H5FD__mirror_xmit_decode_uint64(uint64_t *out,
+                                              const unsigned char *buf);
+H5_DLL size_t H5FD__mirror_xmit_decode_uint8(uint8_t *out,
+                                             const unsigned char *buf);
 H5_DLL size_t H5FD__mirror_xmit_encode_uint16(unsigned char *dest, uint16_t v);
 H5_DLL size_t H5FD__mirror_xmit_encode_uint32(unsigned char *dest, uint32_t v);
 H5_DLL size_t H5FD__mirror_xmit_encode_uint64(unsigned char *dest, uint64_t v);
 H5_DLL size_t H5FD__mirror_xmit_encode_uint8(unsigned char *dest, uint8_t v);
 
-H5_DLL size_t H5FD_mirror_xmit_decode_header(H5FD_mirror_xmit_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD_mirror_xmit_decode_lock(H5FD_mirror_xmit_lock_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD_mirror_xmit_decode_open(H5FD_mirror_xmit_open_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD_mirror_xmit_decode_reply(H5FD_mirror_xmit_reply_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD_mirror_xmit_decode_set_eoa(H5FD_mirror_xmit_eoa_t *out, const unsigned char *buf);
-H5_DLL size_t H5FD_mirror_xmit_decode_write(H5FD_mirror_xmit_write_t *out, const unsigned char *buf);
+H5_DLL size_t H5FD_mirror_xmit_decode_header(H5FD_mirror_xmit_t *out,
+                                             const unsigned char *buf);
+H5_DLL size_t H5FD_mirror_xmit_decode_lock(H5FD_mirror_xmit_lock_t *out,
+                                           const unsigned char *buf);
+H5_DLL size_t H5FD_mirror_xmit_decode_open(H5FD_mirror_xmit_open_t *out,
+                                           const unsigned char *buf);
+H5_DLL size_t H5FD_mirror_xmit_decode_reply(H5FD_mirror_xmit_reply_t *out,
+                                            const unsigned char *buf);
+H5_DLL size_t H5FD_mirror_xmit_decode_set_eoa(H5FD_mirror_xmit_eoa_t *out,
+                                              const unsigned char *buf);
+H5_DLL size_t H5FD_mirror_xmit_decode_write(H5FD_mirror_xmit_write_t *out,
+                                            const unsigned char *buf);
 
-H5_DLL size_t H5FD_mirror_xmit_encode_header(unsigned char *dest, const H5FD_mirror_xmit_t *x);
-H5_DLL size_t H5FD_mirror_xmit_encode_lock(unsigned char *dest, const H5FD_mirror_xmit_lock_t *x);
-H5_DLL size_t H5FD_mirror_xmit_encode_open(unsigned char *dest, const H5FD_mirror_xmit_open_t *x);
-H5_DLL size_t H5FD_mirror_xmit_encode_reply(unsigned char *dest, const H5FD_mirror_xmit_reply_t *x);
-H5_DLL size_t H5FD_mirror_xmit_encode_set_eoa(unsigned char *dest, const H5FD_mirror_xmit_eoa_t *x);
-H5_DLL size_t H5FD_mirror_xmit_encode_write(unsigned char *dest, const H5FD_mirror_xmit_write_t *x);
+H5_DLL size_t H5FD_mirror_xmit_encode_header(unsigned char *dest,
+                                             const H5FD_mirror_xmit_t *x);
+H5_DLL size_t H5FD_mirror_xmit_encode_lock(unsigned char *dest,
+                                           const H5FD_mirror_xmit_lock_t *x);
+H5_DLL size_t H5FD_mirror_xmit_encode_open(unsigned char *dest,
+                                           const H5FD_mirror_xmit_open_t *x);
+H5_DLL size_t H5FD_mirror_xmit_encode_reply(unsigned char *dest,
+                                            const H5FD_mirror_xmit_reply_t *x);
+H5_DLL size_t H5FD_mirror_xmit_encode_set_eoa(unsigned char *dest,
+                                              const H5FD_mirror_xmit_eoa_t *x);
+H5_DLL size_t H5FD_mirror_xmit_encode_write(unsigned char *dest,
+                                            const H5FD_mirror_xmit_write_t *x);
 
 H5_DLL hbool_t H5FD_mirror_xmit_is_close(const H5FD_mirror_xmit_t *xmit);
 H5_DLL hbool_t H5FD_mirror_xmit_is_lock(const H5FD_mirror_xmit_lock_t *xmit);

@@ -16,7 +16,7 @@
 #ifndef H5FDfamily_H
 #define H5FDfamily_H
 
-#define H5FD_FAMILY       (H5FDperform_init(H5FD_family_init))
+#define H5FD_FAMILY (H5FDperform_init(H5FD_family_init))
 #define H5FD_FAMILY_VALUE H5_VFD_FAMILY
 
 #ifdef __cplusplus
@@ -55,7 +55,8 @@ H5_DLL hid_t H5FD_family_init(void);
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id);
+H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size,
+                                 hid_t memb_fapl_id);
 
 /**
  * \ingroup FAPL
@@ -75,7 +76,8 @@ H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fa
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size /*out*/, hid_t *memb_fapl_id /*out*/);
+H5_DLL herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size /*out*/,
+                                 hid_t *memb_fapl_id /*out*/);
 
 #ifdef __cplusplus
 }

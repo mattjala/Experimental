@@ -24,12 +24,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /*generic functions			  */
 #include "H5CXprivate.h" /*API Contexts                            */
 #include "H5Eprivate.h"  /*error handling			  */
 #include "H5Iprivate.h"  /*ID functions		   		  */
 #include "H5MMprivate.h" /*memory management			  */
 #include "H5Tpkg.h"      /*data-type functions			  */
+#include "H5private.h"   /*generic functions			  */
 
 /****************/
 /* Local Macros */
@@ -81,26 +81,25 @@ static H5T_t *H5T__reopen_member_type(const H5T_t *dt, unsigned membno);
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5Tget_member_offset(hid_t type_id, unsigned membno)
-{
-    H5T_t *dt;        /* Datatype to query */
-    size_t ret_value; /* Return value */
+size_t H5Tget_member_offset(hid_t type_id, unsigned membno) {
+  H5T_t *dt;        /* Datatype to query */
+  size_t ret_value; /* Return value */
 
-    FUNC_ENTER_API(0)
-    H5TRACE2("z", "iIu", type_id, membno);
+  FUNC_ENTER_API(0)
+  H5TRACE2("z", "iIu", type_id, membno);
 
-    /* Check args */
-    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound datatype");
-    if (membno >= dt->shared->u.compnd.nmembs)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
+  /* Check args */
+  if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
+      H5T_COMPOUND != dt->shared->type)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound datatype");
+  if (membno >= dt->shared->u.compnd.nmembs)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
 
-    /* Value */
-    ret_value = H5T_GET_MEMBER_OFFSET(dt->shared, membno);
+  /* Value */
+  ret_value = H5T_GET_MEMBER_OFFSET(dt->shared, membno);
 
 done:
-    FUNC_LEAVE_API(ret_value)
+  FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_offset() */
 
 /*-------------------------------------------------------------------------
@@ -119,15 +118,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5T_get_member_offset(const H5T_t *dt, unsigned membno)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(dt);
-    assert(membno < dt->shared->u.compnd.nmembs);
+  assert(dt);
+  assert(membno < dt->shared->u.compnd.nmembs);
 
-    FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].offset)
+  FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].offset)
 } /* end H5T_get_member_offset() */
 
 /*-------------------------------------------------------------------------
@@ -141,28 +138,28 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
  *
  *-------------------------------------------------------------------------
  */
-H5T_class_t
-H5Tget_member_class(hid_t type_id, unsigned membno)
-{
-    H5T_t      *dt;        /* Datatype to query */
-    H5T_class_t ret_value; /* Return value */
+H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno) {
+  H5T_t *dt;             /* Datatype to query */
+  H5T_class_t ret_value; /* Return value */
 
-    FUNC_ENTER_API(H5T_NO_CLASS)
-    H5TRACE2("Tt", "iIu", type_id, membno);
+  FUNC_ENTER_API(H5T_NO_CLASS)
+  H5TRACE2("Tt", "iIu", type_id, membno);
 
-    /* Check args */
-    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound datatype");
-    if (membno >= dt->shared->u.compnd.nmembs)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
+  /* Check args */
+  if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
+      H5T_COMPOUND != dt->shared->type)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound datatype");
+  if (membno >= dt->shared->u.compnd.nmembs)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
 
-    /* Get the type's class.  We have to use this function to get type class
-     *  because of the concern of variable-length string.
-     */
-    ret_value = H5T_GET_CLASS(dt->shared->u.compnd.memb[membno].type->shared, FALSE);
+  /* Get the type's class.  We have to use this function to get type class
+   *  because of the concern of variable-length string.
+   */
+  ret_value =
+      H5T_GET_CLASS(dt->shared->u.compnd.memb[membno].type->shared, FALSE);
 
 done:
-    FUNC_LEAVE_API(ret_value)
+  FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_class() */
 
 /*-------------------------------------------------------------------------
@@ -180,36 +177,40 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5Tget_member_type(hid_t type_id, unsigned membno)
-{
-    H5T_t *dt;             /* Datatype to query */
-    H5T_t *memb_dt = NULL; /* Member datatype */
-    hid_t  ret_value;      /* Return value */
+hid_t H5Tget_member_type(hid_t type_id, unsigned membno) {
+  H5T_t *dt;             /* Datatype to query */
+  H5T_t *memb_dt = NULL; /* Member datatype */
+  hid_t ret_value;       /* Return value */
 
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "iIu", type_id, membno);
+  FUNC_ENTER_API(H5I_INVALID_HID)
+  H5TRACE2("i", "iIu", type_id, membno);
 
-    /* Check args */
-    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a compound datatype");
-    if (membno >= dt->shared->u.compnd.nmembs)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid member number");
+  /* Check args */
+  if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
+      H5T_COMPOUND != dt->shared->type)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID,
+                "not a compound datatype");
+  if (membno >= dt->shared->u.compnd.nmembs)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID,
+                "invalid member number");
 
-    /* Retrieve the datatype for the member */
-    if (NULL == (memb_dt = H5T__reopen_member_type(dt, membno)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to retrieve member type");
+  /* Retrieve the datatype for the member */
+  if (NULL == (memb_dt = H5T__reopen_member_type(dt, membno)))
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID,
+                "unable to retrieve member type");
 
-    /* Get an ID for the datatype */
-    if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable register datatype ID");
+  /* Get an ID for the datatype */
+  if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt, TRUE)) < 0)
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID,
+                "unable register datatype ID");
 
 done:
-    if (ret_value < 0)
-        if (memb_dt && H5T_close(memb_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype");
+  if (ret_value < 0)
+    if (memb_dt && H5T_close(memb_dt) < 0)
+      HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID,
+                  "can't close datatype");
 
-    FUNC_LEAVE_API(ret_value)
+  FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_type() */
 
 /*-------------------------------------------------------------------------
@@ -225,23 +226,23 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5T_t *
-H5T_get_member_type(const H5T_t *dt, unsigned membno)
-{
-    H5T_t *ret_value = NULL; /* Return value */
+H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno) {
+  H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    /* Sanity checks */
-    assert(dt);
-    assert(membno < dt->shared->u.compnd.nmembs);
+  /* Sanity checks */
+  assert(dt);
+  assert(membno < dt->shared->u.compnd.nmembs);
 
-    /* Copy datatype */
-    if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy member datatype");
+  /* Copy datatype */
+  if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type,
+                                    H5T_COPY_TRANSIENT)))
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL,
+                "unable to copy member datatype");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_member_type() */
 
 /*-------------------------------------------------------------------------
@@ -258,23 +259,23 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5T_t *
-H5T__reopen_member_type(const H5T_t *dt, unsigned membno)
-{
-    H5T_t *ret_value = NULL; /* Return value */
+static H5T_t *H5T__reopen_member_type(const H5T_t *dt, unsigned membno) {
+  H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    assert(dt);
-    assert(membno < dt->shared->u.compnd.nmembs);
+  /* Sanity checks */
+  assert(dt);
+  assert(membno < dt->shared->u.compnd.nmembs);
 
-    /* Copy datatype, possibly re-opening it */
-    if (NULL == (ret_value = H5T_copy_reopen(dt->shared->u.compnd.memb[membno].type)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to reopen member datatype");
+  /* Copy datatype, possibly re-opening it */
+  if (NULL ==
+      (ret_value = H5T_copy_reopen(dt->shared->u.compnd.memb[membno].type)))
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL,
+                "unable to reopen member datatype");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__reopen_member_type() */
 
 /*-------------------------------------------------------------------------
@@ -287,15 +288,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5T__get_member_size(const H5T_t *dt, unsigned membno)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+size_t H5T__get_member_size(const H5T_t *dt, unsigned membno) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    assert(dt);
-    assert(membno < dt->shared->u.compnd.nmembs);
+  assert(dt);
+  assert(membno < dt->shared->u.compnd.nmembs);
 
-    FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].type->shared->size)
+  FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].type->shared->size)
 } /* end H5T__get_member_size() */
 
 /*-------------------------------------------------------------------------
@@ -317,35 +316,35 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
-{
-    H5T_t *parent;              /* The compound parent datatype */
-    H5T_t *member;              /* The member datatype	*/
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,
+                 hid_t member_id) {
+  H5T_t *parent;              /* The compound parent datatype */
+  H5T_t *member;              /* The member datatype	*/
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*szi", parent_id, name, offset, member_id);
+  FUNC_ENTER_API(FAIL)
+  H5TRACE4("e", "i*szi", parent_id, name, offset, member_id);
 
-    /* Check args */
-    if (parent_id == member_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't insert compound datatype within itself");
-    if (NULL == (parent = (H5T_t *)H5I_object_verify(parent_id, H5I_DATATYPE)) ||
-        H5T_COMPOUND != parent->shared->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype");
-    if (H5T_STATE_TRANSIENT != parent->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
-    if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
-    if (NULL == (member = (H5T_t *)H5I_object_verify(member_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+  /* Check args */
+  if (parent_id == member_id)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                "can't insert compound datatype within itself");
+  if (NULL == (parent = (H5T_t *)H5I_object_verify(parent_id, H5I_DATATYPE)) ||
+      H5T_COMPOUND != parent->shared->type)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype");
+  if (H5T_STATE_TRANSIENT != parent->shared->state)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
+  if (!name || !*name)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
+  if (NULL == (member = (H5T_t *)H5I_object_verify(member_id, H5I_DATATYPE)))
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
-    /* Insert */
-    if (H5T__insert(parent, name, offset, member) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "unable to insert member");
+  /* Insert */
+  if (H5T__insert(parent, name, offset, member) < 0)
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "unable to insert member");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+  FUNC_LEAVE_API(ret_value)
 } /* end H5Tinsert() */
 
 /*-------------------------------------------------------------------------
@@ -358,26 +357,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Tpack(hid_t type_id)
-{
-    H5T_t *dt;                  /* Datatype to modify */
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5Tpack(hid_t type_id) {
+  H5T_t *dt;                  /* Datatype to modify */
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
+  FUNC_ENTER_API(FAIL)
+  H5TRACE1("e", "i", type_id);
 
-    /* Check args */
-    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
-        H5T_detect_class(dt, H5T_COMPOUND, TRUE) <= 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype");
+  /* Check args */
+  if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
+      H5T_detect_class(dt, H5T_COMPOUND, TRUE) <= 0)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype");
 
-    /* Pack */
-    if (H5T__pack(dt) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound datatype");
+  /* Pack */
+  if (H5T__pack(dt) < 0)
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                "unable to pack compound datatype");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+  FUNC_LEAVE_API(ret_value)
 } /* end H5Tpack() */
 
 /*-------------------------------------------------------------------------
@@ -392,86 +390,94 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
-{
-    unsigned idx; /* Index of member to insert */
-    size_t   total_size;
-    unsigned i;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+herr_t H5T__insert(H5T_t *parent, const char *name, size_t offset,
+                   const H5T_t *member) {
+  unsigned idx; /* Index of member to insert */
+  size_t total_size;
+  unsigned i;                 /* Local index variable */
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* check args */
-    assert(parent && H5T_COMPOUND == parent->shared->type);
-    assert(H5T_STATE_TRANSIENT == parent->shared->state);
-    assert(member);
-    assert(name && *name);
+  /* check args */
+  assert(parent && H5T_COMPOUND == parent->shared->type);
+  assert(H5T_STATE_TRANSIENT == parent->shared->state);
+  assert(member);
+  assert(name && *name);
 
-    /* Does NAME already exist in PARENT? */
-    for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique");
+  /* Does NAME already exist in PARENT? */
+  for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
+    if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
+                  "member name is not unique");
 
-    /* Does the new member overlap any existing member ? */
-    total_size = member->shared->size;
-    for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if ((offset <= parent->shared->u.compnd.memb[i].offset &&
-             (offset + total_size) > parent->shared->u.compnd.memb[i].offset) ||
-            (parent->shared->u.compnd.memb[i].offset <= offset &&
-             (parent->shared->u.compnd.memb[i].offset + parent->shared->u.compnd.memb[i].size) > offset))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member");
+  /* Does the new member overlap any existing member ? */
+  total_size = member->shared->size;
+  for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
+    if ((offset <= parent->shared->u.compnd.memb[i].offset &&
+         (offset + total_size) > parent->shared->u.compnd.memb[i].offset) ||
+        (parent->shared->u.compnd.memb[i].offset <= offset &&
+         (parent->shared->u.compnd.memb[i].offset +
+          parent->shared->u.compnd.memb[i].size) > offset))
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
+                  "member overlaps with another member");
 
-    /* Does the new member overlap the end of the compound type? */
-    if ((offset + total_size) > parent->shared->size)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type");
+  /* Does the new member overlap the end of the compound type? */
+  if ((offset + total_size) > parent->shared->size)
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
+                "member extends past end of compound type");
 
-    /* Increase member array if necessary */
-    if (parent->shared->u.compnd.nmembs >= parent->shared->u.compnd.nalloc) {
-        unsigned     na = MAX(1, parent->shared->u.compnd.nalloc * 2);
-        H5T_cmemb_t *x = (H5T_cmemb_t *)H5MM_realloc(parent->shared->u.compnd.memb, na * sizeof(H5T_cmemb_t));
+  /* Increase member array if necessary */
+  if (parent->shared->u.compnd.nmembs >= parent->shared->u.compnd.nalloc) {
+    unsigned na = MAX(1, parent->shared->u.compnd.nalloc * 2);
+    H5T_cmemb_t *x = (H5T_cmemb_t *)H5MM_realloc(parent->shared->u.compnd.memb,
+                                                 na * sizeof(H5T_cmemb_t));
 
-        if (!x)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed");
-        parent->shared->u.compnd.nalloc = na;
-        parent->shared->u.compnd.memb   = x;
-    } /* end if */
+    if (!x)
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
+                  "memory allocation failed");
+    parent->shared->u.compnd.nalloc = na;
+    parent->shared->u.compnd.memb = x;
+  } /* end if */
 
-    /* Add member to end of member array */
-    idx                                       = parent->shared->u.compnd.nmembs;
-    parent->shared->u.compnd.memb[idx].offset = offset;
-    parent->shared->u.compnd.memb[idx].size   = total_size;
-    if (NULL == (parent->shared->u.compnd.memb[idx].name = H5MM_xstrdup(name)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "couldn't duplicate name string");
-    if (NULL == (parent->shared->u.compnd.memb[idx].type = H5T_copy(member, H5T_COPY_ALL)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "couldn't copy datatype");
+  /* Add member to end of member array */
+  idx = parent->shared->u.compnd.nmembs;
+  parent->shared->u.compnd.memb[idx].offset = offset;
+  parent->shared->u.compnd.memb[idx].size = total_size;
+  if (NULL == (parent->shared->u.compnd.memb[idx].name = H5MM_xstrdup(name)))
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
+                "couldn't duplicate name string");
+  if (NULL == (parent->shared->u.compnd.memb[idx].type =
+                   H5T_copy(member, H5T_COPY_ALL)))
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "couldn't copy datatype");
 
-    parent->shared->u.compnd.sorted = H5T_SORT_NONE;
-    parent->shared->u.compnd.nmembs++;
-    parent->shared->u.compnd.memb_size += total_size;
+  parent->shared->u.compnd.sorted = H5T_SORT_NONE;
+  parent->shared->u.compnd.nmembs++;
+  parent->shared->u.compnd.memb_size += total_size;
 
-    /* It should not be possible to get this far if the type is already packed
-     * - the new member would overlap something */
-    assert(!(parent->shared->u.compnd.packed));
+  /* It should not be possible to get this far if the type is already packed
+   * - the new member would overlap something */
+  assert(!(parent->shared->u.compnd.packed));
 
-    /* Determine if the compound datatype becomes packed */
-    H5T__update_packed(parent);
+  /* Determine if the compound datatype becomes packed */
+  H5T__update_packed(parent);
 
-    /* Set the "force conversion" flag if the field's datatype indicates */
-    if (member->shared->force_conv == TRUE)
-        parent->shared->force_conv = TRUE;
+  /* Set the "force conversion" flag if the field's datatype indicates */
+  if (member->shared->force_conv == TRUE)
+    parent->shared->force_conv = TRUE;
 
-    /* Check for member having a later version than the parent */
-    if (parent->shared->version < member->shared->version)
-        /* Upgrade parent datatype (and all other members also) */
-        /* (can't use a partial datatype and later versions of the format are
-         *  more efficient, so might as well upgrade all members also... -QAK)
-         */
-        if (H5T__upgrade_version(parent, member->shared->version) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade member encoding version");
+  /* Check for member having a later version than the parent */
+  if (parent->shared->version < member->shared->version)
+    /* Upgrade parent datatype (and all other members also) */
+    /* (can't use a partial datatype and later versions of the format are
+     *  more efficient, so might as well upgrade all members also... -QAK)
+     */
+    if (H5T__upgrade_version(parent, member->shared->version) < 0)
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL,
+                  "can't upgrade member encoding version");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__insert() */
 
 /*-------------------------------------------------------------------------
@@ -484,66 +490,67 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5T__pack(const H5T_t *dt)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+static herr_t H5T__pack(const H5T_t *dt) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    assert(dt);
+  assert(dt);
 
-    if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
-        /* If datatype has been packed, skip packing it and indicate success */
-        if (TRUE == H5T__is_packed(dt))
-            HGOTO_DONE(SUCCEED);
+  if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
+    /* If datatype has been packed, skip packing it and indicate success */
+    if (TRUE == H5T__is_packed(dt))
+      HGOTO_DONE(SUCCEED);
 
-        /* Check for packing unmodifiable datatype */
-        if (H5T_STATE_TRANSIENT != dt->shared->state)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is read-only");
+    /* Check for packing unmodifiable datatype */
+    if (H5T_STATE_TRANSIENT != dt->shared->state)
+      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is read-only");
 
-        if (dt->shared->parent) {
-            if (H5T__pack(dt->shared->parent) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack parent of datatype");
+    if (dt->shared->parent) {
+      if (H5T__pack(dt->shared->parent) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                    "unable to pack parent of datatype");
 
-            /* Adjust size of datatype appropriately */
-            if (dt->shared->type == H5T_ARRAY)
-                dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
-            else if (dt->shared->type != H5T_VLEN)
-                dt->shared->size = dt->shared->parent->shared->size;
-        } /* end if */
-        else if (dt->shared->type == H5T_COMPOUND) {
-            size_t   offset; /* Offset of member */
-            unsigned i;      /* Local index variable */
+      /* Adjust size of datatype appropriately */
+      if (dt->shared->type == H5T_ARRAY)
+        dt->shared->size =
+            dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+      else if (dt->shared->type != H5T_VLEN)
+        dt->shared->size = dt->shared->parent->shared->size;
+    } /* end if */
+    else if (dt->shared->type == H5T_COMPOUND) {
+      size_t offset; /* Offset of member */
+      unsigned i;    /* Local index variable */
 
-            /* Recursively pack the members */
-            for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
-                if (H5T__pack(dt->shared->u.compnd.memb[i].type) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                                "unable to pack part of a compound datatype");
+      /* Recursively pack the members */
+      for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
+        if (H5T__pack(dt->shared->u.compnd.memb[i].type) < 0)
+          HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                      "unable to pack part of a compound datatype");
 
-                /* Update the member size */
-                dt->shared->u.compnd.memb[i].size = (dt->shared->u.compnd.memb[i].type)->shared->size;
-            } /* end for */
+        /* Update the member size */
+        dt->shared->u.compnd.memb[i].size =
+            (dt->shared->u.compnd.memb[i].type)->shared->size;
+      } /* end for */
 
-            /* Remove padding between members */
-            if (H5T__sort_value(dt, NULL) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed");
-            for (i = 0, offset = 0; i < dt->shared->u.compnd.nmembs; i++) {
-                dt->shared->u.compnd.memb[i].offset = offset;
-                offset += dt->shared->u.compnd.memb[i].size;
-            }
+      /* Remove padding between members */
+      if (H5T__sort_value(dt, NULL) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed");
+      for (i = 0, offset = 0; i < dt->shared->u.compnd.nmembs; i++) {
+        dt->shared->u.compnd.memb[i].offset = offset;
+        offset += dt->shared->u.compnd.memb[i].size;
+      }
 
-            /* Change total size */
-            dt->shared->size = MAX(1, offset);
+      /* Change total size */
+      dt->shared->size = MAX(1, offset);
 
-            /* Mark the type as packed now */
-            dt->shared->u.compnd.packed = TRUE;
-        } /* end if */
-    }     /* end if */
+      /* Mark the type as packed now */
+      dt->shared->u.compnd.packed = TRUE;
+    } /* end if */
+  }   /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__pack() */
 
 /*-------------------------------------------------------------------------
@@ -556,24 +563,22 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5T__is_packed(const H5T_t *dt)
-{
-    htri_t ret_value = TRUE; /* Return value */
+static htri_t H5T__is_packed(const H5T_t *dt) {
+  htri_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    assert(dt);
+  assert(dt);
 
-    /* Go up the chain as far as possible */
-    while (dt->shared->parent)
-        dt = dt->shared->parent;
+  /* Go up the chain as far as possible */
+  while (dt->shared->parent)
+    dt = dt->shared->parent;
 
-    /* If this is a compound datatype, check if it is packed */
-    if (dt->shared->type == H5T_COMPOUND)
-        ret_value = (htri_t)(dt->shared->u.compnd.packed);
+  /* If this is a compound datatype, check if it is packed */
+  if (dt->shared->type == H5T_COMPOUND)
+    ret_value = (htri_t)(dt->shared->u.compnd.packed);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__is_packed() */
 
 /*-------------------------------------------------------------------------
@@ -588,30 +593,28 @@ H5T__is_packed(const H5T_t *dt)
  *
  *-------------------------------------------------------------------------
  */
-void
-H5T__update_packed(const H5T_t *dt)
-{
-    unsigned i; /* Index */
+void H5T__update_packed(const H5T_t *dt) {
+  unsigned i; /* Index */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    assert(dt);
-    assert(dt->shared->type == H5T_COMPOUND);
+  assert(dt);
+  assert(dt->shared->type == H5T_COMPOUND);
 
-    /* First check if all space is used in the "top level" type */
-    if (dt->shared->size == dt->shared->u.compnd.memb_size) {
-        /* Set the packed flag to TRUE */
-        dt->shared->u.compnd.packed = TRUE;
+  /* First check if all space is used in the "top level" type */
+  if (dt->shared->size == dt->shared->u.compnd.memb_size) {
+    /* Set the packed flag to TRUE */
+    dt->shared->u.compnd.packed = TRUE;
 
-        /* Now check if all members are packed */
-        for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
-            if (!H5T__is_packed(dt->shared->u.compnd.memb[i].type)) {
-                dt->shared->u.compnd.packed = FALSE;
-                break;
-            } /* end if */
-    }         /* end if */
-    else
+    /* Now check if all members are packed */
+    for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
+      if (!H5T__is_packed(dt->shared->u.compnd.memb[i].type)) {
         dt->shared->u.compnd.packed = FALSE;
+        break;
+      } /* end if */
+  }     /* end if */
+  else
+    dt->shared->u.compnd.packed = FALSE;
 
-    FUNC_LEAVE_NOAPI_VOID
+  FUNC_LEAVE_NOAPI_VOID
 } /* end H5T__update_packed() */

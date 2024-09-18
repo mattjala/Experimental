@@ -12,25 +12,25 @@
 
 #include <string>
 
-#include "H5Include.h"
-#include "H5Exception.h"
-#include "H5IdComponent.h"
-#include "H5PropList.h"
-#include "H5OcreatProp.h"
+#include "H5AbstractDs.h"
+#include "H5AtomType.h"
+#include "H5DaccProp.h"
+#include "H5DataSet.h"
+#include "H5DataSpace.h"
+#include "H5DataType.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
-#include "H5DataSpace.h"
-#include "H5LcreatProp.h"
+#include "H5EnumType.h"
+#include "H5Exception.h"
+#include "H5IdComponent.h"
+#include "H5Include.h"
+#include "H5IntType.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
-#include "H5AbstractDs.h"
-#include "H5DataType.h"
-#include "H5DataSet.h"
-#include "H5AtomType.h"
-#include "H5IntType.h"
-#include "H5EnumType.h"
+#include "H5OcreatProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 
@@ -38,9 +38,7 @@ namespace H5 {
 // Function:    EnumType default constructor
 ///\brief       Default constructor: Creates a stub datatype
 //--------------------------------------------------------------------------
-EnumType::EnumType() : DataType()
-{
-}
+EnumType::EnumType() : DataType() {}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -48,17 +46,13 @@ EnumType::EnumType() : DataType()
 ///\param       existing_id - IN: Id of an existing datatype
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-EnumType::EnumType(const hid_t existing_id) : DataType(existing_id)
-{
-}
+EnumType::EnumType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 //--------------------------------------------------------------------------
-EnumType::EnumType(const EnumType &original) : DataType(original)
-{
-}
+EnumType::EnumType(const EnumType &original) : DataType(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -69,9 +63,7 @@ EnumType::EnumType(const EnumType &original) : DataType(original)
 //              The DataType constructor calls the C API H5Tcreate to create
 //              the enum datatype.
 //--------------------------------------------------------------------------
-EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
-{
-}
+EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size) {}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -79,15 +71,14 @@ EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
 ///\param       dataset - IN: Dataset that this enum datatype associates with
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-EnumType::EnumType(const DataSet &dataset) : DataType()
-{
-    // Calls C function H5Dget_type to get the id of the datatype
-    id = H5Dget_type(dataset.getId());
+EnumType::EnumType(const DataSet &dataset) : DataType() {
+  // Calls C function H5Dget_type to get the id of the datatype
+  id = H5Dget_type(dataset.getId());
 
-    // If the datatype id is not valid, throw an exception
-    if (id < 0) {
-        throw DataSetIException("EnumType constructor", "H5Dget_type failed");
-    }
+  // If the datatype id is not valid, throw an exception
+  if (id < 0) {
+    throw DataSetIException("EnumType constructor", "H5Dget_type failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -96,15 +87,14 @@ EnumType::EnumType(const DataSet &dataset) : DataType()
 ///\param       data_type - IN: Base datatype
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-EnumType::EnumType(const IntType &data_type) : DataType()
-{
-    // Calls C function H5Tenum_create to get the id of the datatype
-    id = H5Tenum_create(data_type.getId());
+EnumType::EnumType(const IntType &data_type) : DataType() {
+  // Calls C function H5Tenum_create to get the id of the datatype
+  id = H5Tenum_create(data_type.getId());
 
-    // If the datatype id is not valid, throw an exception
-    if (id < 0) {
-        throw DataSetIException("EnumType constructor", "H5Tenum_create failed");
-    }
+  // If the datatype id is not valid, throw an exception
+  if (id < 0) {
+    throw DataSetIException("EnumType constructor", "H5Tenum_create failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -120,9 +110,8 @@ EnumType::EnumType(const IntType &data_type) : DataType()
 //              improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-EnumType::EnumType(const H5Location &loc, const char *dtype_name) : DataType()
-{
-    id = p_opentype(loc, dtype_name);
+EnumType::EnumType(const H5Location &loc, const char *dtype_name) : DataType() {
+  id = p_opentype(loc, dtype_name);
 }
 
 //--------------------------------------------------------------------------
@@ -138,9 +127,9 @@ EnumType::EnumType(const H5Location &loc, const char *dtype_name) : DataType()
 //              to improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-EnumType::EnumType(const H5Location &loc, const H5std_string &dtype_name) : DataType()
-{
-    id = p_opentype(loc, dtype_name.c_str());
+EnumType::EnumType(const H5Location &loc, const H5std_string &dtype_name)
+    : DataType() {
+  id = p_opentype(loc, dtype_name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -150,19 +139,16 @@ EnumType::EnumType(const H5Location &loc, const H5std_string &dtype_name) : Data
 ///
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-DataType *
-EnumType::decode() const
-{
-    hid_t encoded_enumtype_id = H5I_INVALID_HID;
-    try {
-        encoded_enumtype_id = p_decode();
-    }
-    catch (DataTypeIException &err) {
-        throw;
-    }
-    EnumType *encoded_enumtype = new EnumType;
-    encoded_enumtype->p_setId(encoded_enumtype_id);
-    return (encoded_enumtype);
+DataType *EnumType::decode() const {
+  hid_t encoded_enumtype_id = H5I_INVALID_HID;
+  try {
+    encoded_enumtype_id = p_decode();
+  } catch (DataTypeIException &err) {
+    throw;
+  }
+  EnumType *encoded_enumtype = new EnumType;
+  encoded_enumtype->p_setId(encoded_enumtype_id);
+  return (encoded_enumtype);
 }
 
 //--------------------------------------------------------------------------
@@ -172,14 +158,12 @@ EnumType::decode() const
 ///\param       value - IN: Pointer to the value of the new member
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-void
-EnumType::insert(const char *name, void *value) const
-{
-    // Calls C routine H5Tenum_insert to insert the new enum datatype member.
-    herr_t ret_value = H5Tenum_insert(id, name, value);
-    if (ret_value < 0) {
-        throw DataTypeIException("EnumType::insert", "H5Tenum_insert failed");
-    }
+void EnumType::insert(const char *name, void *value) const {
+  // Calls C routine H5Tenum_insert to insert the new enum datatype member.
+  herr_t ret_value = H5Tenum_insert(id, name, value);
+  if (ret_value < 0) {
+    throw DataTypeIException("EnumType::insert", "H5Tenum_insert failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -188,10 +172,8 @@ EnumType::insert(const char *name, void *value) const
 ///             It differs from the above function only in the type of
 ///             argument \a name.
 //--------------------------------------------------------------------------
-void
-EnumType::insert(const H5std_string &name, void *value) const
-{
-    insert(name.c_str(), value);
+void EnumType::insert(const H5std_string &name, void *value) const {
+  insert(name.c_str(), value);
 }
 
 //--------------------------------------------------------------------------
@@ -202,23 +184,21 @@ EnumType::insert(const H5std_string &name, void *value) const
 ///\param       size  - IN: Size for the name
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-H5std_string
-EnumType::nameOf(void *value, size_t size) const
-{
-    char *name_C = new char[size + 1](); // temporary C-string for C API
+H5std_string EnumType::nameOf(void *value, size_t size) const {
+  char *name_C = new char[size + 1](); // temporary C-string for C API
 
-    // Calls C routine H5Tenum_nameof to get the name of the specified enum type
-    herr_t ret_value = H5Tenum_nameof(id, value, name_C, size);
+  // Calls C routine H5Tenum_nameof to get the name of the specified enum type
+  herr_t ret_value = H5Tenum_nameof(id, value, name_C, size);
 
-    // If H5Tenum_nameof returns a negative value, raise an exception,
-    if (ret_value < 0) {
-        delete[] name_C;
-        throw DataTypeIException("EnumType::nameOf", "H5Tenum_nameof failed");
-    }
-    // otherwise, create the string to hold the datatype name and return it
-    H5std_string name(name_C);
+  // If H5Tenum_nameof returns a negative value, raise an exception,
+  if (ret_value < 0) {
     delete[] name_C;
-    return (name);
+    throw DataTypeIException("EnumType::nameOf", "H5Tenum_nameof failed");
+  }
+  // otherwise, create the string to hold the datatype name and return it
+  H5std_string name(name_C);
+  delete[] name_C;
+  return (name);
 }
 
 //--------------------------------------------------------------------------
@@ -229,14 +209,12 @@ EnumType::nameOf(void *value, size_t size) const
 ///\param       value - OUT: Pointer to the retrieved value
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-void
-EnumType::valueOf(const char *name, void *value) const
-{
-    // Calls C routine H5Tenum_valueof to get the enum datatype value
-    herr_t ret_value = H5Tenum_valueof(id, name, value);
-    if (ret_value < 0) {
-        throw DataTypeIException("EnumType::valueOf", "H5Tenum_valueof failed");
-    }
+void EnumType::valueOf(const char *name, void *value) const {
+  // Calls C routine H5Tenum_valueof to get the enum datatype value
+  herr_t ret_value = H5Tenum_valueof(id, name, value);
+  if (ret_value < 0) {
+    throw DataTypeIException("EnumType::valueOf", "H5Tenum_valueof failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -245,10 +223,8 @@ EnumType::valueOf(const char *name, void *value) const
 ///             It differs from the above function only in the type of
 ///             argument \a name.
 //--------------------------------------------------------------------------
-void
-EnumType::valueOf(const H5std_string &name, void *value) const
-{
-    valueOf(name.c_str(), value);
+void EnumType::valueOf(const H5std_string &name, void *value) const {
+  valueOf(name.c_str(), value);
 }
 
 //--------------------------------------------------------------------------
@@ -260,14 +236,13 @@ EnumType::valueOf(const H5std_string &name, void *value) const
 ///             member function \c EnumType::getNmembers.
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-int
-EnumType::getMemberIndex(const char *name) const
-{
-    int member_index = H5Tget_member_index(id, name);
-    if (member_index < 0) {
-        throw DataTypeIException("EnumType::getMemberIndex", "H5Tget_member_index returns negative value");
-    }
-    return (member_index);
+int EnumType::getMemberIndex(const char *name) const {
+  int member_index = H5Tget_member_index(id, name);
+  if (member_index < 0) {
+    throw DataTypeIException("EnumType::getMemberIndex",
+                             "H5Tget_member_index returns negative value");
+  }
+  return (member_index);
 }
 
 //--------------------------------------------------------------------------
@@ -276,10 +251,8 @@ EnumType::getMemberIndex(const char *name) const
 ///             It differs from the above function only in the type of
 ///             argument \a name.
 //--------------------------------------------------------------------------
-int
-EnumType::getMemberIndex(const H5std_string &name) const
-{
-    return (EnumType::getMemberIndex(name.c_str()));
+int EnumType::getMemberIndex(const H5std_string &name) const {
+  return (EnumType::getMemberIndex(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -288,15 +261,14 @@ EnumType::getMemberIndex(const H5std_string &name) const
 ///\return      Number of members
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-int
-EnumType::getNmembers() const
-{
-    int num_members = H5Tget_nmembers(id);
-    if (num_members < 0) {
-        throw DataTypeIException("EnumType::getNmembers",
-                                 "H5Tget_nmembers returns negative number of members");
-    }
-    return (num_members);
+int EnumType::getNmembers() const {
+  int num_members = H5Tget_nmembers(id);
+  if (num_members < 0) {
+    throw DataTypeIException(
+        "EnumType::getNmembers",
+        "H5Tget_nmembers returns negative number of members");
+  }
+  return (num_members);
 }
 
 //--------------------------------------------------------------------------
@@ -307,22 +279,19 @@ EnumType::getNmembers() const
 ///\param       value   - OUT: Pointer to the retrieved value
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-void
-EnumType::getMemberValue(unsigned memb_no, void *value) const
-{
-    // Call C routine H5Tget_member_value to get the datatype member's value
-    hid_t ret_value = H5Tget_member_value(id, memb_no, value);
-    if (ret_value < 0) {
-        throw DataTypeIException("EnumType::getMemberValue", "H5Tget_member_value failed");
-    }
+void EnumType::getMemberValue(unsigned memb_no, void *value) const {
+  // Call C routine H5Tget_member_value to get the datatype member's value
+  hid_t ret_value = H5Tget_member_value(id, memb_no, value);
+  if (ret_value < 0) {
+    throw DataTypeIException("EnumType::getMemberValue",
+                             "H5Tget_member_value failed");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    EnumType destructor
 ///\brief       Properly terminates access to this enum datatype.
 //--------------------------------------------------------------------------
-EnumType::~EnumType()
-{
-}
+EnumType::~EnumType() {}
 
 } // namespace H5

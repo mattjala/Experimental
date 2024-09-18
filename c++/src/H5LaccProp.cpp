@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5PropList.h"
+#include "H5Include.h"
 #include "H5LaccProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 
@@ -38,24 +38,23 @@ LinkAccPropList *LinkAccPropList::DEFAULT_ = 0;
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
 //--------------------------------------------------------------------------
-LinkAccPropList *
-LinkAccPropList::getConstant()
-{
-    // Tell the C library not to clean up, H5Library::termH5cpp will call
-    // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called) {
-        (void)H5dont_atexit();
-        IdComponent::H5dontAtexit_called = true;
-    }
+LinkAccPropList *LinkAccPropList::getConstant() {
+  // Tell the C library not to clean up, H5Library::termH5cpp will call
+  // H5close - more dependency if use H5Library::dontAtExit()
+  if (!IdComponent::H5dontAtexit_called) {
+    (void)H5dont_atexit();
+    IdComponent::H5dontAtexit_called = true;
+  }
 
-    // If the constant pointer is not allocated, allocate it. Otherwise,
-    // throw because it shouldn't be.
-    if (DEFAULT_ == 0)
-        DEFAULT_ = new LinkAccPropList(H5P_LINK_ACCESS);
-    else
-        throw PropListIException("LinkAccPropList::getConstant",
-                                 "LinkAccPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return (DEFAULT_);
+  // If the constant pointer is not allocated, allocate it. Otherwise,
+  // throw because it shouldn't be.
+  if (DEFAULT_ == 0)
+    DEFAULT_ = new LinkAccPropList(H5P_LINK_ACCESS);
+  else
+    throw PropListIException("LinkAccPropList::getConstant",
+                             "LinkAccPropList::getConstant is being invoked on "
+                             "an allocated DEFAULT_");
+  return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -64,11 +63,7 @@ LinkAccPropList::getConstant()
 //              points to.
 // exception    H5::PropListIException
 //--------------------------------------------------------------------------
-void
-LinkAccPropList::deleteConstants()
-{
-    delete DEFAULT_;
-}
+void LinkAccPropList::deleteConstants() { delete DEFAULT_; }
 
 //--------------------------------------------------------------------------
 // Purpose:     Constant for default property
@@ -81,27 +76,22 @@ const LinkAccPropList &LinkAccPropList::DEFAULT = *getConstant();
 // Function:    Default Constructor
 ///\brief       Creates a file access property list
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS)
-{
-}
+LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList copy constructor
 ///\brief       Copy Constructor: same HDF5 object as \a original
 ///\param       original - IN: LinkAccPropList instance to copy
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList(const LinkAccPropList &original) : PropList(original)
-{
-}
+LinkAccPropList::LinkAccPropList(const LinkAccPropList &original)
+    : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList overloaded constructor
 ///\brief       Creates a file access property list using the id of an
 ///             existing one.
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id)
-{
-}
+LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList::setNumLinks
@@ -111,14 +101,12 @@ LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id)
 ///
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-LinkAccPropList::setNumLinks(size_t nlinks) const
-{
-    herr_t ret_value = H5Pset_nlinks(id, nlinks);
-    // Throw exception if H5Pset_nlinks returns failure
-    if (ret_value < 0) {
-        throw PropListIException("setNumLinks", "H5Pset_nlinks failed");
-    }
+void LinkAccPropList::setNumLinks(size_t nlinks) const {
+  herr_t ret_value = H5Pset_nlinks(id, nlinks);
+  // Throw exception if H5Pset_nlinks returns failure
+  if (ret_value < 0) {
+    throw PropListIException("setNumLinks", "H5Pset_nlinks failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -128,24 +116,20 @@ LinkAccPropList::setNumLinks(size_t nlinks) const
 ///
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-size_t
-LinkAccPropList::getNumLinks() const
-{
-    size_t nlinks    = 0;
-    herr_t ret_value = H5Pget_nlinks(id, &nlinks);
-    // Throw exception if H5Pget_nlinks returns failure
-    if (ret_value < 0) {
-        throw PropListIException("getNumLinks", "H5Pget_nlinks failed");
-    }
-    return (nlinks);
+size_t LinkAccPropList::getNumLinks() const {
+  size_t nlinks = 0;
+  herr_t ret_value = H5Pget_nlinks(id, &nlinks);
+  // Throw exception if H5Pget_nlinks returns failure
+  if (ret_value < 0) {
+    throw PropListIException("getNumLinks", "H5Pget_nlinks failed");
+  }
+  return (nlinks);
 }
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList destructor
 ///\brief       Noop destructor
 //--------------------------------------------------------------------------
-LinkAccPropList::~LinkAccPropList()
-{
-}
+LinkAccPropList::~LinkAccPropList() {}
 
 } // namespace H5

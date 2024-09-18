@@ -19,22 +19,22 @@ package hdf.hdf5lib.exceptions;
  */
 
 public class HDF5FunctionEntryExitException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5FunctionEntryExitException</code> with no
-     * specified detail message.
-     */
-    public HDF5FunctionEntryExitException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5FunctionEntryExitException</code> with no
+   * specified detail message.
+   */
+  public HDF5FunctionEntryExitException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5FunctionEntryExitException</code> with the
-     * specified detail message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5FunctionEntryExitException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5FunctionEntryExitException</code> with the
+   * specified detail message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5FunctionEntryExitException(String s) { super(s); }
 }

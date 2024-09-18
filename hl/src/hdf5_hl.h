@@ -19,13 +19,13 @@
 #ifndef HDF5_HL_H
 #define HDF5_HL_H
 
-#include "hdf5.h"       /* hdf5 main library */
 #include "H5DOpublic.h" /* dataset optimization */
 #include "H5DSpublic.h" /* dimension scales */
-#include "H5LTpublic.h" /* lite */
 #include "H5IMpublic.h" /* image */
-#include "H5TBpublic.h" /* table */
-#include "H5PTpublic.h" /* packet table */
 #include "H5LDpublic.h" /* lite dataset */
+#include "H5LTpublic.h" /* lite */
+#include "H5PTpublic.h" /* packet table */
+#include "H5TBpublic.h" /* table */
+#include "hdf5.h"       /* hdf5 main library */
 
 #endif /*HDF5_HL_H*/

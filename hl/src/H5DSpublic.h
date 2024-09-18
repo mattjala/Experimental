@@ -14,16 +14,17 @@
 #define H5DSpublic_H
 
 #define DIMENSION_SCALE_CLASS "DIMENSION_SCALE"
-#define DIMENSION_LIST        "DIMENSION_LIST"
-#define REFERENCE_LIST        "REFERENCE_LIST"
-#define DIMENSION_LABELS      "DIMENSION_LABELS"
+#define DIMENSION_LIST "DIMENSION_LIST"
+#define REFERENCE_LIST "REFERENCE_LIST"
+#define DIMENSION_LABELS "DIMENSION_LABELS"
 
 /**
  * \brief Prototype for H5DSiterate_scales() operator
  *
  */
 //! <!-- [H5DS_iterate_t_snip] -->
-typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
+typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale,
+                                 void *visitor_data);
 //! <!-- [H5DS_iterate_t_snip] -->
 
 #ifdef __cplusplus
@@ -135,7 +136,8 @@ H5_HLDLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
  * --------------------------------------------------------------------------
  * \ingroup H5DS
  *
- * \brief Detach dimension scale \p dsid from the dimension \p idx of dataset \p did.
+ * \brief Detach dimension scale \p dsid from the dimension \p idx of dataset \p
+ * did.
  *
  * \param[in] did   The dataset
  * \param[in] dsid  The scale to be detached
@@ -192,9 +194,9 @@ H5_HLDLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
  *          - If \p dsid is already a scale
  *          - If \p dsid is a dataset which already has dimension scales
  *
- *          If the dataset was created with the Table, Image, or Palette interface [9],
- *          it is not recommended to convert to a Dimension Scale.
- *          (These Datasets will have a CLASS Table, Image, or Palette.)
+ *          If the dataset was created with the Table, Image, or Palette
+ * interface [9], it is not recommended to convert to a Dimension Scale. (These
+ * Datasets will have a CLASS Table, Image, or Palette.)
  *
  * \todo what is [9] after Palette interface?
  */
@@ -272,7 +274,8 @@ H5_HLDLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
  *          - Bad arguments
  *
  */
-H5_HLDLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size);
+H5_HLDLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label,
+                               size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -300,11 +303,11 @@ H5_HLDLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t 
  *          will be the size of the scale name; that value plus one (1) can then
  *          be assigned to \p size for a second H5DSget_scale_name() call,
  *          which will retrieve the actual name.  (The value passed in with the
- *          parameter \p size must be one greater than size in bytes of the actual
- *          name in order to accommodate the null terminator;
- *          if \p size is set to the exact size of the name, the last byte
- *          passed back will contain the null terminator and the last character
- *          will be missing from the name passed back to the calling application.)
+ *          parameter \p size must be one greater than size in bytes of the
+ * actual name in order to accommodate the null terminator; if \p size is set to
+ * the exact size of the name, the last byte passed back will contain the null
+ * terminator and the last character will be missing from the name passed back
+ * to the calling application.)
  */
 H5_HLDLL ssize_t H5DSget_scale_name(hid_t did, char *name, size_t size);
 
@@ -378,8 +381,8 @@ H5_HLDLL htri_t H5DSis_scale(hid_t did);
  *          the iteration. If the membership changes during the iteration,
  *          the function's behavior is undefined.
  */
-H5_HLDLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx, H5DS_iterate_t visitor,
-                                   void *visitor_data);
+H5_HLDLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx,
+                                   H5DS_iterate_t visitor, void *visitor_data);
 
 /**
  * --------------------------------------------------------------------------
@@ -401,7 +404,8 @@ H5_HLDLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx, H5DS_i
  *          - Bad arguments
  *          - If \p dsid is not a Dimension Scale
  *          - The \p dsid is not a Dimension Scale
- *          - If \p did is a Dimension Scale (A Dimension Scale cannot have scales.)
+ *          - If \p did is a Dimension Scale (A Dimension Scale cannot have
+ * scales.)
  *
  */
 H5_HLDLL htri_t H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx);

@@ -53,7 +53,8 @@ H5_HLDLL herr_t H5LDget_dset_dims(hid_t did, hsize_t *cur_dims);
  * \brief Returns the size in bytes of the dataset's datatype
  *
  * \param[in] did       The dataset identifier
- * \param[in] fields    The pointer to a comma-separated list of fields for a compound datatype
+ * \param[in] fields    The pointer to a comma-separated list of fields for a
+ *compound datatype
  *
  * \return If successful, returns the size in bytes of the
  *         dataset's datatype. Otherwise, returns 0.
@@ -129,8 +130,8 @@ H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
  *
  * \par Examples:
  *
- * For the first example, \c DSET1 is a two-dimensional chunked dataset with atomic type defined below:
- * \snippet H5LDget_dset_elmts.c first_declare
+ * For the first example, \c DSET1 is a two-dimensional chunked dataset with
+ *atomic type defined below: \snippet H5LDget_dset_elmts.c first_declare
  *
  * The following coding sample illustrates the reading of
  * data elements appended to the dataset \c DSET1:
@@ -157,8 +158,9 @@ H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
  * \since 1.10.0
  *
  */
-H5_HLDLL herr_t H5LDget_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims,
-                                   const char *fields, void *buf);
+H5_HLDLL herr_t H5LDget_dset_elmts(hid_t did, const hsize_t *prev_dims,
+                                   const hsize_t *cur_dims, const char *fields,
+                                   void *buf);
 
 #ifdef __cplusplus
 }

@@ -14,18 +14,19 @@
  * Purpose:	Test group filter plugin for the filter_pluging.c test.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "H5PLextern.h"
 
-#define FILTER4_ID   260
-#define SUFFIX_LEN   8
+#define FILTER4_ID 260
+#define SUFFIX_LEN 8
 #define GROUP_SUFFIX ".h5group"
 
-static size_t append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                   size_t nbytes, size_t *buf_size, void **buf);
+static size_t append_to_group_name(unsigned int flags, size_t cd_nelmts,
+                                   const unsigned int *cd_values, size_t nbytes,
+                                   size_t *buf_size, void **buf);
 
 /* Filter class struct */
 const H5Z_class2_t FILTER_INFO[1] = {{
@@ -39,16 +40,8 @@ const H5Z_class2_t FILTER_INFO[1] = {{
     append_to_group_name,   /* The actual filter function       */
 }};
 
-H5PL_type_t
-H5PLget_plugin_type(void)
-{
-    return H5PL_TYPE_FILTER;
-}
-const void *
-H5PLget_plugin_info(void)
-{
-    return FILTER_INFO;
-}
+H5PL_type_t H5PLget_plugin_type(void) { return H5PL_TYPE_FILTER; }
+const void *H5PLget_plugin_info(void) { return FILTER_INFO; }
 
 /*-------------------------------------------------------------------------
  * Function:	append_to_group_name
@@ -63,50 +56,49 @@ H5PLget_plugin_info(void)
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
-                     size_t *buf_size, void **buf)
-{
-    size_t new_name_size = 0; /* Return value */
+static size_t append_to_group_name(unsigned int flags, size_t cd_nelmts,
+                                   const unsigned int *cd_values, size_t nbytes,
+                                   size_t *buf_size, void **buf) {
+  size_t new_name_size = 0; /* Return value */
 
-    /* Check for the correct number of parameters */
-    if (cd_nelmts > 0)
-        return 0;
+  /* Check for the correct number of parameters */
+  if (cd_nelmts > 0)
+    return 0;
 
-    /* Assignment to eliminate unused parameter warning. */
-    (void)cd_values;
+  /* Assignment to eliminate unused parameter warning. */
+  (void)cd_values;
 
-    if (flags & H5Z_FLAG_REVERSE) {
-        /* READ - Remove the suffix from the group name */
-        new_name_size = *buf_size = nbytes - SUFFIX_LEN;
-    }
-    else {
-        /* WRITE - Append the suffix to the group name */
-        void          *outbuf = NULL; /* Pointer to new buffer                    */
-        unsigned char *dst    = NULL; /* Temporary pointer to destination buffer  */
+  if (flags & H5Z_FLAG_REVERSE) {
+    /* READ - Remove the suffix from the group name */
+    new_name_size = *buf_size = nbytes - SUFFIX_LEN;
+  } else {
+    /* WRITE - Append the suffix to the group name */
+    void *outbuf = NULL;       /* Pointer to new buffer                    */
+    unsigned char *dst = NULL; /* Temporary pointer to destination buffer  */
 
-        /* Get memory for the new, larger string buffer using the
-         * library's memory allocator.
-         */
-        if (NULL == (dst = (unsigned char *)(outbuf = H5allocate_memory(nbytes + SUFFIX_LEN, 0))))
-            return 0;
+    /* Get memory for the new, larger string buffer using the
+     * library's memory allocator.
+     */
+    if (NULL == (dst = (unsigned char *)(outbuf = H5allocate_memory(
+                                             nbytes + SUFFIX_LEN, 0))))
+      return 0;
 
-        /* Copy raw data */
-        memcpy((void *)dst, (const void *)(*buf), nbytes);
+    /* Copy raw data */
+    memcpy((void *)dst, (const void *)(*buf), nbytes);
 
-        /* Append suffix to raw data for storage */
-        dst += nbytes;
-        memcpy((void *)dst, (const void *)GROUP_SUFFIX, SUFFIX_LEN);
+    /* Append suffix to raw data for storage */
+    dst += nbytes;
+    memcpy((void *)dst, (const void *)GROUP_SUFFIX, SUFFIX_LEN);
 
-        /* Free the passed-in buffer using the library's allocator */
-        H5free_memory(*buf);
+    /* Free the passed-in buffer using the library's allocator */
+    H5free_memory(*buf);
 
-        /* Set return values */
-        *buf_size     = nbytes + SUFFIX_LEN;
-        *buf          = outbuf;
-        outbuf        = NULL;
-        new_name_size = *buf_size;
-    }
+    /* Set return values */
+    *buf_size = nbytes + SUFFIX_LEN;
+    *buf = outbuf;
+    outbuf = NULL;
+    new_name_size = *buf_size;
+  }
 
-    return new_name_size;
+  return new_name_size;
 } /* append_to_group_name() */

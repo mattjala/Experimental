@@ -17,8 +17,8 @@
  *
  ******
  */
-#include "H5f90.h"
 #include "H5Eprivate.h"
+#include "H5f90.h"
 
 /****if* H5If/h5iget_type_c
  * NAME
@@ -33,24 +33,23 @@
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5iget_type_c(hid_t_f *obj_id, int_f *type)
+int_f h5iget_type_c(hid_t_f *obj_id, int_f *type)
 /******/
 {
-    int        ret_value = -1;
-    hid_t      c_obj_id;
-    H5I_type_t c_type;
+  int ret_value = -1;
+  hid_t c_obj_id;
+  H5I_type_t c_type;
 
-    /*
-     * Call H5Iget_type function.
-     */
-    c_obj_id = *obj_id;
-    c_type   = H5Iget_type(c_obj_id);
-    if (c_type == H5I_BADID)
-        return ret_value;
-    *type     = (int_f)c_type;
-    ret_value = 0;
+  /*
+   * Call H5Iget_type function.
+   */
+  c_obj_id = *obj_id;
+  c_type = H5Iget_type(c_obj_id);
+  if (c_type == H5I_BADID)
     return ret_value;
+  *type = (int_f)c_type;
+  ret_value = 0;
+  return ret_value;
 }
 /****if* H5If/h5iget_name_c
  * NAME
@@ -66,42 +65,42 @@ h5iget_type_c(hid_t_f *obj_id, int_f *type)
  *  length of the name on success, -1 on failure
  * SOURCE
  */
-int_f
-h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size)
+int_f h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size,
+                    size_t_f *name_size)
 /******/
 {
-    int     ret_value = -1;
-    hid_t   c_obj_id;
-    ssize_t c_size;
-    size_t  c_buf_size;
-    char   *c_buf = NULL;
+  int ret_value = -1;
+  hid_t c_obj_id;
+  ssize_t c_size;
+  size_t c_buf_size;
+  char *c_buf = NULL;
 
-    /*
-     * Allocate buffer to hold name of an object
-     */
-    c_buf_size = (size_t)*buf_size + 1;
-    c_buf      = (char *)malloc(c_buf_size);
-    if (c_buf == NULL)
-        return ret_value;
+  /*
+   * Allocate buffer to hold name of an object
+   */
+  c_buf_size = (size_t)*buf_size + 1;
+  c_buf = (char *)malloc(c_buf_size);
+  if (c_buf == NULL)
+    return ret_value;
 
-    /*
-     * Call H5IAget_name function
-     */
-    c_obj_id = (hid_t)*obj_id;
-    c_size   = H5Iget_name(c_obj_id, c_buf, c_buf_size);
-    if (c_size < 0)
-        goto DONE;
+  /*
+   * Call H5IAget_name function
+   */
+  c_obj_id = (hid_t)*obj_id;
+  c_size = H5Iget_name(c_obj_id, c_buf, c_buf_size);
+  if (c_size < 0)
+    goto DONE;
 
-    /*
-     * Convert C name to FORTRAN and place it in the given buffer
-     */
-    HD5packFstring(c_buf, _fcdtocp(buf), c_buf_size - 1);
-    *name_size = (size_t_f)c_size;
-    ret_value  = 0;
+  /*
+   * Convert C name to FORTRAN and place it in the given buffer
+   */
+  HD5packFstring(c_buf, _fcdtocp(buf), c_buf_size - 1);
+  *name_size = (size_t_f)c_size;
+  ret_value = 0;
 
 DONE:
-    free(c_buf);
-    return ret_value;
+  free(c_buf);
+  return ret_value;
 }
 
 /****if* H5If/h5iinc_ref_c
@@ -117,24 +116,23 @@ DONE:
  *  current reference count on success, -1 on failure
  * SOURCE
  */
-int_f
-h5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count)
+int_f h5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
-    int ret_value;
+  int ret_value;
 
-    /*
-     * Call H5Iinc_ref function
-     */
-    if ((ret_value = H5Iinc_ref(*obj_id)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Iinc_ref function
+   */
+  if ((ret_value = H5Iinc_ref(*obj_id)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Set output & return values */
-    *ref_count = ret_value;
-    ret_value  = 0;
+  /* Set output & return values */
+  *ref_count = ret_value;
+  ret_value = 0;
 
 done:
-    return ret_value;
+  return ret_value;
 }
 
 /****if* H5If/h5idec_ref_c
@@ -150,24 +148,23 @@ done:
  *  current reference count on success, -1 on failure
  * SOURCE
  */
-int_f
-h5idec_ref_c(hid_t_f *obj_id, int_f *ref_count)
+int_f h5idec_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
-    int ret_value;
+  int ret_value;
 
-    /*
-     * Call H5Idec_ref function
-     */
-    if ((ret_value = H5Idec_ref(*obj_id)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Idec_ref function
+   */
+  if ((ret_value = H5Idec_ref(*obj_id)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Set output & return values */
-    *ref_count = ret_value;
-    ret_value  = 0;
+  /* Set output & return values */
+  *ref_count = ret_value;
+  ret_value = 0;
 
 done:
-    return ret_value;
+  return ret_value;
 }
 
 /****if* H5If/h5iget_ref_c
@@ -183,24 +180,23 @@ done:
  *  current reference count on success, -1 on failure
  * SOURCE
  */
-int_f
-h5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
+int_f h5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
-    int ret_value;
+  int ret_value;
 
-    /*
-     * Call H5Iget_ref function
-     */
-    if ((ret_value = H5Iget_ref(*obj_id)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Iget_ref function
+   */
+  if ((ret_value = H5Iget_ref(*obj_id)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Set output & return values */
-    *ref_count = ret_value;
-    ret_value  = 0;
+  /* Set output & return values */
+  *ref_count = ret_value;
+  ret_value = 0;
 
 done:
-    return ret_value;
+  return ret_value;
 }
 
 /****if* H5If/h5iget_file_id_c
@@ -216,25 +212,24 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
+int_f h5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
 /******/
 {
-    int   ret_value;
-    hid_t c_file_id;
+  int ret_value;
+  hid_t c_file_id;
 
-    /*
-     * Call H5Iget_file_id
-     */
-    if ((c_file_id = H5Iget_file_id(*obj_id)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Iget_file_id
+   */
+  if ((c_file_id = H5Iget_file_id(*obj_id)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Set output & return values */
-    *file_id  = (hid_t_f)c_file_id;
-    ret_value = 0;
+  /* Set output & return values */
+  *file_id = (hid_t_f)c_file_id;
+  ret_value = 0;
 
 done:
-    return ret_value;
+  return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -244,22 +239,20 @@ done:
  *  Outputs:     0 = false, 1 = true
  *  Returns:     0 on success, -1 on failure
  *---------------------------------------------------------------------------*/
-int_f
-h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)
-{
-    int    ret_value;
-    htri_t c_ret_value;
+int_f h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid) {
+  int ret_value;
+  htri_t c_ret_value;
 
-    /*
-     * Call H5Iis_valid
-     */
-    if ((c_ret_value = H5Iis_valid(*obj_id)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Iis_valid
+   */
+  if ((c_ret_value = H5Iis_valid(*obj_id)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Set output & return values */
-    *c_valid  = (int_f)c_ret_value;
-    ret_value = 0;
+  /* Set output & return values */
+  *c_valid = (int_f)c_ret_value;
+  ret_value = 0;
 
 done:
-    return ret_value;
+  return ret_value;
 }

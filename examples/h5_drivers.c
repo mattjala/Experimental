@@ -30,69 +30,63 @@ void split_file(void);
 /*
  * Cleanup a file unless $HDF5_NOCLEANUP is set.
  */
-void
-cleanup(const char *filename)
-{
-    if (cleanup_g == -1)
-        cleanup_g = getenv(HDF5_NOCLEANUP) ? 0 : 1;
-    if (cleanup_g)
-        remove(filename);
+void cleanup(const char *filename) {
+  if (cleanup_g == -1)
+    cleanup_g = getenv(HDF5_NOCLEANUP) ? 0 : 1;
+  if (cleanup_g)
+    remove(filename);
 }
 
 /*
  * This shows how to use the split file driver.
  */
-void
-split_file(void)
-{
-    hid_t fapl, fid;
+void split_file(void) {
+  hid_t fapl, fid;
 
-    /* Example 1: Both metadata and rawdata files are in the same  */
-    /*    directory.   Use Station1-m.h5 and Station1-r.h5 as      */
-    /*    the metadata and rawdata files.                          */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-    fid = H5Fcreate("Station1", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    /* using the file ... */
-    H5Fclose(fid);
-    H5Pclose(fapl);
-    /* Remove files created */
-    cleanup("Station1-m.h5");
-    cleanup("Station1-r.h5");
+  /* Example 1: Both metadata and rawdata files are in the same  */
+  /*    directory.   Use Station1-m.h5 and Station1-r.h5 as      */
+  /*    the metadata and rawdata files.                          */
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+  fid = H5Fcreate("Station1", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+  /* using the file ... */
+  H5Fclose(fid);
+  H5Pclose(fapl);
+  /* Remove files created */
+  cleanup("Station1-m.h5");
+  cleanup("Station1-r.h5");
 
-    /* Example 2: metadata and rawdata files are in different      */
-    /*    directories.  Use PointA-m.h5 and /tmp/PointA-r.h5 as    */
-    /*    the metadata and rawdata files.                          */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "/tmp/%s-r.h5", H5P_DEFAULT);
-    fid = H5Fcreate("PointA", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    /* using the file ... */
-    H5Fclose(fid);
-    H5Pclose(fapl);
-    /* Remove files created */
-    cleanup("PointA-m.h5");
-    cleanup("/tmp/PointA-r.h5");
+  /* Example 2: metadata and rawdata files are in different      */
+  /*    directories.  Use PointA-m.h5 and /tmp/PointA-r.h5 as    */
+  /*    the metadata and rawdata files.                          */
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "/tmp/%s-r.h5", H5P_DEFAULT);
+  fid = H5Fcreate("PointA", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+  /* using the file ... */
+  H5Fclose(fid);
+  H5Pclose(fapl);
+  /* Remove files created */
+  cleanup("PointA-m.h5");
+  cleanup("/tmp/PointA-r.h5");
 
-    /* Example 3: Using default extension names for the metadata   */
-    /*    and rawdata files.  Use Measure.meta and Measure.raw as  */
-    /*    the metadata and rawdata files.                          */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_split(fapl, NULL, H5P_DEFAULT, NULL, H5P_DEFAULT);
-    fid = H5Fcreate("Measure", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    /* using the file ... */
-    H5Fclose(fid);
-    H5Pclose(fapl);
-    /* Remove files created */
-    cleanup("Measure.meta");
-    cleanup("Measure.raw");
+  /* Example 3: Using default extension names for the metadata   */
+  /*    and rawdata files.  Use Measure.meta and Measure.raw as  */
+  /*    the metadata and rawdata files.                          */
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_split(fapl, NULL, H5P_DEFAULT, NULL, H5P_DEFAULT);
+  fid = H5Fcreate("Measure", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+  /* using the file ... */
+  H5Fclose(fid);
+  H5Pclose(fapl);
+  /* Remove files created */
+  cleanup("Measure.meta");
+  cleanup("Measure.raw");
 }
 
 /* Main Body */
-int
-main(void)
-{
+int main(void) {
 
-    split_file();
+  split_file();
 
-    return (0);
+  return (0);
 }

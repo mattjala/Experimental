@@ -59,53 +59,57 @@
 /* Package Private Typedefs */
 /****************************/
 
-/* Some syntactic sugar to make the compiler happy with two different kinds of callbacks */
+/* Some syntactic sugar to make the compiler happy with two different kinds of
+ * callbacks */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 typedef struct {
-    unsigned    vers;          /* Which version callback to use */
-    hbool_t     is_default;    /* If the printing function is the library's own. */
-    H5E_auto1_t func1;         /* Old-style callback, NO error stack param. */
-    H5E_auto2_t func2;         /* New-style callback, with error stack param. */
-    H5E_auto1_t func1_default; /* The saved library's default function - old style. */
-    H5E_auto2_t func2_default; /* The saved library's default function - new style. */
+  unsigned vers;      /* Which version callback to use */
+  hbool_t is_default; /* If the printing function is the library's own. */
+  H5E_auto1_t func1;  /* Old-style callback, NO error stack param. */
+  H5E_auto2_t func2;  /* New-style callback, with error stack param. */
+  H5E_auto1_t
+      func1_default; /* The saved library's default function - old style. */
+  H5E_auto2_t
+      func2_default; /* The saved library's default function - new style. */
 } H5E_auto_op_t;
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
 typedef struct {
-    H5E_auto2_t func2; /* Only the new style callback function is available. */
+  H5E_auto2_t func2; /* Only the new style callback function is available. */
 } H5E_auto_op_t;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-/* Some syntactic sugar to make the compiler happy with two different kinds of callbacks */
+/* Some syntactic sugar to make the compiler happy with two different kinds of
+ * callbacks */
 typedef struct {
-    unsigned vers; /* Which version callback to use */
-    union {
+  unsigned vers; /* Which version callback to use */
+  union {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        H5E_walk1_t func1; /* Old-style callback, NO error stack param. */
-#endif                     /* H5_NO_DEPRECATED_SYMBOLS */
-        H5E_walk2_t func2; /* New-style callback, with error stack param. */
-    } u;
+    H5E_walk1_t func1; /* Old-style callback, NO error stack param. */
+#endif                 /* H5_NO_DEPRECATED_SYMBOLS */
+    H5E_walk2_t func2; /* New-style callback, with error stack param. */
+  } u;
 } H5E_walk_op_t;
 
 /* Error class */
 typedef struct H5E_cls_t {
-    char *cls_name; /* Name of error class */
-    char *lib_name; /* Name of library within class */
-    char *lib_vers; /* Version of library */
+  char *cls_name; /* Name of error class */
+  char *lib_name; /* Name of library within class */
+  char *lib_vers; /* Version of library */
 } H5E_cls_t;
 
 /* Major or minor message */
 typedef struct H5E_msg_t {
-    char      *msg;  /* Message for error */
-    H5E_type_t type; /* Type of error (major or minor) */
-    H5E_cls_t *cls;  /* Which error class this message belongs to */
+  char *msg;       /* Message for error */
+  H5E_type_t type; /* Type of error (major or minor) */
+  H5E_cls_t *cls;  /* Which error class this message belongs to */
 } H5E_msg_t;
 
 /* Error stack */
 struct H5E_t {
-    size_t        nused;            /* Num slots currently used in stack  */
-    H5E_error2_t  slot[H5E_NSLOTS]; /* Array of error records	     */
-    H5E_auto_op_t auto_op;          /* Operator for 'automatic' error reporting */
-    void         *auto_data;        /* Callback data for 'automatic error reporting */
+  size_t nused;                  /* Num slots currently used in stack  */
+  H5E_error2_t slot[H5E_NSLOTS]; /* Array of error records	     */
+  H5E_auto_op_t auto_op;         /* Operator for 'automatic' error reporting */
+  void *auto_data; /* Callback data for 'automatic error reporting */
 };
 
 /*****************************/
@@ -126,14 +130,18 @@ H5_DLL herr_t H5E__term_deprec_interface(void);
 #if defined(H5_HAVE_THREADSAFE) || defined(H5_HAVE_MULTITHREAD)
 H5_DLL H5E_t *H5E__get_stack(void);
 #endif /* H5_HAVE_THREADSAFE or H5_HAVE_MULTITHREAD */
-H5_DLL herr_t  H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
-                               hid_t maj_id, hid_t min_id, const char *desc);
-H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
-H5_DLL herr_t  H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compat);
-H5_DLL herr_t  H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
-                         void *client_data);
-H5_DLL herr_t  H5E__get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data);
-H5_DLL herr_t  H5E__set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data);
-H5_DLL herr_t  H5E__pop(H5E_t *err_stack, size_t count);
+H5_DLL herr_t H5E__push_stack(H5E_t *estack, const char *file, const char *func,
+                              unsigned line, hid_t cls_id, hid_t maj_id,
+                              hid_t min_id, const char *desc);
+H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type,
+                            char *msg, size_t size);
+H5_DLL herr_t H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compat);
+H5_DLL herr_t H5E__walk(const H5E_t *estack, H5E_direction_t direction,
+                        const H5E_walk_op_t *op, void *client_data);
+H5_DLL herr_t H5E__get_auto(const H5E_t *estack, H5E_auto_op_t *op,
+                            void **client_data);
+H5_DLL herr_t H5E__set_auto(H5E_t *estack, const H5E_auto_op_t *op,
+                            void *client_data);
+H5_DLL herr_t H5E__pop(H5E_t *err_stack, size_t count);
 
 #endif /* H5Epkg_H */

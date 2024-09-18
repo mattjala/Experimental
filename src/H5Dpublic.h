@@ -16,8 +16,8 @@
 #ifndef H5Dpublic_H
 #define H5Dpublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
+#include "H5public.h"  /* Generic Functions                        */
 
 /*****************/
 /* Public Macros */
@@ -26,7 +26,7 @@
 /* Macros used to "unset" chunk cache configuration parameters */
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
-#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
+#define H5D_CHUNK_CACHE_W0_DEFAULT (-1.0)
 
 /**
  * Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts()
@@ -42,12 +42,12 @@
  * Values for the H5D_LAYOUT property
  */
 typedef enum H5D_layout_t {
-    H5D_LAYOUT_ERROR = -1, /**< error */
-    H5D_COMPACT      = 0,  /**< raw data is small (< 64KB) */
-    H5D_CONTIGUOUS   = 1,  /**< contiguous layout */
-    H5D_CHUNKED      = 2,  /**< chunked or tiled layout */
-    H5D_VIRTUAL      = 3,  /**< actual data is stored in other datasets */
-    H5D_NLAYOUTS     = 4   /**< this one must be last! */
+  H5D_LAYOUT_ERROR = -1, /**< error */
+  H5D_COMPACT = 0,       /**< raw data is small (< 64KB) */
+  H5D_CONTIGUOUS = 1,    /**< contiguous layout */
+  H5D_CHUNKED = 2,       /**< chunked or tiled layout */
+  H5D_VIRTUAL = 3,       /**< actual data is stored in other datasets */
+  H5D_NLAYOUTS = 4       /**< this one must be last! */
 } H5D_layout_t;
 //! <!-- [H5D_layout_t_snip] -->
 
@@ -56,14 +56,15 @@ typedef enum H5D_layout_t {
  * Types of chunk index data structures
  */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_IDX_BTREE = 0, /**< v1 B-tree index (default)                */
-    H5D_CHUNK_IDX_SINGLE =
-        1, /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) */
-    H5D_CHUNK_IDX_NONE   = 2, /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) */
-    H5D_CHUNK_IDX_FARRAY = 3, /**< Fixed array (for 0 unlimited dims)       */
-    H5D_CHUNK_IDX_EARRAY = 4, /**< Extensible array (for 1 unlimited dim)   */
-    H5D_CHUNK_IDX_BT2    = 5, /**< v2 B-tree index (for >1 unlimited dims)  */
-    H5D_CHUNK_IDX_NTYPES      /**< This one must be last!                   */
+  H5D_CHUNK_IDX_BTREE = 0,  /**< v1 B-tree index (default)                */
+  H5D_CHUNK_IDX_SINGLE = 1, /**< Single Chunk index (cur dims[]=max dims[]=chunk
+                               dims[]; filtered & non-filtered) */
+  H5D_CHUNK_IDX_NONE = 2,   /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY,
+                               non-filtered, fixed dims) */
+  H5D_CHUNK_IDX_FARRAY = 3, /**< Fixed array (for 0 unlimited dims)       */
+  H5D_CHUNK_IDX_EARRAY = 4, /**< Extensible array (for 1 unlimited dim)   */
+  H5D_CHUNK_IDX_BT2 = 5,    /**< v2 B-tree index (for >1 unlimited dims)  */
+  H5D_CHUNK_IDX_NTYPES      /**< This one must be last!                   */
 } H5D_chunk_index_t;
 //! <!-- [H5D_chunk_index_t_snip] -->
 
@@ -72,11 +73,11 @@ typedef enum H5D_chunk_index_t {
  * Values for the space allocation time property
  */
 typedef enum H5D_alloc_time_t {
-    H5D_ALLOC_TIME_ERROR   = -1, /**< Error */
-    H5D_ALLOC_TIME_DEFAULT = 0,  /**< Default (layout dependent) */
-    H5D_ALLOC_TIME_EARLY   = 1,  /**< Allocate on creation */
-    H5D_ALLOC_TIME_LATE    = 2,  /**< Allocate on first write */
-    H5D_ALLOC_TIME_INCR    = 3   /**< Allocate incrementally (by chunk) */
+  H5D_ALLOC_TIME_ERROR = -1,  /**< Error */
+  H5D_ALLOC_TIME_DEFAULT = 0, /**< Default (layout dependent) */
+  H5D_ALLOC_TIME_EARLY = 1,   /**< Allocate on creation */
+  H5D_ALLOC_TIME_LATE = 2,    /**< Allocate on first write */
+  H5D_ALLOC_TIME_INCR = 3     /**< Allocate incrementally (by chunk) */
 } H5D_alloc_time_t;
 //! <!-- [H5D_alloc_time_t_snip] -->
 
@@ -85,11 +86,14 @@ typedef enum H5D_alloc_time_t {
  * Values for the status of space allocation
  */
 typedef enum H5D_space_status_t {
-    H5D_SPACE_STATUS_ERROR          = -1, /**< Error */
-    H5D_SPACE_STATUS_NOT_ALLOCATED  = 0,  /**< Space has not been allocated for this dataset. */
-    H5D_SPACE_STATUS_PART_ALLOCATED = 1,  /**< Space has been partially allocated for this dataset.
-                                               (Used only for datasets with chunked storage.) */
-    H5D_SPACE_STATUS_ALLOCATED = 2        /**< Space has been allocated for this dataset. */
+  H5D_SPACE_STATUS_ERROR = -1, /**< Error */
+  H5D_SPACE_STATUS_NOT_ALLOCATED =
+      0, /**< Space has not been allocated for this dataset. */
+  H5D_SPACE_STATUS_PART_ALLOCATED =
+      1, /**< Space has been partially allocated for this dataset.
+              (Used only for datasets with chunked storage.) */
+  H5D_SPACE_STATUS_ALLOCATED =
+      2 /**< Space has been allocated for this dataset. */
 } H5D_space_status_t;
 //! <!-- [H5D_space_status_t_snip] -->
 
@@ -98,10 +102,10 @@ typedef enum H5D_space_status_t {
  * Values for time of writing fill value property
  */
 typedef enum H5D_fill_time_t {
-    H5D_FILL_TIME_ERROR = -1, /**< Error */
-    H5D_FILL_TIME_ALLOC = 0,  /**< Fill on allocation */
-    H5D_FILL_TIME_NEVER = 1,  /**< Never write fill values */
-    H5D_FILL_TIME_IFSET = 2   /**< Fill if fill-value was set */
+  H5D_FILL_TIME_ERROR = -1, /**< Error */
+  H5D_FILL_TIME_ALLOC = 0,  /**< Fill on allocation */
+  H5D_FILL_TIME_NEVER = 1,  /**< Never write fill values */
+  H5D_FILL_TIME_IFSET = 2   /**< Fill if fill-value was set */
 } H5D_fill_time_t;
 //! <!-- [H5D_fill_time_t_snip] -->
 
@@ -110,10 +114,10 @@ typedef enum H5D_fill_time_t {
  * Values for fill value status
  */
 typedef enum H5D_fill_value_t {
-    H5D_FILL_VALUE_ERROR        = -1, /**< Error */
-    H5D_FILL_VALUE_UNDEFINED    = 0,  /**< No fill value defined */
-    H5D_FILL_VALUE_DEFAULT      = 1,  /**< Default fill-value */
-    H5D_FILL_VALUE_USER_DEFINED = 2   /**< User-defined fill-value */
+  H5D_FILL_VALUE_ERROR = -1,      /**< Error */
+  H5D_FILL_VALUE_UNDEFINED = 0,   /**< No fill value defined */
+  H5D_FILL_VALUE_DEFAULT = 1,     /**< Default fill-value */
+  H5D_FILL_VALUE_USER_DEFINED = 2 /**< User-defined fill-value */
 } H5D_fill_value_t;
 //! <!-- [H5D_fill_value_t_snip] -->
 
@@ -122,9 +126,10 @@ typedef enum H5D_fill_value_t {
  * Values for VDS bounds option
  */
 typedef enum H5D_vds_view_t {
-    H5D_VDS_ERROR          = -1, /**< Error */
-    H5D_VDS_FIRST_MISSING  = 0,  /**< Include all data before the first missing mapped data */
-    H5D_VDS_LAST_AVAILABLE = 1   /**< Include all available mapped data */
+  H5D_VDS_ERROR = -1, /**< Error */
+  H5D_VDS_FIRST_MISSING =
+      0, /**< Include all data before the first missing mapped data */
+  H5D_VDS_LAST_AVAILABLE = 1 /**< Include all available mapped data */
 } H5D_vds_view_t;
 //! <!-- [H5D_vds_view_t_snip] -->
 
@@ -139,17 +144,17 @@ typedef enum H5D_vds_view_t {
  * \return \herr_t
  *
  */
-typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
+typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims,
+                                  void *op_data);
 //! <!-- [H5D_append_cb_t_snip] -->
 
 //! <!-- [H5D_operator_t_snip] -->
 /**
  * \brief Callback for H5Diterate()
  *
- * \param[in,out] elem Pointer to the memory buffer containing the current dataset
- *                     element
- * \param[in] type_id Datatype identifier of the elements stored in \p elem
- * \param[in] ndim Number of dimensions for the \p point array
+ * \param[in,out] elem Pointer to the memory buffer containing the current
+ * dataset element \param[in] type_id Datatype identifier of the elements stored
+ * in \p elem \param[in] ndim Number of dimensions for the \p point array
  * \param[in] point Array containing the location of the element within
  *                  the original dataspace
  * \param[in,out] operator_data Pointer to any user-defined data associated with
@@ -157,8 +162,8 @@ typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_
  * \return \herr_t_iter
  *
  */
-typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
-                                 void *operator_data);
+typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
+                                 const hsize_t *point, void *operator_data);
 //! <!-- [H5D_operator_t_snip] -->
 
 //! <!-- [H5D_scatter_func_t_snip] -->
@@ -166,18 +171,15 @@ typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const
  * \brief Callback for H5Dscatter()
  *
  * \param[out] src_buf Pointer to the buffer holding the next set of elements to
- *                     scatter. On entry, the value of where \p src_buf points to
- *                     is undefined. The callback function should set \p src_buf
- *                     to point to the next set of elements.
- * \param[out] src_buf_bytes_used Pointer to the number of valid bytes in \p src_buf.
- *                                On entry, the value where \p src_buf_bytes_used points
- *                                to is undefined. The callback function should set
- *                                \p src_buf_bytes_used to the of valid bytes in \p src_buf.
- *                                This number must be a multiple of the datatype size.
- * \param[in,out] op_data User-defined pointer to data required by the callback
- *                        function. A pass-through of the \p op_data pointer provided
- *                        with the H5Dscatter() function call.
- * \return herr_t
+ *                     scatter. On entry, the value of where \p src_buf points
+ * to is undefined. The callback function should set \p src_buf to point to the
+ * next set of elements. \param[out] src_buf_bytes_used Pointer to the number of
+ * valid bytes in \p src_buf. On entry, the value where \p src_buf_bytes_used
+ * points to is undefined. The callback function should set \p
+ * src_buf_bytes_used to the of valid bytes in \p src_buf. This number must be a
+ * multiple of the datatype size. \param[in,out] op_data User-defined pointer to
+ * data required by the callback function. A pass-through of the \p op_data
+ * pointer provided with the H5Dscatter() function call. \return herr_t
  *
  * \details The callback function should always return at least one
  *          element in \p src_buf, and must not return more elements
@@ -187,7 +189,8 @@ typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const
  *          to indicate success, and a negative value to indicate failure.
  *
  */
-typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/,
+typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/,
+                                     size_t *src_buf_bytes_used /*out*/,
                                      void *op_data);
 //! <!-- [H5D_scatter_func_t_snip] -->
 
@@ -215,28 +218,28 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
  *          value to indicate failure.
  *
  */
-typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
+typedef herr_t (*H5D_gather_func_t)(const void *dst_buf,
+                                    size_t dst_buf_bytes_used, void *op_data);
 //! <!-- [H5D_gather_func_t_snip] -->
 
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
 /**
  * \brief Callback for H5Dchunk_iter()
  *
- * \param[in]     offset      Logical position of the chunk's first element in units of dataset elements
- * \param[in]     filter_mask Bitmask indicating the filters used when the chunk was written
- * \param[in]     addr        Chunk address in the file
- * \param[in]     size        Chunk size in bytes, 0 if the chunk does not exist
- * \param[in,out] op_data     Pointer to any user-defined data associated with
- *                            the operation.
- * \returns \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
- *              zero when all elements have been processed.
- *          \li A positive value (#H5_ITER_STOP) causes the iterator to
+ * \param[in]     offset      Logical position of the chunk's first element in
+ * units of dataset elements \param[in]     filter_mask Bitmask indicating the
+ * filters used when the chunk was written \param[in]     addr        Chunk
+ * address in the file \param[in]     size        Chunk size in bytes, 0 if the
+ * chunk does not exist \param[in,out] op_data     Pointer to any user-defined
+ * data associated with the operation. \returns \li Zero (#H5_ITER_CONT) causes
+ * the iterator to continue, returning zero when all elements have been
+ * processed. \li A positive value (#H5_ITER_STOP) causes the iterator to
  *              immediately return that value, indicating short-circuit success.
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
  */
-typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size,
-                                   void *op_data);
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask,
+                                   haddr_t addr, hsize_t size, void *op_data);
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
 
 /********************/
@@ -308,8 +311,9 @@ extern "C" {
  * \see H5Dopen2(), H5Dclose(), H5Tset_size()
  *
  */
-H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
-                        hid_t dcpl_id, hid_t dapl_id);
+H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
+                        hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
+                        hid_t dapl_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -317,12 +321,14 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  * \async_variant_of{H5Dcreate}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                             const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
-                             hid_t dapl_id, hid_t es_id);
+H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t loc_id, const char *name,
+                             hid_t type_id, hid_t space_id, hid_t lcpl_id,
+                             hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
-                              hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
+H5_DLL hid_t H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id,
+                             hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
+                             hid_t dapl_id, hid_t es_id);
 #endif
 
 /**
@@ -364,7 +370,8 @@ H5_DLL hid_t  H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid
  * \see H5Olink(), H5Dcreate()
  *
  */
-H5_DLL hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id);
+H5_DLL hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id,
+                            hid_t dcpl_id, hid_t dapl_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -400,10 +407,12 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
  * \async_variant_of{H5Dopen}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                           const char *name, hid_t dapl_id, hid_t es_id);
+H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func,
+                           unsigned app_line, hid_t loc_id, const char *name,
+                           hid_t dapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
+H5_DLL hid_t H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id,
+                           hid_t es_id);
 #endif
 
 /**
@@ -438,10 +447,10 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
  * \async_variant_of{H5Dget_space}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
-                                hid_t es_id);
+H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func,
+                                unsigned app_line, hid_t dset_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Dget_space_async(hid_t dset_id, hid_t es_id);
+H5_DLL hid_t H5Dget_space_async(hid_t dset_id, hid_t es_id);
 #endif
 
 /**
@@ -475,7 +484,8 @@ H5_DLL hid_t  H5Dget_space_async(hid_t dset_id, hid_t es_id);
  * \since 1.6.0
  *
  */
-H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
+H5_DLL herr_t H5Dget_space_status(hid_t dset_id,
+                                  H5D_space_status_t *allocation);
 
 /**
  * --------------------------------------------------------------------------
@@ -617,7 +627,8 @@ H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_bytes);
+H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset,
+                                        hsize_t *chunk_bytes);
 
 /**
  * --------------------------------------------------------------------------
@@ -651,7 +662,8 @@ H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hs
  * \since 1.10.5
  *
  */
-H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks);
+H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id,
+                                hsize_t *nchunks);
 
 /**
  * --------------------------------------------------------------------------
@@ -660,10 +672,11 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  * \brief Retrieves information about a chunk specified by its coordinates
  *
  * \dset_id
- * \param[in]  offset      Logical position of the chunk's first element in units of dataset elements
- * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
- * \param[out] addr        Chunk address in the file
- * \param[out] size        Chunk size in bytes, 0 if the chunk does not exist
+ * \param[in]  offset      Logical position of the chunk's first element in
+ * units of dataset elements \param[out] filter_mask Bitmask indicating the
+ * filters used when the chunk was written \param[out] addr        Chunk address
+ * in the file \param[out] size        Chunk size in bytes, 0 if the chunk does
+ * not exist
  *
  * \return \herr_t
  *
@@ -682,8 +695,9 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  * \since 1.10.5
  *
  */
-H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask,
-                                         haddr_t *addr, hsize_t *size);
+H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset,
+                                         unsigned *filter_mask, haddr_t *addr,
+                                         hsize_t *size);
 
 /**
  * --------------------------------------------------------------------------
@@ -699,8 +713,8 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \return \herr_t
  *
  * \details H5Dchunk_iter iterates over all chunks in the dataset, calling the
- *          user supplied callback with the details of the chunk and the supplied
- *          context \p op_data.
+ *          user supplied callback with the details of the chunk and the
+ * supplied context \p op_data.
  *
  * \par Example
  * For each chunk, print the allocated chunk size (0 for unallocated chunks).
@@ -711,7 +725,8 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \since 1.14.0
  *
  */
-H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);
+H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id,
+                            H5D_chunk_iter_op_t cb, void *op_data);
 
 /**
  * --------------------------------------------------------------------------
@@ -722,17 +737,17 @@ H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb
  * \dset_id
  * \param[in]  fspace_id File dataspace selection identifier (See Note below)
  * \param[in]  chk_idx   Index of the chunk
- * \param[out] offset    Logical position of the chunk's first element in units of dataset elements
- * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
- * \param[out] addr      Chunk address in the file
- * \param[out] size      Chunk size in bytes, 0 if the chunk does not exist
+ * \param[out] offset    Logical position of the chunk's first element in units
+ * of dataset elements \param[out] filter_mask Bitmask indicating the filters
+ * used when the chunk was written \param[out] addr      Chunk address in the
+ * file \param[out] size      Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
  *
  * \details H5Dget_chunk_info() retrieves the offset coordinates,
  *          \p offset, filter mask, \p filter_mask, size, \p size, and address
- *          \p addr for the dataset specified by the identifier \p dset_id and the chunk
- *          specified by the index \p index. The chunk belongs to a set of
+ *          \p addr for the dataset specified by the identifier \p dset_id and
+ * the chunk specified by the index \p index. The chunk belongs to a set of
  *          chunks in the selection specified by \p fspace_id. If the queried
  *          chunk does not exist in the file, the size will be set to 0 and
  *          address to #HADDR_UNDEF. The value pointed to by filter_mask will
@@ -759,8 +774,9 @@ H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb
  * \since 1.10.5
  *
  */
-H5_DLL herr_t H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx, hsize_t *offset,
-                                unsigned *filter_mask, haddr_t *addr, hsize_t *size);
+H5_DLL herr_t H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx,
+                                hsize_t *offset, unsigned *filter_mask,
+                                haddr_t *addr, hsize_t *size);
 
 /**
  * --------------------------------------------------------------------------
@@ -873,8 +889,8 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  * \snippet H5D_examples.c read
  *
  */
-H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                      hid_t dxpl_id, void *buf /*out*/);
+H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+                      hid_t file_space_id, hid_t dxpl_id, void *buf /*out*/);
 
 /**
  * --------------------------------------------------------------------------
@@ -919,8 +935,9 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
  * \see H5Dread()
  *
  */
-H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                            hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/);
+H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[],
+                            hid_t mem_space_id[], hid_t file_space_id[],
+                            hid_t dxpl_id, void *buf[] /*out*/);
 
 /**
  * --------------------------------------------------------------------------
@@ -928,11 +945,13 @@ H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], 
  * \async_variant_of{H5Dread}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
-                            hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                            void *buf /*out*/, hid_t es_id);
+H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func,
+                            unsigned app_line, hid_t dset_id, hid_t mem_type_id,
+                            hid_t mem_space_id, hid_t file_space_id,
+                            hid_t dxpl_id, void *buf /*out*/, hid_t es_id);
 #else
-H5_DLL herr_t H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+H5_DLL herr_t H5Dread_async(hid_t dset_id, hid_t mem_type_id,
+                            hid_t mem_space_id, hid_t file_space_id,
                             hid_t dxpl_id, void *buf /*out*/, hid_t es_id);
 #endif
 
@@ -942,12 +961,17 @@ H5_DLL herr_t H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id
  * \async_variant_of{H5Dread_multi}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count,
-                                  hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+H5_DLL herr_t H5Dread_multi_async(const char *app_file, const char *app_func,
+                                  unsigned app_line, size_t count,
+                                  hid_t dset_id[], hid_t mem_type_id[],
+                                  hid_t mem_space_id[], hid_t file_space_id[],
+                                  hid_t dxpl_id, void *buf[] /*out*/,
+                                  hid_t es_id);
 #else
-H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[],
+                                  hid_t mem_type_id[], hid_t mem_space_id[],
+                                  hid_t file_space_id[], hid_t dxpl_id,
+                                  void *buf[] /*out*/, hid_t es_id);
 #endif
 
 /**
@@ -1063,8 +1087,8 @@ H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_
  * \see H5Pset_fill_time(), H5Pset_alloc_time()
  *
  */
-H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                       hid_t dxpl_id, const void *buf);
+H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+                       hid_t file_space_id, hid_t dxpl_id, const void *buf);
 
 /**
  * --------------------------------------------------------------------------
@@ -1110,8 +1134,9 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
  * \see H5Dwrite()
  *
  */
-H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                             hid_t file_space_id[], hid_t dxpl_id, const void *buf[]);
+H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[],
+                             hid_t mem_space_id[], hid_t file_space_id[],
+                             hid_t dxpl_id, const void *buf[]);
 
 /**
  * --------------------------------------------------------------------------
@@ -1119,11 +1144,14 @@ H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[],
  * \async_variant_of{H5Dwrite}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
-                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t dset_id,
+                             hid_t mem_type_id, hid_t mem_space_id,
+                             hid_t file_space_id, hid_t dxpl_id,
                              const void *buf, hid_t es_id);
 #else
-H5_DLL herr_t H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+H5_DLL herr_t H5Dwrite_async(hid_t dset_id, hid_t mem_type_id,
+                             hid_t mem_space_id, hid_t file_space_id,
                              hid_t dxpl_id, const void *buf, hid_t es_id);
 #endif
 
@@ -1133,12 +1161,17 @@ H5_DLL herr_t H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_i
  * \async_variant_of{H5Dwrite_multi}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Dwrite_multi_async(const char *app_file, const char *app_func, unsigned app_line,
-                                   size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+H5_DLL herr_t H5Dwrite_multi_async(const char *app_file, const char *app_func,
+                                   unsigned app_line, size_t count,
+                                   hid_t dset_id[], hid_t mem_type_id[],
+                                   hid_t mem_space_id[], hid_t file_space_id[],
+                                   hid_t dxpl_id, const void *buf[],
+                                   hid_t es_id);
 #else
-H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[],
+                                   hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id,
+                                   const void *buf[], hid_t es_id);
 #endif
 
 /**
@@ -1201,8 +1234,9 @@ H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[], hid_t mem_type
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
-                             size_t data_size, const void *buf);
+H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters,
+                             const hsize_t *offset, size_t data_size,
+                             const void *buf);
 
 /**
  * --------------------------------------------------------------------------
@@ -1257,8 +1291,8 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
-                            void *buf);
+H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
+                            uint32_t *filters, void *buf);
 
 /**
  * --------------------------------------------------------------------------
@@ -1292,7 +1326,8 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op, void *operator_data);
+H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
+                         H5D_operator_t op, void *operator_data);
 
 /**
  * --------------------------------------------------------------------------
@@ -1319,7 +1354,8 @@ H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dset_id, hid_t type_id, hid_t space_id, hsize_t *size);
+H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dset_id, hid_t type_id, hid_t space_id,
+                                   hsize_t *size);
 
 /**
  * --------------------------------------------------------------------------
@@ -1357,7 +1393,8 @@ H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dset_id, hid_t type_id, hid_t space_id,
  *      H5Pset_fill_time(), H5Pget_fill_time(), H5Pcreate(), H5Dcreate_anon()
  *
  */
-H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id);
+H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type_id, void *buf,
+                      hid_t buf_type_id, hid_t space_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1428,10 +1465,12 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
  * \async_variant_of{H5Dset_extent}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_line,
-                                  hid_t dset_id, const hsize_t size[], hid_t es_id);
+H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func,
+                                  unsigned app_line, hid_t dset_id,
+                                  const hsize_t size[], hid_t es_id);
 #else
-H5_DLL herr_t H5Dset_extent_async(hid_t dset_id, const hsize_t size[], hid_t es_id);
+H5_DLL herr_t H5Dset_extent_async(hid_t dset_id, const hsize_t size[],
+                                  hid_t es_id);
 #endif
 
 /**
@@ -1519,8 +1558,8 @@ H5_DLL herr_t H5Drefresh(hid_t dset_id);
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id,
-                         void *dst_buf);
+H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
+                         hid_t dst_space_id, void *dst_buf);
 
 /**
  * --------------------------------------------------------------------------
@@ -1579,8 +1618,9 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hi
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size,
-                        void *dst_buf, H5D_gather_func_t op, void *op_data);
+H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
+                        size_t dst_buf_size, void *dst_buf,
+                        H5D_gather_func_t op, void *op_data);
 
 /**
  * --------------------------------------------------------------------------
@@ -1611,8 +1651,8 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  * \async_variant_of{H5Dclose}
  */
 #ifndef H5_DOXYGEN
-H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
-                             hid_t es_id);
+H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func,
+                             unsigned app_line, hid_t dset_id, hid_t es_id);
 #else
 H5_DLL herr_t H5Dclose_async(hid_t dset_id, hid_t es_id);
 #endif
@@ -1628,26 +1668,35 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5D_MODULE
-#define H5Dcreate_async(...)      H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dopen_async(...)        H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dget_space_async(...)   H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dread_async(...)        H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dread_multi_async(...)  H5Dread_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dwrite_async(...)       H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dwrite_multi_async(...) H5Dwrite_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dset_extent_async(...)  H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dclose_async(...)       H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dcreate_async(...)                                                   \
+  H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dopen_async(...)                                                     \
+  H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dget_space_async(...)                                                \
+  H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_async(...)                                                     \
+  H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_multi_async(...)                                               \
+  H5Dread_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_async(...)                                                    \
+  H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_multi_async(...)                                              \
+  H5Dwrite_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dset_extent_async(...)                                               \
+  H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dclose_async(...)                                                    \
+  H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5Dcreate_async_wrap     H5_NO_EXPAND(H5Dcreate_async)
-#define H5Dopen_async_wrap       H5_NO_EXPAND(H5Dopen_async)
-#define H5Dget_space_async_wrap  H5_NO_EXPAND(H5Dget_space_async)
-#define H5Dread_async_wrap       H5_NO_EXPAND(H5Dread_async)
-#define H5Dwrite_async_wrap      H5_NO_EXPAND(H5Dwrite_async)
+#define H5Dcreate_async_wrap H5_NO_EXPAND(H5Dcreate_async)
+#define H5Dopen_async_wrap H5_NO_EXPAND(H5Dopen_async)
+#define H5Dget_space_async_wrap H5_NO_EXPAND(H5Dget_space_async)
+#define H5Dread_async_wrap H5_NO_EXPAND(H5Dread_async)
+#define H5Dwrite_async_wrap H5_NO_EXPAND(H5Dwrite_async)
 #define H5Dset_extent_async_wrap H5_NO_EXPAND(H5Dset_extent_async)
-#define H5Dclose_async_wrap      H5_NO_EXPAND(H5Dclose_async)
+#define H5Dclose_async_wrap H5_NO_EXPAND(H5Dclose_async)
 #endif /* H5D_MODULE */
 /// \endcond
 
@@ -1664,13 +1713,13 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  * These symbols are no longer used in the library.
  */
 /* Property names for H5DOwrite_chunk */
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME     "direct_chunk_flag"
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME  "direct_chunk_filters"
-#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME   "direct_chunk_offset"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME "direct_chunk_flag"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME "direct_chunk_filters"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME "direct_chunk_offset"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME "direct_chunk_datasize"
 /* Property names for H5DOread_chunk */
-#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME    "direct_chunk_read_flag"
-#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME  "direct_chunk_read_offset"
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME "direct_chunk_read_flag"
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME "direct_chunk_read_offset"
 #define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME "direct_chunk_read_filters"
 
 /* Typedefs */
@@ -1738,13 +1787,14 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  *          of specifying when space will be allocated for a dataset, and of
  *          specifying when fill values will be written to a dataset.
  *
- * \version 1.8.0 Function H5Dcreate() renamed to H5Dcreate1() and deprecated in this release.
- * \since 1.0.0
+ * \version 1.8.0 Function H5Dcreate() renamed to H5Dcreate1() and deprecated in
+ * this release. \since 1.0.0
  *
  * \see H5Dopen2(), H5Dclose(), H5Tset_size()
  *
  */
-H5_DLL hid_t H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t dcpl_id);
+H5_DLL hid_t H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id,
+                        hid_t space_id, hid_t dcpl_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -1770,8 +1820,8 @@ H5_DLL hid_t H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  *          when the dataset is no longer needed so that resource leaks will not
  *          develop.
  *
- * \version 1.8.0 Function H5Dopen() renamed to H5Dopen1() and deprecated in this release.
- * \since 1.0.0
+ * \version 1.8.0 Function H5Dopen() renamed to H5Dopen1() and deprecated in
+ * this release. \since 1.0.0
  *
  */
 H5_DLL hid_t H5Dopen1(hid_t loc_id, const char *name);
@@ -1848,7 +1898,8 @@ H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
  * \version 1.12.0 Function was deprecated
  *
  */
-H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf);
+H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id,
+                              void *buf);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

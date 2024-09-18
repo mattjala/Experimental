@@ -13,28 +13,28 @@
 #include <iostream>
 #include <string>
 
-#include "H5Include.h"
-#include "H5Exception.h"
-#include "H5IdComponent.h"
-#include "H5PropList.h"
-#include "H5FaccProp.h"
-#include "H5FcreatProp.h"
-#include "H5OcreatProp.h"
+#include "H5AbstractDs.h"
+#include "H5Alltypes.h"
+#include "H5Attribute.h"
+#include "H5CommonFG.h"
+#include "H5DaccProp.h"
+#include "H5DataSet.h"
+#include "H5DataSpace.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
-#include "H5LcreatProp.h"
+#include "H5Exception.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
+#include "H5File.h"
+#include "H5Group.h"
+#include "H5IdComponent.h"
+#include "H5Include.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
-#include "H5AbstractDs.h"
-#include "H5DataSpace.h"
-#include "H5DataSet.h"
-#include "H5CommonFG.h"
-#include "H5Attribute.h"
-#include "H5Group.h"
-#include "H5File.h"
-#include "H5Alltypes.h"
+#include "H5OcreatProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 using std::cerr;
@@ -44,18 +44,15 @@ using std::endl;
 // Function:    Group default constructor
 ///\brief       Default constructor: creates a stub Group.
 //--------------------------------------------------------------------------
-Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID)
-{
-}
+Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:    Group copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: Original group to copy
 //--------------------------------------------------------------------------
-Group::Group(const Group &original) : H5Object(), CommonFG(), id(original.id)
-{
-    incRefCount(); // increment number of references to this id
+Group::Group(const Group &original) : H5Object(), CommonFG(), id(original.id) {
+  incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -64,13 +61,11 @@ Group::Group(const Group &original) : H5Object(), CommonFG(), id(original.id)
 ///
 ///\exception   H5::FileIException or H5::GroupIException
 //--------------------------------------------------------------------------
-void
-Group::closeObjId(hid_t obj_id) const
-{
-    herr_t ret_value = H5Oclose(obj_id);
-    if (ret_value < 0) {
-        throwException("Group::closeObjId", "H5Oclose failed");
-    }
+void Group::closeObjId(hid_t obj_id) const {
+  herr_t ret_value = H5Oclose(obj_id);
+  if (ret_value < 0) {
+    throwException("Group::closeObjId", "H5Oclose failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -84,20 +79,16 @@ Group::closeObjId(hid_t obj_id) const
 //              After HDFFV-9920, the Group's methods can use getId() and
 //              getLocId() is kept for backward compatibility.
 //--------------------------------------------------------------------------
-hid_t
-Group::getLocId() const
-{
-    return (getId());
-}
+hid_t Group::getLocId() const { return (getId()); }
 
 //--------------------------------------------------------------------------
 // Function:    Group overloaded constructor
 ///\brief       Creates a Group object using the id of an existing group.
 ///\param       existing_id - IN: Id of an existing group
 //--------------------------------------------------------------------------
-Group::Group(const hid_t existing_id) : H5Object(), CommonFG(), id(existing_id)
-{
-    incRefCount(); // increment number of references to this id
+Group::Group(const hid_t existing_id)
+    : H5Object(), CommonFG(), id(existing_id) {
+  incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -112,10 +103,11 @@ Group::Group(const hid_t existing_id) : H5Object(), CommonFG(), id(existing_id)
 ///             \c obj can be DataSet, Group, or named DataType, that
 ///             is a datatype that has been named by DataType::commit.
 //--------------------------------------------------------------------------
-Group::Group(const H5Location &loc, const void *ref, H5R_type_t ref_type, const PropList &plist)
-    : H5Object(), CommonFG(), id(H5I_INVALID_HID)
-{
-    id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
+Group::Group(const H5Location &loc, const void *ref, H5R_type_t ref_type,
+             const PropList &plist)
+    : H5Object(), CommonFG(), id(H5I_INVALID_HID) {
+  id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist,
+                                 "constructor - by dereference");
 }
 
 //--------------------------------------------------------------------------
@@ -124,15 +116,13 @@ Group::Group(const H5Location &loc, const void *ref, H5R_type_t ref_type, const 
 ///\return      Number of objects
 ///\exception   H5::FileIException or H5::GroupIException
 //--------------------------------------------------------------------------
-hsize_t
-Group::getNumObjs() const
-{
-    H5G_info_t ginfo; // Group information
+hsize_t Group::getNumObjs() const {
+  H5G_info_t ginfo; // Group information
 
-    herr_t ret_value = H5Gget_info(getId(), &ginfo);
-    if (ret_value < 0)
-        throwException("getNumObjs", "H5Gget_info failed");
-    return (ginfo.nlinks);
+  herr_t ret_value = H5Gget_info(getId(), &ginfo);
+  if (ret_value < 0)
+    throwException("getNumObjs", "H5Gget_info failed");
+  return (ginfo.nlinks);
 }
 
 //--------------------------------------------------------------------------
@@ -147,14 +137,12 @@ Group::getNumObjs() const
 ///             H5Oopen.  Thus, an object can be opened without knowing
 ///             the object's type.
 //--------------------------------------------------------------------------
-hid_t
-Group::getObjId(const char *obj_name, const PropList &plist) const
-{
-    hid_t ret_value = H5Oopen(getId(), obj_name, plist.getId());
-    if (ret_value < 0) {
-        throwException("Group::getObjId", "H5Oopen failed");
-    }
-    return (ret_value);
+hid_t Group::getObjId(const char *obj_name, const PropList &plist) const {
+  hid_t ret_value = H5Oopen(getId(), obj_name, plist.getId());
+  if (ret_value < 0) {
+    throwException("Group::getObjId", "H5Oopen failed");
+  }
+  return (ret_value);
 }
 
 //--------------------------------------------------------------------------
@@ -166,10 +154,9 @@ Group::getObjId(const char *obj_name, const PropList &plist) const
 ///                            the object
 ///\exception   H5::FileIException or H5::GroupIException
 //--------------------------------------------------------------------------
-hid_t
-Group::getObjId(const H5std_string &obj_name, const PropList &plist) const
-{
-    return (getObjId(obj_name.c_str(), plist));
+hid_t Group::getObjId(const H5std_string &obj_name,
+                      const PropList &plist) const {
+  return (getObjId(obj_name.c_str(), plist));
 }
 
 //--------------------------------------------------------------------------
@@ -183,11 +170,7 @@ Group::getObjId(const H5std_string &obj_name, const PropList &plist) const
 //              addition, member IdComponent::id is moved into subclasses, and
 //              IdComponent::getId now becomes pure virtual function.
 //--------------------------------------------------------------------------
-hid_t
-Group::getId() const
-{
-    return (id);
-}
+hid_t Group::getId() const { return (id); }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -201,18 +184,15 @@ Group::getId() const
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
 //--------------------------------------------------------------------------
-void
-Group::p_setId(const hid_t new_id)
-{
-    // handling references to this old id
-    try {
-        close();
-    }
-    catch (Exception &close_error) {
-        throwException("Group::p_setId", close_error.getDetailMsg());
-    }
-    // reset object's id to the given id
-    id = new_id;
+void Group::p_setId(const hid_t new_id) {
+  // handling references to this old id
+  try {
+    close();
+  } catch (Exception &close_error) {
+    throwException("Group::p_setId", close_error.getDetailMsg());
+  }
+  // reset object's id to the given id
+  id = new_id;
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -222,17 +202,15 @@ Group::p_setId(const hid_t new_id)
 ///
 ///\exception   H5::GroupIException
 //--------------------------------------------------------------------------
-void
-Group::close()
-{
-    if (p_valid_id(id)) {
-        herr_t ret_value = H5Gclose(id);
-        if (ret_value < 0) {
-            throwException("Group::close", "H5Gclose failed");
-        }
-        // reset the id
-        id = H5I_INVALID_HID;
+void Group::close() {
+  if (p_valid_id(id)) {
+    herr_t ret_value = H5Gclose(id);
+    if (ret_value < 0) {
+      throwException("Group::close", "H5Gclose failed");
     }
+    // reset the id
+    id = H5I_INVALID_HID;
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -247,12 +225,11 @@ Group::close()
 //              "Group::" will be inserted to indicate the function called is
 //              an implementation of Group.
 //--------------------------------------------------------------------------
-void
-Group::throwException(const H5std_string &func_name, const H5std_string &msg) const
-{
-    H5std_string full_name = func_name;
-    full_name.insert(0, "Group::");
-    throw GroupIException(full_name, msg);
+void Group::throwException(const H5std_string &func_name,
+                           const H5std_string &msg) const {
+  H5std_string full_name = func_name;
+  full_name.insert(0, "Group::");
+  throw GroupIException(full_name, msg);
 }
 
 //--------------------------------------------------------------------------
@@ -264,14 +241,12 @@ Group::throwException(const H5std_string &func_name, const H5std_string &msg) co
 //              - Replaced decRefCount with close() to let the C library
 //              handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
-Group::~Group()
-{
-    try {
-        close();
-    }
-    catch (Exception &close_error) {
-        cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
-    }
+Group::~Group() {
+  try {
+    close();
+  } catch (Exception &close_error) {
+    cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
+  }
 }
 
 } // namespace H5

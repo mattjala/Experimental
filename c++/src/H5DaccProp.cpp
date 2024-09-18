@@ -12,13 +12,13 @@
 
 #include <string>
 
-#include "H5Include.h"
+#include "H5DaccProp.h"
+#include "H5DataSpace.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5DataSpace.h"
-#include "H5PropList.h"
+#include "H5Include.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 
@@ -41,24 +41,23 @@ DSetAccPropList *DSetAccPropList::DEFAULT_ = 0;
 //              object, throw a PropListIException.  This scenario should
 //              not happen.
 //--------------------------------------------------------------------------
-DSetAccPropList *
-DSetAccPropList::getConstant()
-{
-    // Tell the C library not to clean up, H5Library::termH5cpp will call
-    // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called) {
-        (void)H5dont_atexit();
-        IdComponent::H5dontAtexit_called = true;
-    }
+DSetAccPropList *DSetAccPropList::getConstant() {
+  // Tell the C library not to clean up, H5Library::termH5cpp will call
+  // H5close - more dependency if use H5Library::dontAtExit()
+  if (!IdComponent::H5dontAtexit_called) {
+    (void)H5dont_atexit();
+    IdComponent::H5dontAtexit_called = true;
+  }
 
-    // If the constant pointer is not allocated, allocate it. Otherwise,
-    // throw because it shouldn't be.
-    if (DEFAULT_ == 0)
-        DEFAULT_ = new DSetAccPropList(H5P_DATASET_ACCESS);
-    else
-        throw PropListIException("DSetAccPropList::getConstant",
-                                 "DSetAccPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return (DEFAULT_);
+  // If the constant pointer is not allocated, allocate it. Otherwise,
+  // throw because it shouldn't be.
+  if (DEFAULT_ == 0)
+    DEFAULT_ = new DSetAccPropList(H5P_DATASET_ACCESS);
+  else
+    throw PropListIException("DSetAccPropList::getConstant",
+                             "DSetAccPropList::getConstant is being invoked on "
+                             "an allocated DEFAULT_");
+  return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -66,11 +65,7 @@ DSetAccPropList::getConstant()
 // Purpose:     Deletes the constant object that DSetAccPropList::DEFAULT_
 //              points to.
 //--------------------------------------------------------------------------
-void
-DSetAccPropList::deleteConstants()
-{
-    delete DEFAULT_;
-}
+void DSetAccPropList::deleteConstants() { delete DEFAULT_; }
 
 //--------------------------------------------------------------------------
 // Purpose      Constant for dataset creation default property
@@ -81,35 +76,32 @@ const DSetAccPropList &DSetAccPropList::DEFAULT = *getConstant();
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList default constructor
-///\brief       Default constructor: creates a stub dataset creation property list
+///\brief       Default constructor: creates a stub dataset creation property
+///list
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS)
-{
-}
+DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///             DSetAccPropList object
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(orig)
-{
-}
+DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig)
+    : LinkAccPropList(orig) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList overloaded constructor
 ///\brief       Creates a DSetAccPropList object using the id of an
 ///             existing dataset creation property list.
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList(const hid_t plist_id) : LinkAccPropList(plist_id)
-{
-}
+DSetAccPropList::DSetAccPropList(const hid_t plist_id)
+    : LinkAccPropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList::setChunkCache
 ///\brief       Sets the raw data chunk cache parameters.
-///\param       rdcc_nslots - IN: Number of chunk slots in the raw data chunk cache
-///\param       rdcc_nbytes - IN: Total size of the raw data chunk cache
+///\param       rdcc_nslots - IN: Number of chunk slots in the raw data chunk
+///cache \param       rdcc_nbytes - IN: Total size of the raw data chunk cache
 ///\param       rdcc_w0     - IN: The chunk preemption policy for this dataset
 ///\exception   H5::PropListIException
 ///\par Description
@@ -123,20 +115,20 @@ DSetAccPropList::DSetAccPropList(const hid_t plist_id) : LinkAccPropList(plist_i
 ///             the HDF5 C Reference Manual.
 // July 2018
 //--------------------------------------------------------------------------
-void
-DSetAccPropList::setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0) const
-{
-    herr_t ret_value = H5Pset_chunk_cache(id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
-    if (ret_value < 0) {
-        throw PropListIException("DSetAccPropList::setChunkCache", "H5Pset_chunk_cache failed");
-    }
+void DSetAccPropList::setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes,
+                                    double rdcc_w0) const {
+  herr_t ret_value = H5Pset_chunk_cache(id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
+  if (ret_value < 0) {
+    throw PropListIException("DSetAccPropList::setChunkCache",
+                             "H5Pset_chunk_cache failed");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList::getChunkCache
 ///\brief       Retrieves the raw data chunk cache parameters.
-///\param       rdcc_nslots - OUT: Number of chunk slots in the raw data chunk cache
-///\param       rdcc_nbytes - OUT: Total size of the raw data chunk cache
+///\param       rdcc_nslots - OUT: Number of chunk slots in the raw data chunk
+///cache \param       rdcc_nbytes - OUT: Total size of the raw data chunk cache
 ///\param       rdcc_w0     - OUT: The chunk preemption policy for this dataset
 ///\exception   H5::PropListIException
 ///\par Description
@@ -144,21 +136,20 @@ DSetAccPropList::setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rd
 ///             the HDF5 C Reference Manual.
 // July 2018
 //--------------------------------------------------------------------------
-void
-DSetAccPropList::getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0) const
-{
-    herr_t ret_value = H5Pget_chunk_cache(id, &rdcc_nslots, &rdcc_nbytes, &rdcc_w0);
-    if (ret_value < 0) {
-        throw PropListIException("DSetAccPropList::getChunkCache", "H5Pget_chunk_cache failed");
-    }
+void DSetAccPropList::getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes,
+                                    double &rdcc_w0) const {
+  herr_t ret_value =
+      H5Pget_chunk_cache(id, &rdcc_nslots, &rdcc_nbytes, &rdcc_w0);
+  if (ret_value < 0) {
+    throw PropListIException("DSetAccPropList::getChunkCache",
+                             "H5Pget_chunk_cache failed");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
-DSetAccPropList::~DSetAccPropList()
-{
-}
+DSetAccPropList::~DSetAccPropList() {}
 
 } // namespace H5

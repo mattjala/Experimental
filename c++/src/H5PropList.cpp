@@ -13,9 +13,9 @@
 #include <iostream>
 #include <string>
 
-#include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
+#include "H5Include.h"
 #include "H5PropList.h"
 
 namespace H5 {
@@ -39,35 +39,30 @@ PropList *PropList::DEFAULT_ = 0;
 //              If PropList::DEFAULT_ already points to an allocated object,
 //              throw a PropListIException.  This scenario should not happen.
 //--------------------------------------------------------------------------
-PropList *
-PropList::getConstant()
-{
-    // Tell the C library not to clean up, H5Library::termH5cpp will call
-    // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called) {
-        (void)H5dont_atexit();
-        IdComponent::H5dontAtexit_called = true;
-    }
+PropList *PropList::getConstant() {
+  // Tell the C library not to clean up, H5Library::termH5cpp will call
+  // H5close - more dependency if use H5Library::dontAtExit()
+  if (!IdComponent::H5dontAtexit_called) {
+    (void)H5dont_atexit();
+    IdComponent::H5dontAtexit_called = true;
+  }
 
-    // If the constant pointer is not allocated, allocate it. Otherwise,
-    // throw because it shouldn't be.
-    if (DEFAULT_ == 0)
-        DEFAULT_ = new PropList(H5P_DEFAULT);
-    else
-        throw PropListIException("PropList::getConstant",
-                                 "PropList::getConstant is being invoked on an allocated DEFAULT_");
-    return (DEFAULT_);
+  // If the constant pointer is not allocated, allocate it. Otherwise,
+  // throw because it shouldn't be.
+  if (DEFAULT_ == 0)
+    DEFAULT_ = new PropList(H5P_DEFAULT);
+  else
+    throw PropListIException(
+        "PropList::getConstant",
+        "PropList::getConstant is being invoked on an allocated DEFAULT_");
+  return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
 // Function:    PropList::deleteConstants
 // Purpose      Deletes the constant object that PropList::DEFAULT_ points to.
 //--------------------------------------------------------------------------
-void
-PropList::deleteConstants()
-{
-    delete DEFAULT_;
-}
+void PropList::deleteConstants() { delete DEFAULT_; }
 
 //--------------------------------------------------------------------------
 // Purpose      Constant for default property.
@@ -80,18 +75,15 @@ const PropList &PropList::DEFAULT = *getConstant();
 // Function:    Default constructor
 ///\brief       Default constructor: creates a stub property list object.
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent(), id(H5P_DEFAULT)
-{
-}
+PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
 
 //--------------------------------------------------------------------------
 // Function:    PropList copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: The original property list to copy
 //--------------------------------------------------------------------------
-PropList::PropList(const PropList &original) : IdComponent(), id(original.id)
-{
-    incRefCount(); // increment number of references to this id
+PropList::PropList(const PropList &original) : IdComponent(), id(original.id) {
+  incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -105,49 +97,48 @@ PropList::PropList(const PropList &original) : IdComponent(), id(original.id)
 //              is given.  If the given id is anything else, then set this
 //              property's id to H5P_DEFAULT.
 //--------------------------------------------------------------------------
-PropList::PropList(const hid_t plist_id) : IdComponent(), id{H5P_DEFAULT}
-{
-    H5I_type_t id_type = H5Iget_type(plist_id);
-    switch (id_type) {
-        case H5I_GENPROP_CLS:
-            // call C routine to create a new property from the given prop class
-            id = H5Pcreate(plist_id);
-            if (id < 0) {
-                throw PropListIException("PropList constructor", "H5Pcreate failed");
-            }
-            break;
-        case H5I_GENPROP_LST:
-            // call C routine to make a copy of the given property list
-            id = H5Pcopy(plist_id);
-            if (id < 0) {
-                throw PropListIException("PropList constructor", "H5Pcopy failed");
-            }
-            break;
-        /* These should really be error cases, but changing that breaks
-         * the stated behavior and causes test failures.
-         * (DER, July 2017)
-         */
-        case H5I_BADID:
-        case H5I_FILE:
-        case H5I_GROUP:
-        case H5I_DATATYPE:
-        case H5I_DATASPACE:
-        case H5I_DATASET:
-        case H5I_ATTR:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        case H5I_UNINIT:
-        case H5I_MAP:
-        case H5I_SPACE_SEL_ITER:
-        case H5I_EVENTSET:
-        default:
-            id = H5P_DEFAULT;
-            break;
+PropList::PropList(const hid_t plist_id) : IdComponent(), id{H5P_DEFAULT} {
+  H5I_type_t id_type = H5Iget_type(plist_id);
+  switch (id_type) {
+  case H5I_GENPROP_CLS:
+    // call C routine to create a new property from the given prop class
+    id = H5Pcreate(plist_id);
+    if (id < 0) {
+      throw PropListIException("PropList constructor", "H5Pcreate failed");
     }
+    break;
+  case H5I_GENPROP_LST:
+    // call C routine to make a copy of the given property list
+    id = H5Pcopy(plist_id);
+    if (id < 0) {
+      throw PropListIException("PropList constructor", "H5Pcopy failed");
+    }
+    break;
+  /* These should really be error cases, but changing that breaks
+   * the stated behavior and causes test failures.
+   * (DER, July 2017)
+   */
+  case H5I_BADID:
+  case H5I_FILE:
+  case H5I_GROUP:
+  case H5I_DATATYPE:
+  case H5I_DATASPACE:
+  case H5I_DATASET:
+  case H5I_ATTR:
+  case H5I_VFL:
+  case H5I_VOL:
+  case H5I_ERROR_CLASS:
+  case H5I_ERROR_MSG:
+  case H5I_ERROR_STACK:
+  case H5I_NTYPES:
+  case H5I_UNINIT:
+  case H5I_MAP:
+  case H5I_SPACE_SEL_ITER:
+  case H5I_EVENTSET:
+  default:
+    id = H5P_DEFAULT;
+    break;
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -161,22 +152,19 @@ PropList::PropList(const hid_t plist_id) : IdComponent(), id{H5P_DEFAULT}
 //              - Replaced decRefCount with close() to let the C library
 //              handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
-void
-PropList::copy(const PropList &like_plist)
-{
-    // If this object is representing an hdf5 object, close it before
-    // copying like_plist to it
-    try {
-        close();
-    }
-    catch (Exception &close_error) {
-        throw PropListIException(inMemFunc("copy"), close_error.getDetailMsg());
-    }
+void PropList::copy(const PropList &like_plist) {
+  // If this object is representing an hdf5 object, close it before
+  // copying like_plist to it
+  try {
+    close();
+  } catch (Exception &close_error) {
+    throw PropListIException(inMemFunc("copy"), close_error.getDetailMsg());
+  }
 
-    // call C routine to copy the property list
-    id = H5Pcopy(like_plist.getId());
-    if (id < 0)
-        throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
+  // call C routine to copy the property list
+  id = H5Pcopy(like_plist.getId());
+  if (id < 0)
+    throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
 }
 
 //--------------------------------------------------------------------------
@@ -189,12 +177,10 @@ PropList::copy(const PropList &like_plist)
 //              Makes a copy of the property list on the right hand side
 //              and stores the new id in the left hand side object.
 //--------------------------------------------------------------------------
-PropList &
-PropList::operator=(const PropList &rhs)
-{
-    if (this != &rhs)
-        copy(rhs);
-    return (*this);
+PropList &PropList::operator=(const PropList &rhs) {
+  if (this != &rhs)
+    copy(rhs);
+  return (*this);
 }
 
 //--------------------------------------------------------------------------
@@ -204,14 +190,12 @@ PropList::operator=(const PropList &rhs)
 ///\param       name - IN: Name of the property to copy - \c char pointer
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-PropList::copyProp(PropList &dest, const char *name) const
-{
-    hid_t  dst_id    = dest.getId();
-    herr_t ret_value = H5Pcopy_prop(dst_id, id, name);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("copyProp"), "H5Pcopy_prop failed");
-    }
+void PropList::copyProp(PropList &dest, const char *name) const {
+  hid_t dst_id = dest.getId();
+  herr_t ret_value = H5Pcopy_prop(dst_id, id, name);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("copyProp"), "H5Pcopy_prop failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -222,10 +206,8 @@ PropList::copyProp(PropList &dest, const char *name) const
 ///\param       dest - IN: Destination property list or class
 ///\param       name - IN: Name of the property to copy - \c H5std_string
 //--------------------------------------------------------------------------
-void
-PropList::copyProp(PropList &dest, const H5std_string &name) const
-{
-    copyProp(dest, name.c_str());
+void PropList::copyProp(PropList &dest, const H5std_string &name) const {
+  copyProp(dest, name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -237,15 +219,13 @@ PropList::copyProp(PropList &dest, const H5std_string &name) const
 ///\note        This member function will be removed in the next release
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-PropList::copyProp(PropList &dest, PropList &src, const char *name) const
-{
-    hid_t  dst_id    = dest.getId();
-    hid_t  src_id    = src.getId();
-    herr_t ret_value = H5Pcopy_prop(dst_id, src_id, name);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("copyProp"), "H5Pcopy_prop failed");
-    }
+void PropList::copyProp(PropList &dest, PropList &src, const char *name) const {
+  hid_t dst_id = dest.getId();
+  hid_t src_id = src.getId();
+  herr_t ret_value = H5Pcopy_prop(dst_id, src_id, name);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("copyProp"), "H5Pcopy_prop failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -257,10 +237,9 @@ PropList::copyProp(PropList &dest, PropList &src, const char *name) const
 ///\param       src  - IN: Source property list or class
 ///\param       name - IN: Name of the property to copy - \c H5std_string
 //--------------------------------------------------------------------------
-void
-PropList::copyProp(PropList &dest, PropList &src, const H5std_string &name) const
-{
-    copyProp(dest, src, name.c_str());
+void PropList::copyProp(PropList &dest, PropList &src,
+                        const H5std_string &name) const {
+  copyProp(dest, src, name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -273,11 +252,7 @@ PropList::copyProp(PropList &dest, PropList &src, const H5std_string &name) cons
 //              addition, member IdComponent::id is moved into subclasses, and
 //              IdComponent::getId now becomes pure virtual function.
 //--------------------------------------------------------------------------
-hid_t
-PropList::getId() const
-{
-    return (id);
-}
+hid_t PropList::getId() const { return (id); }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -291,18 +266,15 @@ PropList::getId() const
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
 //--------------------------------------------------------------------------
-void
-PropList::p_setId(const hid_t new_id)
-{
-    // handling references to this old id
-    try {
-        close();
-    }
-    catch (Exception &close_error) {
-        throw PropListIException(inMemFunc("p_setId"), close_error.getDetailMsg());
-    }
-    // reset object's id to the given id
-    id = new_id;
+void PropList::p_setId(const hid_t new_id) {
+  // handling references to this old id
+  try {
+    close();
+  } catch (Exception &close_error) {
+    throw PropListIException(inMemFunc("p_setId"), close_error.getDetailMsg());
+  }
+  // reset object's id to the given id
+  id = new_id;
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
@@ -313,33 +285,30 @@ PropList::p_setId(const hid_t new_id)
 ///
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-PropList::close()
-{
-    if (p_valid_id(id)) {
-        herr_t ret_value = H5Pclose(id);
-        if (ret_value < 0) {
-            throw PropListIException(inMemFunc("close"), "H5Pclose failed");
-        }
-        // reset the id
-        id = H5I_INVALID_HID;
+void PropList::close() {
+  if (p_valid_id(id)) {
+    herr_t ret_value = H5Pclose(id);
+    if (ret_value < 0) {
+      throw PropListIException(inMemFunc("close"), "H5Pclose failed");
     }
+    // reset the id
+    id = H5I_INVALID_HID;
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    PropList::getClass
-///\brief       Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
-///\return      The property list class if it is not equal to \c H5P_ROOT
-///\exception   H5::PropListIException
+///\brief       Returns the class of this property list, i.e. \c
+///H5P_FILE_CREATE... \return      The property list class if it is not equal to
+///\c H5P_ROOT \exception   H5::PropListIException
 //--------------------------------------------------------------------------
-hid_t
-PropList::getClass() const
-{
-    hid_t plist_class = H5Pget_class(id);
-    if (plist_class == H5P_ROOT) {
-        throw PropListIException(inMemFunc("getClass"), "H5Pget_class failed - returned H5P_ROOT");
-    }
-    return (plist_class);
+hid_t PropList::getClass() const {
+  hid_t plist_class = H5Pget_class(id);
+  if (plist_class == H5P_ROOT) {
+    throw PropListIException(inMemFunc("getClass"),
+                             "H5Pget_class failed - returned H5P_ROOT");
+  }
+  return (plist_class);
 }
 
 //--------------------------------------------------------------------------
@@ -353,21 +322,19 @@ PropList::getClass() const
 ///             This routine checks if a property exists within a property
 ///             list or class.
 //--------------------------------------------------------------------------
-bool
-PropList::propExist(const char *name) const
-{
-    // Calls C routine H5Pexist to determine whether a property exists
-    // within a property list or class.  It returns a positive value, 0,
-    // or a negative value
-    htri_t ret_value = H5Pexist(id, name);
-    if (ret_value > 0)
-        return true;
-    else if (ret_value == 0)
-        return false;
-    else // Raise exception when H5Pexist returns a negative value
-    {
-        throw PropListIException(inMemFunc("propExist"), "H5Pexist failed");
-    }
+bool PropList::propExist(const char *name) const {
+  // Calls C routine H5Pexist to determine whether a property exists
+  // within a property list or class.  It returns a positive value, 0,
+  // or a negative value
+  htri_t ret_value = H5Pexist(id, name);
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else // Raise exception when H5Pexist returns a negative value
+  {
+    throw PropListIException(inMemFunc("propExist"), "H5Pexist failed");
+  }
 }
 //--------------------------------------------------------------------------
 // Function:    PropList::propExist
@@ -376,10 +343,8 @@ PropList::propExist(const char *name) const
 ///             accepts.
 ///\param       name - IN: Name of property to check for - \c H5std_string
 //--------------------------------------------------------------------------
-bool
-PropList::propExist(const H5std_string &name) const
-{
-    return (propExist(name.c_str()));
+bool PropList::propExist(const H5std_string &name) const {
+  return (propExist(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -391,13 +356,11 @@ PropList::propExist(const H5std_string &name) const
 ///             Releases memory and detaches a class from the property
 ///             list class hierarchy.
 //--------------------------------------------------------------------------
-void
-PropList::closeClass() const
-{
-    herr_t ret_value = H5Pclose_class(id);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("closeClass"), "H5Pclose_class failed");
-    }
+void PropList::closeClass() const {
+  herr_t ret_value = H5Pclose_class(id);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("closeClass"), "H5Pclose_class failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -411,13 +374,11 @@ PropList::closeClass() const
 ///             list.  The property name must exist or this routine will
 ///             throw an exception.
 //--------------------------------------------------------------------------
-void
-PropList::getProperty(const char *name, void *value) const
-{
-    herr_t ret_value = H5Pget(id, name, value);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
-    }
+void PropList::getProperty(const char *name, void *value) const {
+  herr_t ret_value = H5Pget(id, name, value);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
+  }
 }
 //--------------------------------------------------------------------------
 // Function:    PropList::getProperty
@@ -428,27 +389,25 @@ PropList::getProperty(const char *name, void *value) const
 ///\return      The property that is a \c H5std_string.
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-H5std_string
-PropList::getProperty(const char *name) const
-{
-    // Get property size first
-    size_t size = getPropSize(name);
+H5std_string PropList::getProperty(const char *name) const {
+  // Get property size first
+  size_t size = getPropSize(name);
 
-    // Allocate buffer then get the property
-    char *prop_strg_C = new char[size + 1]();
+  // Allocate buffer then get the property
+  char *prop_strg_C = new char[size + 1]();
 
-    herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
+  herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
 
-    // Throw exception if H5Pget returns failure
-    if (ret_value < 0) {
-        delete[] prop_strg_C;
-        throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
-    }
-
-    // Return property value as a string after deleting temp C-string
-    H5std_string prop_strg(prop_strg_C);
+  // Throw exception if H5Pget returns failure
+  if (ret_value < 0) {
     delete[] prop_strg_C;
-    return (prop_strg);
+    throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
+  }
+
+  // Return property value as a string after deleting temp C-string
+  H5std_string prop_strg(prop_strg_C);
+  delete[] prop_strg_C;
+  return (prop_strg);
 }
 //--------------------------------------------------------------------------
 // Function:    PropList::getProperty
@@ -458,10 +417,8 @@ PropList::getProperty(const char *name) const
 ///\param       name -   IN: Name of property to query - \c H5std_string
 ///\param       value - OUT: Pointer to the buffer for the property value
 //--------------------------------------------------------------------------
-void
-PropList::getProperty(const H5std_string &name, void *value) const
-{
-    getProperty(name.c_str(), value);
+void PropList::getProperty(const H5std_string &name, void *value) const {
+  getProperty(name.c_str(), value);
 }
 //--------------------------------------------------------------------------
 // Function:    PropList::getProperty
@@ -471,10 +428,8 @@ PropList::getProperty(const H5std_string &name, void *value) const
 ///\param       name -  IN: Name of property to query - \c H5std_string
 ///\return      The property that is a \c H5std_string.
 //--------------------------------------------------------------------------
-H5std_string
-PropList::getProperty(const H5std_string &name) const
-{
-    return (getProperty(name.c_str()));
+H5std_string PropList::getProperty(const H5std_string &name) const {
+  return (getProperty(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -489,15 +444,13 @@ PropList::getProperty(const H5std_string &name) const
 ///             value will be of 0.  This function works for both property
 ///             lists and classes.
 //--------------------------------------------------------------------------
-size_t
-PropList::getPropSize(const char *name) const
-{
-    size_t prop_size;
-    herr_t ret_value = H5Pget_size(id, name, &prop_size);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("getPropSize"), "H5Pget_size failed");
-    }
-    return (prop_size);
+size_t PropList::getPropSize(const char *name) const {
+  size_t prop_size;
+  herr_t ret_value = H5Pget_size(id, name, &prop_size);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("getPropSize"), "H5Pget_size failed");
+  }
+  return (prop_size);
 }
 //--------------------------------------------------------------------------
 // Function:    PropList::getPropSize
@@ -507,10 +460,8 @@ PropList::getPropSize(const char *name) const
 ///\param       name - IN: Name of property to query - \c H5std_string
 ///
 //--------------------------------------------------------------------------
-size_t
-PropList::getPropSize(const H5std_string &name) const
-{
-    return (getPropSize(name.c_str()));
+size_t PropList::getPropSize(const H5std_string &name) const {
+  return (getPropSize(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -519,18 +470,15 @@ PropList::getPropSize(const H5std_string &name) const
 ///\return      A string containing the class name, if success, otherwise,
 ///             an empty string.
 //--------------------------------------------------------------------------
-H5std_string
-PropList::getClassName() const
-{
-    char *temp_str;
-    temp_str = H5Pget_class_name(id);
-    if (temp_str != NULL) {
-        H5std_string class_name(temp_str);
-        H5free_memory(temp_str);
-        return (class_name);
-    }
-    else
-        return "";
+H5std_string PropList::getClassName() const {
+  char *temp_str;
+  temp_str = H5Pget_class_name(id);
+  if (temp_str != NULL) {
+    H5std_string class_name(temp_str);
+    H5free_memory(temp_str);
+    return (class_name);
+  } else
+    return "";
 }
 
 //--------------------------------------------------------------------------
@@ -539,15 +487,13 @@ PropList::getClassName() const
 ///\return      Size of the property.
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-size_t
-PropList::getNumProps() const
-{
-    size_t nprops;
-    herr_t ret_value = H5Pget_nprops(id, &nprops);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("getNumProps"), "H5Pget_nprops failed");
-    }
-    return (nprops);
+size_t PropList::getNumProps() const {
+  size_t nprops;
+  herr_t ret_value = H5Pget_nprops(id, &nprops);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("getNumProps"), "H5Pget_nprops failed");
+  }
+  return (nprops);
 }
 
 //--------------------------------------------------------------------------
@@ -560,13 +506,11 @@ PropList::getNumProps() const
 //              Revision svn r29815 changed 'value' to const, hence, deprecated
 //              the non-const setProperty.
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const char *name, const void *value) const
-{
-    herr_t ret_value = H5Pset(id, name, value);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
-    }
+void PropList::setProperty(const char *name, const void *value) const {
+  herr_t ret_value = H5Pset(id, name, value);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -575,13 +519,11 @@ PropList::setProperty(const char *name, const void *value) const
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const char *name, void *value) const
-{
-    herr_t ret_value = H5Pset(id, name, value);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
-    }
+void PropList::setProperty(const char *name, void *value) const {
+  herr_t ret_value = H5Pset(id, name, value);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -595,13 +537,11 @@ PropList::setProperty(const char *name, void *value) const
 //              Revision svn r29815 changed 'value' to const, hence, deprecated
 //              the non-const setProperty.
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const char *name, const char *charptr) const
-{
-    herr_t ret_value = H5Pset(id, name, static_cast<const void *>(charptr));
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
-    }
+void PropList::setProperty(const char *name, const char *charptr) const {
+  herr_t ret_value = H5Pset(id, name, static_cast<const void *>(charptr));
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -612,10 +552,8 @@ PropList::setProperty(const char *name, const char *charptr) const
 ///\param       name - IN: Name of property to set - \c char pointer
 ///\param       strg - IN: Value for the property is a \c H5std_string
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const char *name, const H5std_string &strg) const
-{
-    setProperty(name, strg.c_str());
+void PropList::setProperty(const char *name, const H5std_string &strg) const {
+  setProperty(name, strg.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -624,10 +562,8 @@ PropList::setProperty(const char *name, const H5std_string &strg) const
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const char *name, H5std_string &strg) const
-{
-    setProperty(name, strg.c_str());
+void PropList::setProperty(const char *name, H5std_string &strg) const {
+  setProperty(name, strg.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -638,10 +574,8 @@ PropList::setProperty(const char *name, H5std_string &strg) const
 ///\param       name  - IN: Name of property to set - \c H5std_string
 ///\param       value - IN: Void pointer to the value for the property
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const H5std_string &name, const void *value) const
-{
-    setProperty(name.c_str(), value);
+void PropList::setProperty(const H5std_string &name, const void *value) const {
+  setProperty(name.c_str(), value);
 }
 
 //--------------------------------------------------------------------------
@@ -650,10 +584,8 @@ PropList::setProperty(const H5std_string &name, const void *value) const
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const H5std_string &name, void *value) const
-{
-    setProperty(name.c_str(), value);
+void PropList::setProperty(const H5std_string &name, void *value) const {
+  setProperty(name.c_str(), value);
 }
 
 //--------------------------------------------------------------------------
@@ -664,10 +596,9 @@ PropList::setProperty(const H5std_string &name, void *value) const
 ///\param       name - IN: Name of property to set - \c H5std_string
 ///\param       strg - IN: Value for the property is a \c H5std_string
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const H5std_string &name, const H5std_string &strg) const
-{
-    setProperty(name.c_str(), strg.c_str());
+void PropList::setProperty(const H5std_string &name,
+                           const H5std_string &strg) const {
+  setProperty(name.c_str(), strg.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -676,10 +607,8 @@ PropList::setProperty(const H5std_string &name, const H5std_string &strg) const
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
-void
-PropList::setProperty(const H5std_string &name, H5std_string &strg) const
-{
-    setProperty(name.c_str(), strg.c_str());
+void PropList::setProperty(const H5std_string &name, H5std_string &strg) const {
+  setProperty(name.c_str(), strg.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -690,18 +619,16 @@ PropList::setProperty(const H5std_string &name, H5std_string &strg) const
 ///             class, and false, otherwise.
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-bool
-PropList::isAClass(const PropList &prop_class) const
-{
-    htri_t ret_value = H5Pisa_class(id, prop_class.getId());
-    if (ret_value > 0)
-        return true;
-    else if (ret_value == 0)
-        return false;
-    else // Raise exception when H5Pisa_class returns a negative value
-    {
-        throw PropListIException(inMemFunc("isAClass"), "H5Pisa_class failed");
-    }
+bool PropList::isAClass(const PropList &prop_class) const {
+  htri_t ret_value = H5Pisa_class(id, prop_class.getId());
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else // Raise exception when H5Pisa_class returns a negative value
+  {
+    throw PropListIException(inMemFunc("isAClass"), "H5Pisa_class failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -710,13 +637,11 @@ PropList::isAClass(const PropList &prop_class) const
 ///\param       name - IN: Name of property to remove - \c char pointer
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-PropList::removeProp(const char *name) const
-{
-    herr_t ret_value = H5Premove(id, name);
-    if (ret_value < 0) {
-        throw PropListIException(inMemFunc("removeProp"), "H5Premove failed");
-    }
+void PropList::removeProp(const char *name) const {
+  herr_t ret_value = H5Premove(id, name);
+  if (ret_value < 0) {
+    throw PropListIException(inMemFunc("removeProp"), "H5Premove failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -726,32 +651,28 @@ PropList::removeProp(const char *name) const
 ///             accepts.
 ///\param       name - IN: Name of property to remove - \c H5std_string
 //--------------------------------------------------------------------------
-void
-PropList::removeProp(const H5std_string &name) const
-{
-    removeProp(name.c_str());
+void PropList::removeProp(const H5std_string &name) const {
+  removeProp(name.c_str());
 }
 
 //--------------------------------------------------------------------------
 // Function:    PropList::operator==
-///\brief       Compares this property list or class against the given list or class.
-///\param       rhs - IN: Reference to the property list to compare
+///\brief       Compares this property list or class against the given list or
+///class. \param       rhs - IN: Reference to the property list to compare
 ///\return      true if the property lists or classes are equal, and
 ///             false, otherwise.
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-bool
-PropList::operator==(const PropList &rhs) const
-{
-    htri_t ret_value = H5Pequal(id, rhs.getId());
-    if (ret_value > 0)
-        return true;
-    else if (ret_value == 0)
-        return false;
-    else // Raise exception when H5Pequal returns a negative value
-    {
-        throw PropListIException(inMemFunc("operator=="), "H5Pequal failed");
-    }
+bool PropList::operator==(const PropList &rhs) const {
+  htri_t ret_value = H5Pequal(id, rhs.getId());
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else // Raise exception when H5Pequal returns a negative value
+  {
+    throw PropListIException(inMemFunc("operator=="), "H5Pequal failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -760,15 +681,14 @@ PropList::operator==(const PropList &rhs) const
 ///\return      The parent class of a property class
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-PropList
-PropList::getClassParent() const
-{
-    hid_t class_id = H5Pget_class_parent(id);
-    if (class_id < 0) {
-        throw PropListIException(inMemFunc("getClassParent"), "H5Pget_class_parent failed");
-    }
-    PropList pclass(class_id);
-    return (pclass);
+PropList PropList::getClassParent() const {
+  hid_t class_id = H5Pget_class_parent(id);
+  if (class_id < 0) {
+    throw PropListIException(inMemFunc("getClassParent"),
+                             "H5Pget_class_parent failed");
+  }
+  PropList pclass(class_id);
+  return (pclass);
 }
 
 //--------------------------------------------------------------------------
@@ -780,14 +700,12 @@ PropList::getClassParent() const
 //              - Replaced decRefCount with close() to let the C library
 //              handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
-PropList::~PropList()
-{
-    try {
-        close();
-    }
-    catch (Exception &close_error) {
-        cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;
-    }
+PropList::~PropList() {
+  try {
+    close();
+  } catch (Exception &close_error) {
+    cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;
+  }
 }
 
 } // namespace H5

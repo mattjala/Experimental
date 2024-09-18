@@ -37,16 +37,14 @@
  *
  *-------------------------------------------------------------------------
  */
-int
-main(void)
-{
-    char *driver = NULL;
+int main(void) {
+  char *driver = NULL;
 
-    driver = HDgetenv(HDF5_DRIVER);
+  driver = HDgetenv(HDF5_DRIVER);
 
-    if (H5FD__supports_swmr_test(driver))
-        return EXIT_SUCCESS;
-    else
-        return EXIT_FAILURE;
+  if (H5FD__supports_swmr_test(driver))
+    return EXIT_SUCCESS;
+  else
+    return EXIT_FAILURE;
 
 } /* end main() */

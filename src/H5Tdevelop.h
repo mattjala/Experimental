@@ -33,18 +33,18 @@
  * Commands sent to conversion functions
  */
 typedef enum H5T_cmd_t {
-    H5T_CONV_INIT = 0, /**< query and/or initialize private data	     */
-    H5T_CONV_CONV = 1, /**< convert data from source to dest datatype */
-    H5T_CONV_FREE = 2  /**< function is being removed from path	     */
+  H5T_CONV_INIT = 0, /**< query and/or initialize private data	     */
+  H5T_CONV_CONV = 1, /**< convert data from source to dest datatype */
+  H5T_CONV_FREE = 2  /**< function is being removed from path	     */
 } H5T_cmd_t;
 
 /**
  * How is the `bkg' buffer used by the conversion function?
  */
 typedef enum H5T_bkg_t {
-    H5T_BKG_NO   = 0, /**< background buffer is not needed, send NULL */
-    H5T_BKG_TEMP = 1, /**< bkg buffer used as temp storage only       */
-    H5T_BKG_YES  = 2  /**< init bkg buf with data before conversion   */
+  H5T_BKG_NO = 0,   /**< background buffer is not needed, send NULL */
+  H5T_BKG_TEMP = 1, /**< bkg buffer used as temp storage only       */
+  H5T_BKG_YES = 2   /**< init bkg buf with data before conversion   */
 } H5T_bkg_t;
 
 /**
@@ -52,10 +52,10 @@ typedef enum H5T_bkg_t {
  */
 //! <!-- [H5T_cdata_t_snip] -->
 typedef struct H5T_cdata_t {
-    H5T_cmd_t command;  /**< what should the conversion function do?    */
-    H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
-    hbool_t   recalc;   /**< recalculate private data		     */
-    void     *priv;     /**< private data				     */
+  H5T_cmd_t command;  /**< what should the conversion function do?    */
+  H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
+  hbool_t recalc;     /**< recalculate private data		     */
+  void *priv;         /**< private data				     */
 } H5T_cdata_t;
 //! <!-- [H5T_cdata_t_snip] -->
 
@@ -63,17 +63,19 @@ typedef struct H5T_cdata_t {
  * Conversion function persistence
  */
 typedef enum H5T_pers_t {
-    H5T_PERS_DONTCARE = -1, /**< wild card				     */
-    H5T_PERS_HARD     = 0,  /**< hard conversion function		     */
-    H5T_PERS_SOFT     = 1   /**< soft conversion function		     */
+  H5T_PERS_DONTCARE = -1, /**< wild card				     */
+  H5T_PERS_HARD = 0,      /**< hard conversion function		     */
+  H5T_PERS_SOFT = 1       /**< soft conversion function		     */
 } H5T_pers_t;
 
 /**
  * All datatype conversion functions are...
  */
 //! <!-- [H5T_conv_t_snip] -->
-typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
-                             size_t bkg_stride, void *buf, void *bkg, hid_t dset_xfer_plist);
+typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+                             size_t nelmts, size_t buf_stride,
+                             size_t bkg_stride, void *buf, void *bkg,
+                             hid_t dset_xfer_plist);
 //! <!-- [H5T_conv_t_snip] -->
 
 /********************/
@@ -135,7 +137,8 @@ extern "C" {
  *              the \c nelmts parameter type changed to size_t.
  *
  */
-H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func);
+H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id,
+                          hid_t dst_id, H5T_conv_t func);
 /**
  * \ingroup CONV
  *
@@ -170,7 +173,8 @@ H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t
  *                the \c nelmts parameter type changed to size_t.
  *
  */
-H5_DLL herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func);
+H5_DLL herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id,
+                            hid_t dst_id, H5T_conv_t func);
 /**
  * \ingroup CONV
  *
