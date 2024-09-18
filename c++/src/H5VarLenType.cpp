@@ -12,18 +12,18 @@
 
 #include <string>
 
-#include "H5Include.h"
+#include "H5DaccProp.h"
+#include "H5DataType.h"
+#include "H5DcreatProp.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5PropList.h"
-#include "H5OcreatProp.h"
-#include "H5DcreatProp.h"
-#include "H5LcreatProp.h"
+#include "H5Include.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
-#include "H5DataType.h"
+#include "H5OcreatProp.h"
+#include "H5PropList.h"
 #include "H5VarLenType.h"
 
 namespace H5 {
@@ -32,9 +32,7 @@ namespace H5 {
 // Function:    VarLenType default constructor
 ///\brief       Default constructor: Creates a stub variable-length datatype.
 //--------------------------------------------------------------------------
-VarLenType::VarLenType() : DataType()
-{
-}
+VarLenType::VarLenType() : DataType() {}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType overloaded constructor
@@ -42,17 +40,13 @@ VarLenType::VarLenType() : DataType()
 ///\param       existing_id - IN: Id of an existing datatype
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id)
-{
-}
+VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const VarLenType &original) : DataType(original)
-{
-}
+VarLenType::VarLenType(const VarLenType &original) : DataType(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType overloaded constructor
@@ -65,12 +59,12 @@ VarLenType::VarLenType(const VarLenType &original) : DataType(original)
 //              Updated: this is unnecessary.
 //              -BMR, Sep, 2017
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const DataType *base_type) : DataType()
-{
-    id = H5Tvlen_create(base_type->getId());
-    if (id < 0) {
-        throw DataTypeIException("VarLenType constructor", "H5Tvlen_create returns negative value");
-    }
+VarLenType::VarLenType(const DataType *base_type) : DataType() {
+  id = H5Tvlen_create(base_type->getId());
+  if (id < 0) {
+    throw DataTypeIException("VarLenType constructor",
+                             "H5Tvlen_create returns negative value");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -80,12 +74,12 @@ VarLenType::VarLenType(const DataType *base_type) : DataType()
 ///\param       base_type - IN: An existing datatype
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const DataType &base_type) : DataType()
-{
-    id = H5Tvlen_create(base_type.getId());
-    if (id < 0) {
-        throw DataTypeIException("VarLenType constructor", "H5Tvlen_create returns negative value");
-    }
+VarLenType::VarLenType(const DataType &base_type) : DataType() {
+  id = H5Tvlen_create(base_type.getId());
+  if (id < 0) {
+    throw DataTypeIException("VarLenType constructor",
+                             "H5Tvlen_create returns negative value");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -101,9 +95,9 @@ VarLenType::VarLenType(const DataType &base_type) : DataType()
 //              improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const H5Location &loc, const char *dtype_name) : DataType()
-{
-    id = p_opentype(loc, dtype_name);
+VarLenType::VarLenType(const H5Location &loc, const char *dtype_name)
+    : DataType() {
+  id = p_opentype(loc, dtype_name);
 }
 
 //--------------------------------------------------------------------------
@@ -119,9 +113,9 @@ VarLenType::VarLenType(const H5Location &loc, const char *dtype_name) : DataType
 //              to improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const H5Location &loc, const H5std_string &dtype_name) : DataType()
-{
-    id = p_opentype(loc, dtype_name.c_str());
+VarLenType::VarLenType(const H5Location &loc, const H5std_string &dtype_name)
+    : DataType() {
+  id = p_opentype(loc, dtype_name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -131,27 +125,22 @@ VarLenType::VarLenType(const H5Location &loc, const H5std_string &dtype_name) : 
 ///
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-DataType *
-VarLenType::decode() const
-{
-    hid_t encoded_vltype_id = H5I_INVALID_HID;
-    try {
-        encoded_vltype_id = p_decode();
-    }
-    catch (DataTypeIException &err) {
-        throw;
-    }
-    VarLenType *encoded_vltype = new VarLenType;
-    encoded_vltype->p_setId(encoded_vltype_id);
-    return (encoded_vltype);
+DataType *VarLenType::decode() const {
+  hid_t encoded_vltype_id = H5I_INVALID_HID;
+  try {
+    encoded_vltype_id = p_decode();
+  } catch (DataTypeIException &err) {
+    throw;
+  }
+  VarLenType *encoded_vltype = new VarLenType;
+  encoded_vltype->p_setId(encoded_vltype_id);
+  return (encoded_vltype);
 }
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType destructor
 ///\brief       Properly terminates access to this datatype.
 //--------------------------------------------------------------------------
-VarLenType::~VarLenType()
-{
-}
+VarLenType::~VarLenType() {}
 
 } // namespace H5

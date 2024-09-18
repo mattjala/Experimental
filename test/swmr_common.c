@@ -23,8 +23,8 @@
 /* Headers */
 /***********/
 
-#include "h5test.h"
 #include "swmr_common.h"
+#include "h5test.h"
 #include "vds_swmr.h"
 
 /*******************/
@@ -73,15 +73,17 @@ unsigned symbol_count[NLEVELS] = {100, 200, 400, 800, 1600};
 /* Array of dataset information entries (1 per dataset) */
 symbol_info_t *symbol_info[NLEVELS];
 
-hsize_t PLANES[N_SOURCES][RANK] = {{1, SM_HEIGHT, WIDTH}, {1, LG_HEIGHT, WIDTH}, {1, SM_HEIGHT, WIDTH},
-                                   {1, LG_HEIGHT, WIDTH}, {1, SM_HEIGHT, WIDTH}, {1, LG_HEIGHT, WIDTH}};
+hsize_t PLANES[N_SOURCES][RANK] = {
+    {1, SM_HEIGHT, WIDTH}, {1, LG_HEIGHT, WIDTH}, {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH}, {1, SM_HEIGHT, WIDTH}, {1, LG_HEIGHT, WIDTH}};
 
-char FILE_NAMES[N_SOURCES][NAME_LEN] = {{"vds_swmr_src_a.h5"}, {"vds_swmr_src_b.h5"}, {"vds_swmr_src_c.h5"},
-                                        {"vds_swmr_src_d.h5"}, {"vds_swmr_src_e.h5"}, {"vds_swmr_src_f.h5"}};
+char FILE_NAMES[N_SOURCES][NAME_LEN] = {
+    {"vds_swmr_src_a.h5"}, {"vds_swmr_src_b.h5"}, {"vds_swmr_src_c.h5"},
+    {"vds_swmr_src_d.h5"}, {"vds_swmr_src_e.h5"}, {"vds_swmr_src_f.h5"}};
 
-char VDS_FILE_NAME[NAME_LEN]    = "vds_swmr.h5";
+char VDS_FILE_NAME[NAME_LEN] = "vds_swmr.h5";
 char SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
-char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
+char VDS_DSET_NAME[NAME_LEN] = "vds_dset";
 
 /*-------------------------------------------------------------------------
  * Function:    choose_dataset
@@ -95,19 +97,17 @@ char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
  *
  *-------------------------------------------------------------------------
  */
-symbol_info_t *
-choose_dataset(void)
-{
-    unsigned level;  /* The level of the dataset */
-    unsigned offset; /* The "offset" of the dataset at that level */
+symbol_info_t *choose_dataset(void) {
+  unsigned level;  /* The level of the dataset */
+  unsigned offset; /* The "offset" of the dataset at that level */
 
-    /* Determine level of dataset */
-    level = symbol_mapping[HDrandom() % NMAPPING];
+  /* Determine level of dataset */
+  level = symbol_mapping[HDrandom() % NMAPPING];
 
-    /* Determine the offset of the level */
-    offset = (unsigned)(HDrandom() % (int)symbol_count[level]);
+  /* Determine the offset of the level */
+  offset = (unsigned)(HDrandom() % (int)symbol_count[level]);
 
-    return &symbol_info[level][offset];
+  return &symbol_info[level][offset];
 } /* end choose_dataset() */
 
 /*-------------------------------------------------------------------------
@@ -123,31 +123,30 @@ choose_dataset(void)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-create_symbol_datatype(void)
-{
-    hid_t sym_type_id;  /* Datatype ID for symbol */
-    hid_t opaq_type_id; /* Datatype ID for opaque part of record */
+hid_t create_symbol_datatype(void) {
+  hid_t sym_type_id;  /* Datatype ID for symbol */
+  hid_t opaq_type_id; /* Datatype ID for opaque part of record */
 
-    /* Create opaque datatype to represent other information for this record */
-    if ((opaq_type_id = H5Tcreate(H5T_OPAQUE, (size_t)DTYPE_SIZE)) < 0)
-        return -1;
+  /* Create opaque datatype to represent other information for this record */
+  if ((opaq_type_id = H5Tcreate(H5T_OPAQUE, (size_t)DTYPE_SIZE)) < 0)
+    return -1;
 
-    /* Create compound datatype for symbol */
-    if ((sym_type_id = H5Tcreate(H5T_COMPOUND, sizeof(symbol_t))) < 0)
-        return -1;
+  /* Create compound datatype for symbol */
+  if ((sym_type_id = H5Tcreate(H5T_COMPOUND, sizeof(symbol_t))) < 0)
+    return -1;
 
-    /* Insert fields in symbol datatype */
-    if (H5Tinsert(sym_type_id, "rec_id", HOFFSET(symbol_t, rec_id), H5T_NATIVE_UINT64) < 0)
-        return -1;
-    if (H5Tinsert(sym_type_id, "info", HOFFSET(symbol_t, info), opaq_type_id) < 0)
-        return -1;
+  /* Insert fields in symbol datatype */
+  if (H5Tinsert(sym_type_id, "rec_id", HOFFSET(symbol_t, rec_id),
+                H5T_NATIVE_UINT64) < 0)
+    return -1;
+  if (H5Tinsert(sym_type_id, "info", HOFFSET(symbol_t, info), opaq_type_id) < 0)
+    return -1;
 
-    /* Close opaque datatype */
-    if (H5Tclose(opaq_type_id) < 0)
-        return -1;
+  /* Close opaque datatype */
+  if (H5Tclose(opaq_type_id) < 0)
+    return -1;
 
-    return sym_type_id;
+  return sym_type_id;
 } /* end create_symbol_datatype() */
 
 /*-------------------------------------------------------------------------
@@ -176,14 +175,13 @@ create_symbol_datatype(void)
  *
  *-------------------------------------------------------------------------
  */
-int
-generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned count)
-{
-    assert(name_buf);
+int generate_name(char *name_buf, size_t name_buf_length, unsigned level,
+                  unsigned count) {
+  assert(name_buf);
 
-    HDsnprintf(name_buf, name_buf_length, "%u-%04u", level, count);
+  HDsnprintf(name_buf, name_buf_length, "%u-%04u", level, count);
 
-    return 0;
+  return 0;
 } /* end generate_name() */
 
 /*-------------------------------------------------------------------------
@@ -198,24 +196,22 @@ generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned c
  *
  *-------------------------------------------------------------------------
  */
-int
-generate_symbols(void)
-{
-    unsigned u, v; /* Local index variables */
+int generate_symbols(void) {
+  unsigned u, v; /* Local index variables */
 
-    for (u = 0; u < NLEVELS; u++) {
-        symbol_info[u] = malloc(symbol_count[u] * sizeof(symbol_info_t));
-        for (v = 0; v < symbol_count[u]; v++) {
-            char name_buf[64];
+  for (u = 0; u < NLEVELS; u++) {
+    symbol_info[u] = malloc(symbol_count[u] * sizeof(symbol_info_t));
+    for (v = 0; v < symbol_count[u]; v++) {
+      char name_buf[64];
 
-            generate_name(name_buf, sizeof(name_buf), u, v);
-            symbol_info[u][v].name     = HDstrdup(name_buf);
-            symbol_info[u][v].dsid     = -1;
-            symbol_info[u][v].nrecords = 0;
-        } /* end for */
-    }     /* end for */
+      generate_name(name_buf, sizeof(name_buf), u, v);
+      symbol_info[u][v].name = HDstrdup(name_buf);
+      symbol_info[u][v].dsid = -1;
+      symbol_info[u][v].nrecords = 0;
+    } /* end for */
+  }   /* end for */
 
-    return 0;
+  return 0;
 } /* end generate_symbols() */
 
 /*-------------------------------------------------------------------------
@@ -230,25 +226,24 @@ generate_symbols(void)
  *
  *-------------------------------------------------------------------------
  */
-int
-shutdown_symbols(void)
-{
-    unsigned u, v; /* Local index variables */
+int shutdown_symbols(void) {
+  unsigned u, v; /* Local index variables */
 
-    /* Clean up the symbols */
-    for (u = 0; u < NLEVELS; u++) {
-        for (v = 0; v < symbol_count[u]; v++)
-            free(symbol_info[u][v].name);
-        free(symbol_info[u]);
-    } /* end for */
+  /* Clean up the symbols */
+  for (u = 0; u < NLEVELS; u++) {
+    for (v = 0; v < symbol_count[u]; v++)
+      free(symbol_info[u][v].name);
+    free(symbol_info[u]);
+  } /* end for */
 
-    return 0;
+  return 0;
 } /* end shutdown_symbols() */
 
 /*-------------------------------------------------------------------------
  * Function:    print_metadata_retries_info
  *
- * Purpose:     To retrieve and print the collection of metadata retries for the file.
+ * Purpose:     To retrieve and print the collection of metadata retries for the
+ *file.
  *
  * Parameters:  fid: the currently opened file identifier
  *
@@ -257,38 +252,36 @@ shutdown_symbols(void)
  *
  *-------------------------------------------------------------------------
  */
-int
-print_metadata_retries_info(hid_t fid)
-{
-    H5F_retry_info_t info;
-    unsigned         i;
+int print_metadata_retries_info(hid_t fid) {
+  H5F_retry_info_t info;
+  unsigned i;
 
-    /* Retrieve the collection of retries */
-    if (H5Fget_metadata_read_retry_info(fid, &info) < 0)
-        return (-1);
+  /* Retrieve the collection of retries */
+  if (H5Fget_metadata_read_retry_info(fid, &info) < 0)
+    return (-1);
 
-    /* Print information for each non-NULL retries[i] */
-    for (i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
-        unsigned power;
-        unsigned j;
+  /* Print information for each non-NULL retries[i] */
+  for (i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
+    unsigned power;
+    unsigned j;
 
-        if (NULL == info.retries[i])
-            continue;
+    if (NULL == info.retries[i])
+      continue;
 
-        fprintf(stderr, "Metadata read retries for item %u:\n", i);
-        power = 1;
-        for (j = 0; j < info.nbins; j++) {
-            if (info.retries[i][j])
-                fprintf(stderr, "\t# of retries for %u - %u retries: %u\n", power, (power * 10) - 1,
-                        info.retries[i][j]);
-            power *= 10;
-        } /* end for */
-    }     /* end for */
+    fprintf(stderr, "Metadata read retries for item %u:\n", i);
+    power = 1;
+    for (j = 0; j < info.nbins; j++) {
+      if (info.retries[i][j])
+        fprintf(stderr, "\t# of retries for %u - %u retries: %u\n", power,
+                (power * 10) - 1, info.retries[i][j]);
+      power *= 10;
+    } /* end for */
+  }   /* end for */
 
-    /* Free memory for each non-NULL retries[i] */
-    for (i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-        if (info.retries[i] != NULL)
-            H5free_memory(info.retries[i]);
+  /* Free memory for each non-NULL retries[i] */
+  for (i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+    if (info.retries[i] != NULL)
+      H5free_memory(info.retries[i]);
 
-    return 0;
+  return 0;
 } /* print_metadata_retries_info() */

@@ -35,35 +35,36 @@
  *              full_namelen - name length
  * Returns:     0 on success, -1 on failure
  *---------------------------------------------------------------------------*/
-int_f
-nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name, size_t_f *full_namelen)
-{
-    char *c_base_name = NULL;
-    char *c_full_name = NULL;
-    int_f ret_value   = 0;
+int_f nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl,
+                    _fcd full_name, size_t_f *full_namelen) {
+  char *c_base_name = NULL;
+  char *c_full_name = NULL;
+  int_f ret_value = 0;
 
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if (NULL == (c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen)))
-        HGOTO_DONE(FAIL);
-    if (NULL == (c_full_name = (char *)malloc((size_t)*full_namelen + 1)))
-        HGOTO_DONE(FAIL);
+  /*
+   * Convert FORTRAN name to C name
+   */
+  if (NULL ==
+      (c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen)))
+    HGOTO_DONE(FAIL);
+  if (NULL == (c_full_name = (char *)malloc((size_t)*full_namelen + 1)))
+    HGOTO_DONE(FAIL);
 
-    /*
-     * Call h5_fixname function.
-     */
-    if (NULL == h5_fixname(c_base_name, (hid_t)*fapl, c_full_name, (size_t)*full_namelen + 1))
-        HGOTO_DONE(FAIL);
-    HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);
+  /*
+   * Call h5_fixname function.
+   */
+  if (NULL == h5_fixname(c_base_name, (hid_t)*fapl, c_full_name,
+                         (size_t)*full_namelen + 1))
+    HGOTO_DONE(FAIL);
+  HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);
 
 done:
-    if (c_base_name)
-        free(c_base_name);
-    if (c_full_name)
-        free(c_full_name);
+  if (c_base_name)
+    free(c_base_name);
+  if (c_full_name)
+    free(c_full_name);
 
-    return ret_value;
+  return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -74,42 +75,40 @@ done:
  *              fapl - file access property list
  * Returns:     0 on success, -1 on failure
  *---------------------------------------------------------------------------*/
-int_f
-nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl)
-{
-    char  filename[1024];
-    int   ret_value = -1;
-    char *c_base_name[1];
-    hid_t c_fapl;
+int_f nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl) {
+  char filename[1024];
+  int ret_value = -1;
+  char *c_base_name[1];
+  hid_t c_fapl;
 
-    /*
-     * Define ifile access property list
-     */
-    c_fapl = (hid_t)*fapl;
-    /*c_fapl = H5Pcreate(H5P_FILE_ACCESS);*/
-    /*
-     * Convert FORTRAN name to C name
-     */
-    c_base_name[0] = (char *)HD5f2cstring(base_name, (size_t)*base_namelen);
-    if (c_base_name[0] == NULL)
-        goto DONE;
-
-    /*
-     * Call h5_cleanup function.
-     */
-    /*if (h5_cleanup(c_base_name, c_fapl) != 0) {
-    ret_value = 0;
+  /*
+   * Define ifile access property list
+   */
+  c_fapl = (hid_t)*fapl;
+  /*c_fapl = H5Pcreate(H5P_FILE_ACCESS);*/
+  /*
+   * Convert FORTRAN name to C name
+   */
+  c_base_name[0] = (char *)HD5f2cstring(base_name, (size_t)*base_namelen);
+  if (c_base_name[0] == NULL)
     goto DONE;
-    }
+
+  /*
+   * Call h5_cleanup function.
+   */
+  /*if (h5_cleanup(c_base_name, c_fapl) != 0) {
+  ret_value = 0;
+  goto DONE;
+  }
 */
-    h5_fixname(c_base_name[0], c_fapl, filename, sizeof(filename));
-    HDremove(filename);
-    ret_value = 0;
+  h5_fixname(c_base_name[0], c_fapl, filename, sizeof(filename));
+  HDremove(filename);
+  ret_value = 0;
 
 DONE:
-    if (NULL != c_base_name[0])
-        free(c_base_name[0]);
-    return ret_value;
+  if (NULL != c_base_name[0])
+    free(c_base_name[0]);
+  return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -121,11 +120,7 @@ DONE:
  * Inputs:      status - status for exit() to return
  * Returns:     none
  *---------------------------------------------------------------------------*/
-void
-nh5_exit_c(int_f *status)
-{
-    exit((int)*status);
-} /* h5_exit_c */
+void nh5_exit_c(int_f *status) { exit((int)*status); } /* h5_exit_c */
 
 /*----------------------------------------------------------------------------
  * Name:        h5_env_nocleanup_c
@@ -135,10 +130,8 @@ nh5_exit_c(int_f *status)
  *                       0 - HDF5_NOCLEANUP is not set
  * Returns:     none
  *---------------------------------------------------------------------------*/
-void
-nh5_env_nocleanup_c(int_f *status)
-{
-    *status = (int_f)0;
-    if (getenv(HDF5_NOCLEANUP))
-        *status = (int_f)1;
+void nh5_env_nocleanup_c(int_f *status) {
+  *status = (int_f)0;
+  if (getenv(HDF5_NOCLEANUP))
+    *status = (int_f)1;
 } /* h5_env_nocleanup_c */

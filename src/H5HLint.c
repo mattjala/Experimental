@@ -28,10 +28,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions            */
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5FLprivate.h" /* Free lists                   */
 #include "H5HLpkg.h"     /* Local Heaps                  */
+#include "H5private.h"   /* Generic Functions            */
 
 /****************/
 /* Local Macros */
@@ -74,37 +74,35 @@ H5FL_DEFINE_STATIC(H5HL_t);
  *
  *-------------------------------------------------------------------------
  */
-H5HL_t *
-H5HL__new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size)
-{
-    H5HL_t *heap      = NULL; /* New local heap */
-    H5HL_t *ret_value = NULL;
+H5HL_t *H5HL__new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size) {
+  H5HL_t *heap = NULL; /* New local heap */
+  H5HL_t *ret_value = NULL;
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* check arguments */
-    assert(sizeof_size > 0);
-    assert(sizeof_addr > 0);
-    assert(prfx_size > 0);
+  /* check arguments */
+  assert(sizeof_size > 0);
+  assert(sizeof_addr > 0);
+  assert(prfx_size > 0);
 
-    /* Allocate new local heap structure */
-    if (NULL == (heap = H5FL_CALLOC(H5HL_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed");
+  /* Allocate new local heap structure */
+  if (NULL == (heap = H5FL_CALLOC(H5HL_t)))
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed");
 
-    /* Initialize non-zero fields */
-    heap->sizeof_size = sizeof_size;
-    heap->sizeof_addr = sizeof_addr;
-    heap->prfx_size   = prfx_size;
+  /* Initialize non-zero fields */
+  heap->sizeof_size = sizeof_size;
+  heap->sizeof_addr = sizeof_addr;
+  heap->prfx_size = prfx_size;
 
-    /* Set the return value */
-    ret_value = heap;
+  /* Set the return value */
+  ret_value = heap;
 
 done:
-    if (!ret_value && heap != NULL)
-        if (NULL == (heap = H5FL_FREE(H5HL_t, heap)))
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't free heap memory");
+  if (!ret_value && heap != NULL)
+    if (NULL == (heap = H5FL_FREE(H5HL_t, heap)))
+      HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't free heap memory");
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__new() */
 
 /*-------------------------------------------------------------------------
@@ -116,18 +114,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HL__inc_rc(H5HL_t *heap)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+herr_t H5HL__inc_rc(H5HL_t *heap) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check arguments */
-    assert(heap);
+  /* check arguments */
+  assert(heap);
 
-    /* Increment heap's ref. count */
-    heap->rc++;
+  /* Increment heap's ref. count */
+  heap->rc++;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL__inc_rc() */
 
 /*-------------------------------------------------------------------------
@@ -139,25 +135,23 @@ H5HL__inc_rc(H5HL_t *heap)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HL__dec_rc(H5HL_t *heap)
-{
-    herr_t ret_value = SUCCEED;
+herr_t H5HL__dec_rc(H5HL_t *heap) {
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* check arguments */
-    assert(heap);
+  /* check arguments */
+  assert(heap);
 
-    /* Decrement heap's ref. count */
-    heap->rc--;
+  /* Decrement heap's ref. count */
+  heap->rc--;
 
-    /* Check if we should destroy the heap */
-    if (heap->rc == 0 && FAIL == H5HL__dest(heap))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap");
+  /* Check if we should destroy the heap */
+  if (heap->rc == 0 && FAIL == H5HL__dest(heap))
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__dec_rc() */
 
 /*-------------------------------------------------------------------------
@@ -169,37 +163,38 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HL__dest(H5HL_t *heap)
-{
-    herr_t ret_value = SUCCEED;
+herr_t H5HL__dest(H5HL_t *heap) {
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* check arguments */
-    assert(heap);
+  /* check arguments */
+  assert(heap);
 
-    /* Verify that node is unused */
-    assert(heap->prots == 0);
-    assert(heap->rc == 0);
-    assert(heap->prfx == NULL);
-    assert(heap->dblk == NULL);
+  /* Verify that node is unused */
+  assert(heap->prots == 0);
+  assert(heap->rc == 0);
+  assert(heap->prfx == NULL);
+  assert(heap->dblk == NULL);
 
-    /* Use DONE errors here to try to free as much as possible */
-    if (heap->dblk_image)
-        if (NULL != (heap->dblk_image = H5FL_BLK_FREE(lheap_chunk, heap->dblk_image)))
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap data block image");
-    while (heap->freelist) {
-        H5HL_free_t *fl;
+  /* Use DONE errors here to try to free as much as possible */
+  if (heap->dblk_image)
+    if (NULL !=
+        (heap->dblk_image = H5FL_BLK_FREE(lheap_chunk, heap->dblk_image)))
+      HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
+                  "unable to free local heap data block image");
+  while (heap->freelist) {
+    H5HL_free_t *fl;
 
-        fl             = heap->freelist;
-        heap->freelist = fl->next;
-        if (NULL != (fl = H5FL_FREE(H5HL_free_t, fl)))
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap free list");
-    }
+    fl = heap->freelist;
+    heap->freelist = fl->next;
+    if (NULL != (fl = H5FL_FREE(H5HL_free_t, fl)))
+      HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
+                  "unable to free local heap free list");
+  }
 
-    if (NULL != (heap = H5FL_FREE(H5HL_t, heap)))
-        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap");
+  if (NULL != (heap = H5FL_FREE(H5HL_t, heap)))
+    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap");
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__dest() */

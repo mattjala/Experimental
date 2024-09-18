@@ -38,8 +38,8 @@
  * Structure for filter callback property
  */
 typedef struct H5Z_cb_t {
-    H5Z_filter_func_t func;
-    void             *op_data;
+  H5Z_filter_func_t func;
+  void *op_data;
 } H5Z_cb_t;
 
 /**
@@ -75,7 +75,8 @@ typedef struct H5Z_cb_t {
  *          error.
  */
 //! <!-- [H5Z_can_apply_func_t_snip] -->
-typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id,
+                                       hid_t space_id);
 //! <!-- [H5Z_can_apply_func_t_snip] -->
 
 /**
@@ -113,18 +114,18 @@ typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          success and negative for an error.
  */
 //! <!-- [H5Z_set_local_func_t_snip] -->
-typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id,
+                                       hid_t space_id);
 //! <!-- [H5Z_set_local_func_t_snip] -->
 
 /**
  * \brief The filter operation callback function, defining a filter's operation
  *        on data
  *
- * \param[in] flags Bit vector specifying certain general properties of the filter
- * \param[in] cd_nelmts Number of elements in \p cd_values
- * \param[in] cd_values Auxiliary data for the filter
- * \param[in] nbytes The number of valid bytes in \p buf to be filtered
- * \param[in,out] buf_size The size of \p buf
+ * \param[in] flags Bit vector specifying certain general properties of the
+ * filter \param[in] cd_nelmts Number of elements in \p cd_values \param[in]
+ * cd_values Auxiliary data for the filter \param[in] nbytes The number of valid
+ * bytes in \p buf to be filtered \param[in,out] buf_size The size of \p buf
  * \param[in,out] buf The filter buffer
  *
  * \return Returns the number of valid bytes of data contained in \p buf. In the
@@ -147,8 +148,9 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          zero and leave all pointer arguments unchanged.
  */
 //! <!-- [H5Z_func_t_snip] -->
-typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
-                             size_t nbytes, size_t *buf_size, void **buf);
+typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts,
+                             const unsigned int cd_values[], size_t nbytes,
+                             size_t *buf_size, void **buf);
 //! <!-- [H5Z_func_t_snip] -->
 
 /**
@@ -157,14 +159,16 @@ typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigne
  */
 //! <!-- [H5Z_class2_t_snip] -->
 typedef struct H5Z_class2_t {
-    int                  version;         /**< Version number of the H5Z_class_t struct     */
-    H5Z_filter_t         id;              /**< Filter ID number                             */
-    unsigned             encoder_present; /**< Does this filter have an encoder?            */
-    unsigned             decoder_present; /**< Does this filter have a decoder?             */
-    const char          *name;            /**< Comment for debugging                        */
-    H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
-    H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
-    H5Z_func_t           filter;          /**< The actual filter function                   */
+  int version;              /**< Version number of the H5Z_class_t struct     */
+  H5Z_filter_t id;          /**< Filter ID number                             */
+  unsigned encoder_present; /**< Does this filter have an encoder?            */
+  unsigned decoder_present; /**< Does this filter have a decoder?             */
+  const char *name;         /**< Comment for debugging                        */
+  H5Z_can_apply_func_t
+      can_apply; /**< The "can apply" callback for a filter        */
+  H5Z_set_local_func_t
+      set_local;     /**< The "set local" callback for a filter        */
+  H5Z_func_t filter; /**< The actual filter function                   */
 } H5Z_class2_t;
 //! <!-- [H5Z_class2_t_snip] -->
 
@@ -262,12 +266,12 @@ extern "C" {
  *
  *          When a filter is applied to the fractal heap for a group (e.g.,
  *          when compressing group metadata) and if they can apply and set local
- *          callback functions that have been defined for that filter, HDF5 passes
- *          the value -1 for all parameters for those callback functions. This
- *          is done to ensure that the filter will not be applied to groups if
- *          it relies on these parameters, as they are not applicable to group
- *          fractal heaps; to operate on group fractal heaps, a filter must be
- *          capable of operating on an opaque block of binary data.
+ *          callback functions that have been defined for that filter, HDF5
+ * passes the value -1 for all parameters for those callback functions. This is
+ * done to ensure that the filter will not be applied to groups if it relies on
+ * these parameters, as they are not applicable to group fractal heaps; to
+ * operate on group fractal heaps, a filter must be capable of operating on an
+ * opaque block of binary data.
  *
  *          The \Emph{can-apply} callback function must return a positive value
  *          for a valid combination, zero for an invalid combination, and a
@@ -345,8 +349,8 @@ extern "C" {
  *          will work in many cases, but if there is a mismatch between the
  *          memory allocators used in the library and any filter that
  *          reallocates a buffer, there could be problems. This is most often
- *          the case with Windows and/or when debugging memory allocators are being
- *          used. In both cases, the "state" of the memory allocator lies in
+ *          the case with Windows and/or when debugging memory allocators are
+ * being used. In both cases, the "state" of the memory allocator lies in
  *          different libraries and will get corrupted if you allocate in one
  *          library and free in another. Windows adds the C standard library
  *          via dlls that can vary with Visual Studio version and debug vs.
@@ -426,11 +430,11 @@ H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
  */
 //! <!-- [H5Z_class1_t_snip] -->
 typedef struct H5Z_class1_t {
-    H5Z_filter_t         id;        /**< Filter ID number			     */
-    const char          *name;      /**< Comment for debugging		     */
-    H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter */
-    H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
-    H5Z_func_t           filter;    /**< The actual filter function		     */
+  H5Z_filter_t id;                /**< Filter ID number			     */
+  const char *name;               /**< Comment for debugging		     */
+  H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter */
+  H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
+  H5Z_func_t filter;              /**< The actual filter function		     */
 } H5Z_class1_t;
 //! <!-- [H5Z_class1_t_snip] -->
 

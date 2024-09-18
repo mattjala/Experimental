@@ -18,22 +18,22 @@ package hdf.hdf5lib.exceptions;
  * This sub-class represents HDF5 major error code <b>H5E_BTREE</b>
  */
 public class HDF5BtreeException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5BtreeException</code> with no specified detail
-     * message.
-     */
-    public HDF5BtreeException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5BtreeException</code> with no specified detail
+   * message.
+   */
+  public HDF5BtreeException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5BtreeException</code> with the specified detail
-     * message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5BtreeException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5BtreeException</code> with the specified detail
+   * message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5BtreeException(String s) { super(s); }
 }

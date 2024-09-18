@@ -20,10 +20,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdlib.h>
-#include "hdf5.h"
-#include "h5jni.h"
 #include "h5pLAPLImp.h"
+#include "h5jni.h"
+#include "hdf5.h"
+#include <stdlib.h>
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.
@@ -35,21 +35,22 @@ extern "C" {
  * Method:    H5Pset_nlinks
  * Signature: (JJ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1nlinks(JNIEnv *env, jclass clss, jlong lapl_id, jlong nlinks)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1nlinks(JNIEnv *env,
+                                                          jclass clss,
+                                                          jlong lapl_id,
+                                                          jlong nlinks) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (nlinks <= 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_nlinks: nlinks <= 0");
+  if (nlinks <= 0)
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_nlinks: nlinks <= 0");
 
-    if ((retVal = H5Pset_nlinks((hid_t)lapl_id, (size_t)nlinks)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Pset_nlinks((hid_t)lapl_id, (size_t)nlinks)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1nlinks */
 
 /*
@@ -57,18 +58,18 @@ done:
  * Method:    H5Pget_nlinks
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1nlinks(JNIEnv *env, jclass clss, jlong lapl_id)
-{
-    size_t nlinks = 0;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1nlinks(JNIEnv *env,
+                                                           jclass clss,
+                                                           jlong lapl_id) {
+  size_t nlinks = 0;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (H5Pget_nlinks((hid_t)lapl_id, &nlinks) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Pget_nlinks((hid_t)lapl_id, &nlinks) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong)nlinks;
+  return (jlong)nlinks;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1nlinks */
 
 /*
@@ -84,27 +85,27 @@ done:
  * Method:    H5Pset_elink_prefix
  * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1elink_1prefix(JNIEnv *env, jclass clss, jlong lapl_id, jstring prefix)
-{
-    const char *linkPrefix = NULL;
-    herr_t      retVal     = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1elink_1prefix(
+    JNIEnv *env, jclass clss, jlong lapl_id, jstring prefix) {
+  const char *linkPrefix = NULL;
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == prefix)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_elink_prefix: prefix is NULL");
+  if (NULL == prefix)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_elink_prefix: prefix is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, prefix, linkPrefix, NULL, "H5Pset_elink_prefix: link prefix not pinned");
+  PIN_JAVA_STRING(ENVONLY, prefix, linkPrefix, NULL,
+                  "H5Pset_elink_prefix: link prefix not pinned");
 
-    if ((retVal = H5Pset_elink_prefix((hid_t)lapl_id, linkPrefix)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Pset_elink_prefix((hid_t)lapl_id, linkPrefix)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (linkPrefix)
-        UNPIN_JAVA_STRING(ENVONLY, prefix, linkPrefix);
+  if (linkPrefix)
+    UNPIN_JAVA_STRING(ENVONLY, prefix, linkPrefix);
 
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1elink_1prefix */
 
 /*
@@ -112,43 +113,46 @@ done:
  * Method:    H5Pget_elink_prefix
  * Signature: (J[Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix(JNIEnv *env, jclass clss, jlong lapl_id, jobjectArray prefix)
-{
-    ssize_t prefix_size = -1;
-    size_t  size        = 0;
-    char   *pre         = NULL;
-    jstring str         = NULL;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix(
+    JNIEnv *env, jclass clss, jlong lapl_id, jobjectArray prefix) {
+  ssize_t prefix_size = -1;
+  size_t size = 0;
+  char *pre = NULL;
+  jstring str = NULL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == prefix)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_elink_prefix: prefix is NULL");
+  if (NULL == prefix)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_elink_prefix: prefix is NULL");
 
-    if ((prefix_size = H5Pget_elink_prefix((hid_t)lapl_id, (char *)NULL, size)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((prefix_size = H5Pget_elink_prefix((hid_t)lapl_id, (char *)NULL, size)) <
+      0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (pre = (char *)malloc(sizeof(char) * (size_t)prefix_size + 1)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_elink_prefix: memory allocation failed");
+  if (NULL == (pre = (char *)malloc(sizeof(char) * (size_t)prefix_size + 1)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Pget_elink_prefix: memory allocation failed");
 
-    if (H5Pget_elink_prefix((hid_t)lapl_id, (char *)pre, (size_t)prefix_size + 1) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-    pre[prefix_size] = '\0';
+  if (H5Pget_elink_prefix((hid_t)lapl_id, (char *)pre,
+                          (size_t)prefix_size + 1) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+  pre[prefix_size] = '\0';
 
-    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, pre))) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_OUT_OF_MEMORY_ERROR(
-            ENVONLY, "H5Pget_elink_prefix: out of memory - unable to construct string from UTF characters");
-    }
+  if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, pre))) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Pget_elink_prefix: out of memory - unable to "
+                           "construct string from UTF characters");
+  }
 
-    ENVPTR->SetObjectArrayElement(ENVONLY, prefix, 0, str);
-    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  ENVPTR->SetObjectArrayElement(ENVONLY, prefix, 0, str);
+  CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
 done:
-    if (pre)
-        free(pre);
+  if (pre)
+    free(pre);
 
-    return (jlong)prefix_size;
+  return (jlong)prefix_size;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix */
 
 /*
@@ -156,18 +160,19 @@ done:
  * Method:    H5Pset_elink_fapl
  * Signature: (JJ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1elink_1fapl(JNIEnv *env, jclass clss, jlong lapl_id, jlong fapl_id)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1elink_1fapl(JNIEnv *env,
+                                                               jclass clss,
+                                                               jlong lapl_id,
+                                                               jlong fapl_id) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Pset_elink_fapl((hid_t)lapl_id, (hid_t)fapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Pset_elink_fapl((hid_t)lapl_id, (hid_t)fapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1elink_1fapl */
 
 /*
@@ -175,18 +180,17 @@ done:
  * Method:    _H5Pget_elink_fapl
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Pget_1elink_1fapl(JNIEnv *env, jclass clss, jlong lapl_id)
-{
-    hid_t retVal = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Pget_1elink_1fapl(
+    JNIEnv *env, jclass clss, jlong lapl_id) {
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Pget_elink_fapl((hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Pget_elink_fapl((hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Pget_1elink_1fapl */
 
 /*
@@ -194,18 +198,17 @@ done:
  * Method:    H5Pset_elink_acc_flags
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags(JNIEnv *env, jclass clss, jlong lapl_id, jint flags)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags(
+    JNIEnv *env, jclass clss, jlong lapl_id, jint flags) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Pset_elink_acc_flags((hid_t)lapl_id, (unsigned)flags)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Pset_elink_acc_flags((hid_t)lapl_id, (unsigned)flags)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags */
 
 /*
@@ -213,18 +216,17 @@ done:
  * Method:    H5Pget_elink_acc_flags
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1elink_1acc_1flags(JNIEnv *env, jclass clss, jlong lapl_id)
-{
-    unsigned flags;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1elink_1acc_1flags(
+    JNIEnv *env, jclass clss, jlong lapl_id) {
+  unsigned flags;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (H5Pget_elink_acc_flags((hid_t)lapl_id, &flags) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Pget_elink_acc_flags((hid_t)lapl_id, &flags) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)flags;
+  return (jint)flags;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1elink_1acc_1flags */
 
 #ifdef __cplusplus

@@ -19,22 +19,22 @@ package hdf.hdf5lib.exceptions;
  */
 
 public class HDF5ResourceUnavailableException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5ResourceUnavailableException</code> with no
-     * specified detail message.
-     */
-    public HDF5ResourceUnavailableException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5ResourceUnavailableException</code> with no
+   * specified detail message.
+   */
+  public HDF5ResourceUnavailableException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5FunctionArgumentException</code> with the
-     * specified detail message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5ResourceUnavailableException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5FunctionArgumentException</code> with the
+   * specified detail message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5ResourceUnavailableException(String s) { super(s); }
 }

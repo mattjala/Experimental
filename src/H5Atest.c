@@ -29,14 +29,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Apkg.h"      /* Attributes                               */
 #include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Apkg.h"      /* Attributes                               */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5SMprivate.h" /* Shared object header messages            */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
+#include "H5private.h"   /* Generic Functions                        */
 
 /****************/
 /* Local Macros */
@@ -75,23 +75,21 @@
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5A__is_shared_test(hid_t attr_id)
-{
-    H5A_t *attr;             /* Attribute object for ID */
-    htri_t ret_value = FAIL; /* Return value */
+htri_t H5A__is_shared_test(hid_t attr_id) {
+  H5A_t *attr;             /* Attribute object for ID */
+  htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Check arguments */
-    if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
+  /* Check arguments */
+  if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
-    /* Check if attribute is shared */
-    ret_value = H5O_msg_is_shared(H5O_ATTR_ID, attr);
+  /* Check if attribute is shared */
+  ret_value = H5O_msg_is_shared(H5O_ATTR_ID, attr);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__is_shared_test() */
 
 /*-------------------------------------------------------------------------
@@ -103,34 +101,34 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
-{
-    H5A_t  *attr;                     /* Attribute object for ID */
-    hbool_t api_ctx_pushed = FALSE;   /* Whether API context pushed */
-    herr_t  ret_value      = SUCCEED; /* Return value */
+herr_t H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count) {
+  H5A_t *attr;                    /* Attribute object for ID */
+  hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+  herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Check arguments */
-    if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
+  /* Check arguments */
+  if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
-    /* Push API context */
-    if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context");
-    api_ctx_pushed = TRUE;
+  /* Push API context */
+  if (H5CX_push() < 0)
+    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context");
+  api_ctx_pushed = TRUE;
 
-    /* Sanity check */
-    assert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
+  /* Sanity check */
+  assert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
 
-    /* Retrieve ref count for shared or shareable attribute */
-    if (H5SM_get_refcount(attr->oloc.file, H5O_ATTR_ID, &attr->sh_loc, ref_count) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count");
+  /* Retrieve ref count for shared or shareable attribute */
+  if (H5SM_get_refcount(attr->oloc.file, H5O_ATTR_ID, &attr->sh_loc,
+                        ref_count) < 0)
+    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL,
+                "can't retrieve shared message ref count");
 
 done:
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context");
+  if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context");
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_shared_rc_test() */

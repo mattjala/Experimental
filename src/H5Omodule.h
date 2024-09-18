@@ -22,7 +22,7 @@
  *      reporting macros.
  */
 #define H5O_MODULE
-#define H5_MY_PKG     H5O
+#define H5_MY_PKG H5O
 #define H5_MY_PKG_ERR H5E_OHDR
 
 /** \page H5O_UG The HDF5 Objects

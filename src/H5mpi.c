@@ -15,9 +15,9 @@
  *
  */
 
-#include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5MMprivate.h" /* Memory Management                        */
+#include "H5private.h"   /* Generic Functions                        */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -45,15 +45,13 @@ static hsize_t bigio_count_g = H5_MAX_MPI_COUNT;
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
-H5_mpi_set_bigio_count(hsize_t new_count)
-{
-    hsize_t orig_count = bigio_count_g;
+hsize_t H5_mpi_set_bigio_count(hsize_t new_count) {
+  hsize_t orig_count = bigio_count_g;
 
-    if ((new_count > 0) && (new_count < (hsize_t)TWO_GIG_LIMIT)) {
-        bigio_count_g = new_count;
-    }
-    return orig_count;
+  if ((new_count > 0) && (new_count < (hsize_t)TWO_GIG_LIMIT)) {
+    bigio_count_g = new_count;
+  }
+  return orig_count;
 } /* end H5_mpi_set_bigio_count() */
 
 /*-------------------------------------------------------------------------
@@ -66,11 +64,7 @@ H5_mpi_set_bigio_count(hsize_t new_count)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE hsize_t
-H5_mpi_get_bigio_count(void)
-{
-    return bigio_count_g;
-}
+H5_ATTR_PURE hsize_t H5_mpi_get_bigio_count(void) { return bigio_count_g; }
 
 /*-------------------------------------------------------------------------
  * Function:    H5_mpi_comm_dup
@@ -86,48 +80,46 @@ H5_mpi_get_bigio_count(void)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new)
-{
-    herr_t   ret_value = SUCCEED;
-    MPI_Comm comm_dup  = MPI_COMM_NULL;
-    int      mpi_code;
+herr_t H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new) {
+  herr_t ret_value = SUCCEED;
+  MPI_Comm comm_dup = MPI_COMM_NULL;
+  int mpi_code;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check arguments */
-    if (!comm_new)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "comm_new cannot be NULL");
+  /* Check arguments */
+  if (!comm_new)
+    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "comm_new cannot be NULL");
 
-    /* Handle MPI_COMM_NULL separately */
-    if (MPI_COMM_NULL == comm) {
-        /* Don't duplicate MPI_COMM_NULL since that's an error in MPI */
-        comm_dup = MPI_COMM_NULL;
-    }
-    else {
+  /* Handle MPI_COMM_NULL separately */
+  if (MPI_COMM_NULL == comm) {
+    /* Don't duplicate MPI_COMM_NULL since that's an error in MPI */
+    comm_dup = MPI_COMM_NULL;
+  } else {
 
-        /* Duplicate the MPI communicator */
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(comm, &comm_dup)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
+    /* Duplicate the MPI communicator */
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(comm, &comm_dup)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
 
-        /* Set MPI_ERRORS_RETURN on comm_dup so that MPI failures are not fatal,
-         * and return codes can be checked and handled.
-         */
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(comm_dup, MPI_ERRORS_RETURN)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Errhandler_set failed", mpi_code)
-    }
+    /* Set MPI_ERRORS_RETURN on comm_dup so that MPI failures are not fatal,
+     * and return codes can be checked and handled.
+     */
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Comm_set_errhandler(comm_dup, MPI_ERRORS_RETURN)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Errhandler_set failed", mpi_code)
+  }
 
-    /* Copy the new communicator to the return argument */
-    *comm_new = comm_dup;
+  /* Copy the new communicator to the return argument */
+  *comm_new = comm_dup;
 
 done:
-    if (FAIL == ret_value) {
-        /* need to free anything created here */
-        if (MPI_COMM_NULL != comm_dup)
-            MPI_Comm_free(&comm_dup);
-    }
+  if (FAIL == ret_value) {
+    /* need to free anything created here */
+    if (MPI_COMM_NULL != comm_dup)
+      MPI_Comm_free(&comm_dup);
+  }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpi_comm_dup() */
 
 /*-------------------------------------------------------------------------
@@ -145,41 +137,38 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new)
-{
-    herr_t   ret_value = SUCCEED;
-    MPI_Info info_dup  = MPI_INFO_NULL;
-    int      mpi_code;
+herr_t H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new) {
+  herr_t ret_value = SUCCEED;
+  MPI_Info info_dup = MPI_INFO_NULL;
+  int mpi_code;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check arguments */
-    if (!info_new)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "info_new cannot be NULL");
+  /* Check arguments */
+  if (!info_new)
+    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "info_new cannot be NULL");
 
-    /* Duplicate the MPI info */
-    if (info == MPI_INFO_NULL) {
-        /* Don't duplicate MPI_INFO_NULL. Just copy it. */
-        info_dup = MPI_INFO_NULL;
-    }
-    else {
-        /* Duplicate the info */
-        if (MPI_SUCCESS != (mpi_code = MPI_Info_dup(info, &info_dup)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code)
-    }
+  /* Duplicate the MPI info */
+  if (info == MPI_INFO_NULL) {
+    /* Don't duplicate MPI_INFO_NULL. Just copy it. */
+    info_dup = MPI_INFO_NULL;
+  } else {
+    /* Duplicate the info */
+    if (MPI_SUCCESS != (mpi_code = MPI_Info_dup(info, &info_dup)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code)
+  }
 
-    /* Copy the new info to the return argument */
-    *info_new = info_dup;
+  /* Copy the new info to the return argument */
+  *info_new = info_dup;
 
 done:
-    if (FAIL == ret_value) {
-        /* need to free anything created here */
-        if (MPI_INFO_NULL != info_dup)
-            MPI_Info_free(&info_dup);
-    }
+  if (FAIL == ret_value) {
+    /* need to free anything created here */
+    if (MPI_INFO_NULL != info_dup)
+      MPI_Info_free(&info_dup);
+  }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpi_info_dup() */
 
 /*-------------------------------------------------------------------------
@@ -193,25 +182,24 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpi_comm_free(MPI_Comm *comm)
-{
-    herr_t ret_value = SUCCEED;
+herr_t H5_mpi_comm_free(MPI_Comm *comm) {
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check arguments */
-    if (!comm)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "comm pointer cannot be NULL");
+  /* Check arguments */
+  if (!comm)
+    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                "comm pointer cannot be NULL");
 
-    /* Free the communicator */
-    if (MPI_COMM_WORLD != *comm && MPI_COMM_NULL != *comm)
-        MPI_Comm_free(comm);
+  /* Free the communicator */
+  if (MPI_COMM_WORLD != *comm && MPI_COMM_NULL != *comm)
+    MPI_Comm_free(comm);
 
-    *comm = MPI_COMM_NULL;
+  *comm = MPI_COMM_NULL;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* End H5_mpi_comm_free() */
 
 /*-------------------------------------------------------------------------
@@ -225,25 +213,24 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpi_info_free(MPI_Info *info)
-{
-    herr_t ret_value = SUCCEED;
+herr_t H5_mpi_info_free(MPI_Info *info) {
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check arguments */
-    if (!info)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "info pointer cannot be NULL");
+  /* Check arguments */
+  if (!info)
+    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                "info pointer cannot be NULL");
 
-    /* Free the info */
-    if (MPI_INFO_NULL != *info)
-        MPI_Info_free(info);
+  /* Free the info */
+  if (MPI_INFO_NULL != *info)
+    MPI_Info_free(info);
 
-    *info = MPI_INFO_NULL;
+  *info = MPI_INFO_NULL;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* End H5_mpi_info_free() */
 
 /*-------------------------------------------------------------------------
@@ -266,54 +253,50 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result)
-{
-    int    mpi_code;
-    int    mpi_result = MPI_IDENT;
-    herr_t ret_value  = SUCCEED;
+herr_t H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result) {
+  int mpi_code;
+  int mpi_result = MPI_IDENT;
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check arguments */
-    if (!result)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "result cannot be NULL");
+  /* Check arguments */
+  if (!result)
+    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "result cannot be NULL");
 
-    /* Set out parameter to something reasonable in case something goes wrong */
+  /* Set out parameter to something reasonable in case something goes wrong */
+  *result = 0;
+
+  /* Can't pass MPI_COMM_NULL to MPI_Comm_compare() so we have to handle
+   * it in special cases.
+   *
+   * MPI_Comm can either be an integer type or a pointer. We cast them
+   * to intptr_t so we can compare them with < and > when needed.
+   */
+  if (MPI_COMM_NULL == comm1 && MPI_COMM_NULL == comm2) {
+    /* Special case of both communicators being MPI_COMM_NULL */
     *result = 0;
+  } else if (MPI_COMM_NULL == comm1 || MPI_COMM_NULL == comm2) {
 
-    /* Can't pass MPI_COMM_NULL to MPI_Comm_compare() so we have to handle
-     * it in special cases.
-     *
-     * MPI_Comm can either be an integer type or a pointer. We cast them
-     * to intptr_t so we can compare them with < and > when needed.
-     */
-    if (MPI_COMM_NULL == comm1 && MPI_COMM_NULL == comm2) {
-        /* Special case of both communicators being MPI_COMM_NULL */
-        *result = 0;
-    }
-    else if (MPI_COMM_NULL == comm1 || MPI_COMM_NULL == comm2) {
+    /* Special case of one communicator being MPI_COMM_NULL */
+    *result = (intptr_t)comm1 < (intptr_t)comm2 ? -1 : 1;
+  } else {
 
-        /* Special case of one communicator being MPI_COMM_NULL */
-        *result = (intptr_t)comm1 < (intptr_t)comm2 ? -1 : 1;
-    }
-    else {
+    /* Normal communicator compare */
 
-        /* Normal communicator compare */
+    /* Compare the MPI communicators */
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_compare(comm1, comm2, &mpi_result)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Comm_compare failed", mpi_code)
 
-        /* Compare the MPI communicators */
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_compare(comm1, comm2, &mpi_result)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_compare failed", mpi_code)
-
-        /* Set the result */
-        if (MPI_IDENT == mpi_result || MPI_CONGRUENT == mpi_result)
-            *result = 0;
-        else
-            *result = (intptr_t)comm1 < (intptr_t)comm2 ? -1 : 1;
-    }
+    /* Set the result */
+    if (MPI_IDENT == mpi_result || MPI_CONGRUENT == mpi_result)
+      *result = 0;
+    else
+      *result = (intptr_t)comm1 < (intptr_t)comm2 ? -1 : 1;
+  }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpi_comm_cmp() */
 
 /*-------------------------------------------------------------------------
@@ -332,115 +315,118 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
-{
-    hbool_t same      = FALSE;
-    char   *key       = NULL;
-    char   *value1    = NULL;
-    char   *value2    = NULL;
-    herr_t  ret_value = SUCCEED;
+herr_t H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result) {
+  hbool_t same = FALSE;
+  char *key = NULL;
+  char *value1 = NULL;
+  char *value2 = NULL;
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check arguments */
-    if (!result)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "result cannot be NULL");
+  /* Check arguments */
+  if (!result)
+    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "result cannot be NULL");
 
-    /* Check for MPI_INFO_NULL */
-    if (MPI_INFO_NULL == info1 && MPI_INFO_NULL == info2) {
-        /* Special case of both info objects being MPI_INFO_NULL */
-        same = TRUE;
-    }
-    else if (MPI_INFO_NULL == info1 || MPI_INFO_NULL == info2) {
+  /* Check for MPI_INFO_NULL */
+  if (MPI_INFO_NULL == info1 && MPI_INFO_NULL == info2) {
+    /* Special case of both info objects being MPI_INFO_NULL */
+    same = TRUE;
+  } else if (MPI_INFO_NULL == info1 || MPI_INFO_NULL == info2) {
 
-        /* Special case of one info object being MPI_INFO_NULL */
-        same = FALSE;
-    }
+    /* Special case of one info object being MPI_INFO_NULL */
+    same = FALSE;
+  } else {
+    int mpi_code;
+    int nkeys_1;
+    int nkeys_2;
+
+    /* Check if the number of keys is the same */
+    if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nkeys(info1, &nkeys_1)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nkeys failed", mpi_code)
+    if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nkeys(info2, &nkeys_2)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nkeys failed", mpi_code)
+
+    if (nkeys_1 != nkeys_2)
+      same = FALSE;
+    else if (0 == nkeys_1 && 0 == nkeys_2)
+      same = TRUE;
     else {
-        int mpi_code;
-        int nkeys_1;
-        int nkeys_2;
+      int i;
+      int flag1 = -1;
+      int flag2 = -1;
 
-        /* Check if the number of keys is the same */
-        if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nkeys(info1, &nkeys_1)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nkeys failed", mpi_code)
-        if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nkeys(info2, &nkeys_2)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nkeys failed", mpi_code)
+      /* Allocate buffers for iteration */
+      if (NULL == (key = (char *)H5MM_malloc(MPI_MAX_INFO_KEY * sizeof(char))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                    "memory allocation failed");
+      if (NULL ==
+          (value1 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                    "memory allocation failed");
+      if (NULL ==
+          (value2 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                    "memory allocation failed");
 
-        if (nkeys_1 != nkeys_2)
-            same = FALSE;
-        else if (0 == nkeys_1 && 0 == nkeys_2)
-            same = TRUE;
-        else {
-            int i;
-            int flag1 = -1;
-            int flag2 = -1;
+      /* Iterate over the keys, comparing them */
+      for (i = 0; i < nkeys_1; i++) {
 
-            /* Allocate buffers for iteration */
-            if (NULL == (key = (char *)H5MM_malloc(MPI_MAX_INFO_KEY * sizeof(char))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL == (value1 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL == (value2 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        same = TRUE;
 
-            /* Iterate over the keys, comparing them */
-            for (i = 0; i < nkeys_1; i++) {
+        /* Memset the buffers to zero */
+        memset(key, 0, MPI_MAX_INFO_KEY);
+        memset(value1, 0, MPI_MAX_INFO_VAL);
+        memset(value2, 0, MPI_MAX_INFO_VAL);
 
-                same = TRUE;
+        /* Get the nth key */
+        if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nthkey(info1, i, key)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nthkey failed", mpi_code)
 
-                /* Memset the buffers to zero */
-                memset(key, 0, MPI_MAX_INFO_KEY);
-                memset(value1, 0, MPI_MAX_INFO_VAL);
-                memset(value2, 0, MPI_MAX_INFO_VAL);
+        /* Get the values */
+        if (MPI_SUCCESS != (mpi_code = MPI_Info_get(
+                                info1, key, MPI_MAX_INFO_VAL, value1, &flag1)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Info_get failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Info_get(
+                                info2, key, MPI_MAX_INFO_VAL, value2, &flag2)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Info_get failed", mpi_code)
 
-                /* Get the nth key */
-                if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nthkey(info1, i, key)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Info_get_nthkey failed", mpi_code)
+        /* Compare values and flags */
+        if (!flag1 || !flag2 || memcmp(value1, value2, MPI_MAX_INFO_VAL)) {
+          same = FALSE;
+          break;
+        }
 
-                /* Get the values */
-                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info1, key, MPI_MAX_INFO_VAL, value1, &flag1)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Info_get failed", mpi_code)
-                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info2, key, MPI_MAX_INFO_VAL, value2, &flag2)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Info_get failed", mpi_code)
+      } /* end for */
+    }   /* end else */
+  }     /* end else */
 
-                /* Compare values and flags */
-                if (!flag1 || !flag2 || memcmp(value1, value2, MPI_MAX_INFO_VAL)) {
-                    same = FALSE;
-                    break;
-                }
-
-            } /* end for */
-        }     /* end else */
-    }         /* end else */
-
-    /* Set the output value
-     *
-     * MPI_Info can either be an integer type or a pointer. We cast them
-     * to intptr_t so we can compare them with < and > when needed.
-     */
-    if (same)
-        *result = 0;
-    else
-        *result = (intptr_t)info1 < (intptr_t)info2 ? -1 : 1;
+  /* Set the output value
+   *
+   * MPI_Info can either be an integer type or a pointer. We cast them
+   * to intptr_t so we can compare them with < and > when needed.
+   */
+  if (same)
+    *result = 0;
+  else
+    *result = (intptr_t)info1 < (intptr_t)info2 ? -1 : 1;
 
 done:
-    if (key)
-        H5MM_xfree(key);
-    if (value1)
-        H5MM_xfree(value1);
-    if (value2)
-        H5MM_xfree(value2);
+  if (key)
+    H5MM_xfree(key);
+  if (value1)
+    H5MM_xfree(value1);
+  if (value2)
+    H5MM_xfree(value2);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpi_info_cmp() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5_mpio_create_large_type
  *
- * Purpose:     Create a large datatype of size larger than what a 32 bit integer
- *              can hold.
+ * Purpose:     Create a large datatype of size larger than what a 32 bit
+ *integer can hold.
  *
  * Return:      Non-negative on success, negative on failure.
  *
@@ -448,98 +434,106 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datatype old_type,
-                          MPI_Datatype *new_type)
-{
-    int          num_big_types;   /* num times the 2G datatype will be repeated */
-    int          remaining_bytes; /* the number of bytes left that can be held in an int value */
-    hsize_t      leftover;
-    int          block_len[2];
-    int          mpi_code; /* MPI return code */
-    MPI_Datatype inner_type, outer_type, leftover_type, type[2];
-    MPI_Aint     disp[2], old_extent;
-    herr_t       ret_value = SUCCEED; /* Return value */
+herr_t H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+                                 MPI_Datatype old_type,
+                                 MPI_Datatype *new_type) {
+  int num_big_types;   /* num times the 2G datatype will be repeated */
+  int remaining_bytes; /* the number of bytes left that can be held in an int
+                          value */
+  hsize_t leftover;
+  int block_len[2];
+  int mpi_code; /* MPI return code */
+  MPI_Datatype inner_type, outer_type, leftover_type, type[2];
+  MPI_Aint disp[2], old_extent;
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Calculate how many Big MPI datatypes are needed to represent the buffer */
-    num_big_types = (int)(num_elements / bigio_count_g);
-    leftover      = (hsize_t)num_elements - (hsize_t)num_big_types * bigio_count_g;
-    H5_CHECKED_ASSIGN(remaining_bytes, int, leftover, hsize_t);
+  /* Calculate how many Big MPI datatypes are needed to represent the buffer */
+  num_big_types = (int)(num_elements / bigio_count_g);
+  leftover = (hsize_t)num_elements - (hsize_t)num_big_types * bigio_count_g;
+  H5_CHECKED_ASSIGN(remaining_bytes, int, leftover, hsize_t);
 
-    /* Create a contiguous datatype of size equal to the largest
-     * number that a 32 bit integer can hold x size of old type.
-     * If the displacement is 0, then the type is contiguous, otherwise
-     * use type_hvector to create the type with the displacement provided
-     */
-    if (0 == stride_bytes) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)bigio_count_g, old_type, &inner_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+  /* Create a contiguous datatype of size equal to the largest
+   * number that a 32 bit integer can hold x size of old type.
+   * If the displacement is 0, then the type is contiguous, otherwise
+   * use type_hvector to create the type with the displacement provided
+   */
+  if (0 == stride_bytes) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)bigio_count_g,
+                                                       old_type, &inner_type)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+  } /* end if */
+  else if (MPI_SUCCESS !=
+           (mpi_code = MPI_Type_create_hvector(
+                (int)bigio_count_g, 1, stride_bytes, old_type, &inner_type)))
+    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+
+  /* Create a contiguous datatype of the buffer (minus the remaining < 2GB part)
+   * If a stride is present, use hvector type
+   */
+  if (0 == stride_bytes) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(
+                            num_big_types, inner_type, &outer_type)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+  } /* end if */
+  else if (MPI_SUCCESS !=
+           (mpi_code = MPI_Type_create_hvector(num_big_types, 1, stride_bytes,
+                                               inner_type, &outer_type)))
+    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+
+  MPI_Type_free(&inner_type);
+
+  /* If there is a remaining part create a contiguous/vector datatype and then
+   * use a struct datatype to encapsulate everything.
+   */
+  if (remaining_bytes) {
+    if (stride_bytes == 0) {
+      if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(
+                              remaining_bytes, old_type, &leftover_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     } /* end if */
     else if (MPI_SUCCESS !=
-             (mpi_code = MPI_Type_create_hvector((int)bigio_count_g, 1, stride_bytes, old_type, &inner_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+             (mpi_code = MPI_Type_create_hvector(
+                  (int)(num_elements - (hsize_t)num_big_types * bigio_count_g),
+                  1, stride_bytes, old_type, &leftover_type)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
 
-    /* Create a contiguous datatype of the buffer (minus the remaining < 2GB part)
-     * If a stride is present, use hvector type
-     */
-    if (0 == stride_bytes) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(num_big_types, inner_type, &outer_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-    } /* end if */
-    else if (MPI_SUCCESS !=
-             (mpi_code = MPI_Type_create_hvector(num_big_types, 1, stride_bytes, inner_type, &outer_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+      /* As of version 4.0, OpenMPI now turns off MPI-1 API calls by default,
+       * so we're using the MPI-2 version even though we don't need the lb
+       * value.
+       */
+      {
+        MPI_Aint unused_lb_arg;
+        MPI_Type_get_extent(old_type, &unused_lb_arg, &old_extent);
+      }
 
-    MPI_Type_free(&inner_type);
+    /* Set up the arguments for MPI_Type_create_struct() */
+    type[0] = outer_type;
+    type[1] = leftover_type;
+    block_len[0] = 1;
+    block_len[1] = 1;
+    disp[0] = 0;
+    disp[1] =
+        (old_extent + stride_bytes) * num_big_types * (MPI_Aint)bigio_count_g;
 
-    /* If there is a remaining part create a contiguous/vector datatype and then
-     * use a struct datatype to encapsulate everything.
-     */
-    if (remaining_bytes) {
-        if (stride_bytes == 0) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(remaining_bytes, old_type, &leftover_type)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-        } /* end if */
-        else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector(
-                                     (int)(num_elements - (hsize_t)num_big_types * bigio_count_g), 1,
-                                     stride_bytes, old_type, &leftover_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Type_create_struct(2, block_len, disp, type, new_type)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
 
-        /* As of version 4.0, OpenMPI now turns off MPI-1 API calls by default,
-         * so we're using the MPI-2 version even though we don't need the lb
-         * value.
-         */
-        {
-            MPI_Aint unused_lb_arg;
-            MPI_Type_get_extent(old_type, &unused_lb_arg, &old_extent);
-        }
+    MPI_Type_free(&outer_type);
+    MPI_Type_free(&leftover_type);
+  } /* end if */
+  else
+    /* There are no remaining bytes so just set the new type to
+     * the outer type created */
+    *new_type = outer_type;
 
-        /* Set up the arguments for MPI_Type_create_struct() */
-        type[0]      = outer_type;
-        type[1]      = leftover_type;
-        block_len[0] = 1;
-        block_len[1] = 1;
-        disp[0]      = 0;
-        disp[1]      = (old_extent + stride_bytes) * num_big_types * (MPI_Aint)bigio_count_g;
-
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(2, block_len, disp, type, new_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-
-        MPI_Type_free(&outer_type);
-        MPI_Type_free(&leftover_type);
-    } /* end if */
-    else
-        /* There are no remaining bytes so just set the new type to
-         * the outer type created */
-        *new_type = outer_type;
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+  if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
+    HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpio_create_large_type() */
 
 /*-------------------------------------------------------------------------
@@ -614,85 +608,91 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, const int recv_counts[],
-                      const int displacements[], MPI_Datatype recv_type, hbool_t allgather, int root,
-                      MPI_Comm comm, int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries)
-{
-    size_t recv_buf_num_entries = 0;
-    void  *recv_buf             = NULL;
+herr_t H5_mpio_gatherv_alloc(void *send_buf, int send_count,
+                             MPI_Datatype send_type, const int recv_counts[],
+                             const int displacements[], MPI_Datatype recv_type,
+                             hbool_t allgather, int root, MPI_Comm comm,
+                             int mpi_rank, int mpi_size, void **out_buf,
+                             size_t *out_buf_num_entries) {
+  size_t recv_buf_num_entries = 0;
+  void *recv_buf = NULL;
 #if H5_CHECK_MPI_VERSION(3, 0)
-    MPI_Count type_lb;
-    MPI_Count type_extent;
+  MPI_Count type_lb;
+  MPI_Count type_extent;
 #else
-    MPI_Aint type_lb;
-    MPI_Aint type_extent;
+  MPI_Aint type_lb;
+  MPI_Aint type_extent;
 #endif
-    int    mpi_code;
-    herr_t ret_value = SUCCEED;
+  int mpi_code;
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    assert(send_buf || send_count == 0);
-    if (allgather || (mpi_rank == root))
-        assert(out_buf && out_buf_num_entries);
+  assert(send_buf || send_count == 0);
+  if (allgather || (mpi_rank == root))
+    assert(out_buf && out_buf_num_entries);
 
-        /* Retrieve the extent of the MPI Datatype being used */
+    /* Retrieve the extent of the MPI Datatype being used */
 #if H5_CHECK_MPI_VERSION(3, 0)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent_x(recv_type, &type_lb, &type_extent)))
+  if (MPI_SUCCESS !=
+      (mpi_code = MPI_Type_get_extent_x(recv_type, &type_lb, &type_extent)))
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(recv_type, &type_lb, &type_extent)))
+  if (MPI_SUCCESS !=
+      (mpi_code = MPI_Type_get_extent(recv_type, &type_lb, &type_extent)))
 #endif
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent(_x) failed", mpi_code)
+    HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent(_x) failed", mpi_code)
 
-    if (type_extent < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "MPI recv_type had a negative extent");
+  if (type_extent < 0)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                "MPI recv_type had a negative extent");
 
-    /*
-     * Calculate the total size of the buffer being
-     * returned and allocate it
-     */
-    if (allgather || (mpi_rank == root)) {
-        size_t i;
-        size_t buf_size;
+  /*
+   * Calculate the total size of the buffer being
+   * returned and allocate it
+   */
+  if (allgather || (mpi_rank == root)) {
+    size_t i;
+    size_t buf_size;
 
-        for (i = 0, recv_buf_num_entries = 0; i < (size_t)mpi_size; i++)
-            recv_buf_num_entries += (size_t)recv_counts[i];
-        buf_size = recv_buf_num_entries * (size_t)type_extent;
+    for (i = 0, recv_buf_num_entries = 0; i < (size_t)mpi_size; i++)
+      recv_buf_num_entries += (size_t)recv_counts[i];
+    buf_size = recv_buf_num_entries * (size_t)type_extent;
 
-        /* If our buffer size is 0, there's nothing to do */
-        if (buf_size == 0)
-            HGOTO_DONE(SUCCEED);
+    /* If our buffer size is 0, there's nothing to do */
+    if (buf_size == 0)
+      HGOTO_DONE(SUCCEED);
 
-        if (NULL == (recv_buf = H5MM_malloc(buf_size)))
-            /* Push an error, but still participate in collective gather operation */
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate receive buffer");
-    }
+    if (NULL == (recv_buf = H5MM_malloc(buf_size)))
+      /* Push an error, but still participate in collective gather operation */
+      HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                  "couldn't allocate receive buffer");
+  }
 
-    /* Perform gather operation */
-    if (allgather) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Allgatherv(send_buf, send_count, send_type, recv_buf, recv_counts,
-                                                      displacements, recv_type, comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
-    }
-    else {
-        if (MPI_SUCCESS != (mpi_code = MPI_Gatherv(send_buf, send_count, send_type, recv_buf, recv_counts,
-                                                   displacements, recv_type, root, comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Gatherv failed", mpi_code)
-    }
+  /* Perform gather operation */
+  if (allgather) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Allgatherv(
+                            send_buf, send_count, send_type, recv_buf,
+                            recv_counts, displacements, recv_type, comm)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
+  } else {
+    if (MPI_SUCCESS != (mpi_code = MPI_Gatherv(
+                            send_buf, send_count, send_type, recv_buf,
+                            recv_counts, displacements, recv_type, root, comm)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Gatherv failed", mpi_code)
+  }
 
-    if (allgather || (mpi_rank == root)) {
-        *out_buf             = recv_buf;
-        *out_buf_num_entries = recv_buf_num_entries;
-    }
+  if (allgather || (mpi_rank == root)) {
+    *out_buf = recv_buf;
+    *out_buf_num_entries = recv_buf_num_entries;
+  }
 
 done:
-    if (ret_value < 0) {
-        if (recv_buf)
-            H5MM_free(recv_buf);
-    }
+  if (ret_value < 0) {
+    if (recv_buf)
+      H5MM_free(recv_buf);
+  }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpio_gatherv_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -708,71 +708,75 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type, MPI_Datatype recv_type,
-                             hbool_t allgather, int root, MPI_Comm comm, int mpi_rank, int mpi_size,
-                             void **out_buf, size_t *out_buf_num_entries)
-{
-    int   *recv_counts_disps_array = NULL;
-    int    mpi_code;
-    herr_t ret_value = SUCCEED;
+herr_t H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count,
+                                    MPI_Datatype send_type,
+                                    MPI_Datatype recv_type, hbool_t allgather,
+                                    int root, MPI_Comm comm, int mpi_rank,
+                                    int mpi_size, void **out_buf,
+                                    size_t *out_buf_num_entries) {
+  int *recv_counts_disps_array = NULL;
+  int mpi_code;
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    assert(send_buf || send_count == 0);
-    if (allgather || (mpi_rank == root))
-        assert(out_buf && out_buf_num_entries);
+  assert(send_buf || send_count == 0);
+  if (allgather || (mpi_rank == root))
+    assert(out_buf && out_buf_num_entries);
 
-    /*
-     * Allocate array to store the receive counts of each rank, as well as
-     * the displacements into the final array where each rank will place
-     * their data. The first half of the array contains the receive counts
-     * (in rank order), while the latter half contains the displacements
-     * (also in rank order).
-     */
-    if (allgather || (mpi_rank == root)) {
-        if (NULL ==
-            (recv_counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*recv_counts_disps_array))))
-            /* Push an error, but still participate in collective gather operation */
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array");
-    }
+  /*
+   * Allocate array to store the receive counts of each rank, as well as
+   * the displacements into the final array where each rank will place
+   * their data. The first half of the array contains the receive counts
+   * (in rank order), while the latter half contains the displacements
+   * (also in rank order).
+   */
+  if (allgather || (mpi_rank == root)) {
+    if (NULL == (recv_counts_disps_array = H5MM_malloc(
+                     2 * (size_t)mpi_size * sizeof(*recv_counts_disps_array))))
+      /* Push an error, but still participate in collective gather operation */
+      HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                  "couldn't allocate receive counts and displacements array");
+  }
 
-    /* Collect each rank's send count to interested ranks */
-    if (allgather) {
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Allgather(&send_count, 1, MPI_INT, recv_counts_disps_array, 1, MPI_INT, comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
-    }
-    else {
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Gather(&send_count, 1, MPI_INT, recv_counts_disps_array, 1, MPI_INT, root, comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
-    }
+  /* Collect each rank's send count to interested ranks */
+  if (allgather) {
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Allgather(&send_count, 1, MPI_INT,
+                                  recv_counts_disps_array, 1, MPI_INT, comm)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
+  } else {
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Gather(&send_count, 1, MPI_INT, recv_counts_disps_array,
+                               1, MPI_INT, root, comm)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
+  }
 
-    /* Set the displacements into the receive buffer for the gather operation */
-    if (allgather || (mpi_rank == root)) {
-        size_t i;
-        int   *displacements_ptr;
+  /* Set the displacements into the receive buffer for the gather operation */
+  if (allgather || (mpi_rank == root)) {
+    size_t i;
+    int *displacements_ptr;
 
-        displacements_ptr = &recv_counts_disps_array[mpi_size];
+    displacements_ptr = &recv_counts_disps_array[mpi_size];
 
-        *displacements_ptr = 0;
-        for (i = 1; i < (size_t)mpi_size; i++)
-            displacements_ptr[i] = displacements_ptr[i - 1] + recv_counts_disps_array[i - 1];
-    }
+    *displacements_ptr = 0;
+    for (i = 1; i < (size_t)mpi_size; i++)
+      displacements_ptr[i] =
+          displacements_ptr[i - 1] + recv_counts_disps_array[i - 1];
+  }
 
-    /* Perform gather operation */
-    if (H5_mpio_gatherv_alloc(send_buf, send_count, send_type, recv_counts_disps_array,
-                              &recv_counts_disps_array[mpi_size], recv_type, allgather, root, comm, mpi_rank,
-                              mpi_size, out_buf, out_buf_num_entries) < 0)
-        HGOTO_ERROR(H5E_LIB, H5E_CANTGATHER, FAIL, "can't gather data");
+  /* Perform gather operation */
+  if (H5_mpio_gatherv_alloc(
+          send_buf, send_count, send_type, recv_counts_disps_array,
+          &recv_counts_disps_array[mpi_size], recv_type, allgather, root, comm,
+          mpi_rank, mpi_size, out_buf, out_buf_num_entries) < 0)
+    HGOTO_ERROR(H5E_LIB, H5E_CANTGATHER, FAIL, "can't gather data");
 
 done:
-    if (recv_counts_disps_array)
-        H5MM_free(recv_counts_disps_array);
+  if (recv_counts_disps_array)
+    H5MM_free(recv_counts_disps_array);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpio_gatherv_alloc_simple() */
 
 /*-------------------------------------------------------------------------
@@ -790,42 +794,44 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
-{
-    MPI_Info info_used;
-    int      flag;
-    char    *sync_env_var;
-    char     value[MPI_MAX_INFO_VAL];
-    herr_t   ret_value = SUCCEED;
+herr_t H5_mpio_get_file_sync_required(MPI_File fh,
+                                      hbool_t *file_sync_required) {
+  MPI_Info info_used;
+  int flag;
+  char *sync_env_var;
+  char value[MPI_MAX_INFO_VAL];
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file_sync_required);
+  assert(file_sync_required);
 
+  *file_sync_required = FALSE;
+
+  if (MPI_SUCCESS != MPI_File_get_info(fh, &info_used))
+    HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
+
+  if (MPI_SUCCESS != MPI_Info_get(info_used, "romio_visibility_immediate",
+                                  MPI_MAX_INFO_VAL - 1, value, &flag))
+    HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
+
+  if (flag && !HDstrcmp(value, "false"))
+    *file_sync_required = TRUE;
+
+  if (MPI_SUCCESS != MPI_Info_free(&info_used))
+    HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't free MPI info");
+
+  /* Force setting the flag via env variable (temp solution before the flag is
+   * implemented in MPI) */
+  sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
+  if (sync_env_var &&
+      (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
+    *file_sync_required = TRUE;
+  if (sync_env_var &&
+      (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
     *file_sync_required = FALSE;
 
-    if (MPI_SUCCESS != MPI_File_get_info(fh, &info_used))
-        HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
-
-    if (MPI_SUCCESS !=
-        MPI_Info_get(info_used, "romio_visibility_immediate", MPI_MAX_INFO_VAL - 1, value, &flag))
-        HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
-
-    if (flag && !HDstrcmp(value, "false"))
-        *file_sync_required = TRUE;
-
-    if (MPI_SUCCESS != MPI_Info_free(&info_used))
-        HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't free MPI info");
-
-    /* Force setting the flag via env variable (temp solution before the flag is implemented in MPI) */
-    sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
-        *file_sync_required = TRUE;
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
-        *file_sync_required = FALSE;
-
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpio_get_file_sync_required() */
 #endif /* H5_HAVE_PARALLEL */

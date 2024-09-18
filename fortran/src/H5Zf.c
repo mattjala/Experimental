@@ -31,23 +31,22 @@
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5zunregister_c(int_f *filter)
+int_f h5zunregister_c(int_f *filter)
 /******/
 {
-    int          ret_value = -1;
-    herr_t       status;
-    H5Z_filter_t c_filter;
+  int ret_value = -1;
+  herr_t status;
+  H5Z_filter_t c_filter;
 
-    /*
-     * Call H5Zunregister function.
-     */
-    c_filter = (H5Z_filter_t)*filter;
-    status   = H5Zunregister(c_filter);
-    if (status < 0)
-        return ret_value;
-    ret_value = 0;
+  /*
+   * Call H5Zunregister function.
+   */
+  c_filter = (H5Z_filter_t)*filter;
+  status = H5Zunregister(c_filter);
+  if (status < 0)
     return ret_value;
+  ret_value = 0;
+  return ret_value;
 }
 /****if* H5Zf/h5zfiletr_avail_c
  * NAME
@@ -63,20 +62,19 @@ h5zunregister_c(int_f *filter)
  * SOURCE
  */
 
-int_f
-h5zfilter_avail_c(int_f *filter, int_f *flag)
+int_f h5zfilter_avail_c(int_f *filter, int_f *flag)
 /******/
 {
-    int          ret_value = 0;
-    H5Z_filter_t c_filter;
-    htri_t       status;
+  int ret_value = 0;
+  H5Z_filter_t c_filter;
+  htri_t status;
 
-    c_filter = (H5Z_filter_t)*filter;
-    status   = H5Zfilter_avail(c_filter);
-    *flag    = (int_f)status;
-    if (status < 0)
-        ret_value = -1;
-    return ret_value;
+  c_filter = (H5Z_filter_t)*filter;
+  status = H5Zfilter_avail(c_filter);
+  *flag = (int_f)status;
+  if (status < 0)
+    ret_value = -1;
+  return ret_value;
 }
 
 /****if* H5Zf/h5zget_filter_info_c
@@ -94,17 +92,16 @@ h5zfilter_avail_c(int_f *filter, int_f *flag)
  * SOURCE
  */
 
-int_f
-h5zget_filter_info_c(int_f *filter, int_f *flag)
+int_f h5zget_filter_info_c(int_f *filter, int_f *flag)
 /******/
 {
-    int          ret_value = 0;
-    H5Z_filter_t c_filter;
-    unsigned int c_flag;
+  int ret_value = 0;
+  H5Z_filter_t c_filter;
+  unsigned int c_flag;
 
-    c_filter  = (H5Z_filter_t)*filter;
-    ret_value = H5Zget_filter_info(c_filter, &c_flag);
-    *flag     = (int_f)c_flag;
+  c_filter = (H5Z_filter_t)*filter;
+  ret_value = H5Zget_filter_info(c_filter, &c_flag);
+  *flag = (int_f)c_flag;
 
-    return ret_value;
+  return ret_value;
 }

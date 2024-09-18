@@ -57,77 +57,75 @@ static int open_file(const char *filename, hid_t fapl, int metadata_write_strate
  * according to the communicator argument, the processes will freeze up
  * sooner or later due to barrier mixed up.
  */
-void
-test_split_comm_access(void)
-{
-    MPI_Comm    comm;
-    MPI_Info    info = MPI_INFO_NULL;
-    int         is_old, mrc;
-    int         newrank, newprocs;
-    hid_t       fid;     /* file IDs */
-    hid_t       acc_tpl; /* File access properties */
-    herr_t      ret;     /* generic return value */
-    const char *filename;
+void test_split_comm_access(void) {
+  MPI_Comm comm;
+  MPI_Info info = MPI_INFO_NULL;
+  int is_old, mrc;
+  int newrank, newprocs;
+  hid_t fid;     /* file IDs */
+  hid_t acc_tpl; /* File access properties */
+  herr_t ret;    /* generic return value */
+  const char *filename;
 
-    filename = (const char *)PARATESTFILE /* GetTestParameters()*/;
-    if (VERBOSE_MED)
-        printf("Split Communicator access test on file %s\n", filename);
+  filename = (const char *)PARATESTFILE /* GetTestParameters()*/;
+  if (VERBOSE_MED)
+    printf("Split Communicator access test on file %s\n", filename);
 
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  /* set up MPI parameters */
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file aren't supported with this connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file aren't supported with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    is_old = mpi_rank % 2;
-    mrc    = MPI_Comm_split(MPI_COMM_WORLD, is_old, mpi_rank, &comm);
+    return;
+  }
+
+  is_old = mpi_rank % 2;
+  mrc = MPI_Comm_split(MPI_COMM_WORLD, is_old, mpi_rank, &comm);
+  VRFY((mrc == MPI_SUCCESS), "");
+  MPI_Comm_size(comm, &newprocs);
+  MPI_Comm_rank(comm, &newrank);
+
+  if (is_old) {
+    /* odd-rank processes */
+    mrc = MPI_Barrier(comm);
     VRFY((mrc == MPI_SUCCESS), "");
-    MPI_Comm_size(comm, &newprocs);
-    MPI_Comm_rank(comm, &newrank);
+  } else {
+    /* even-rank processes */
+    int sub_mpi_rank; /* rank in the sub-comm */
+    MPI_Comm_rank(comm, &sub_mpi_rank);
 
-    if (is_old) {
-        /* odd-rank processes */
-        mrc = MPI_Barrier(comm);
-        VRFY((mrc == MPI_SUCCESS), "");
-    }
-    else {
-        /* even-rank processes */
-        int sub_mpi_rank; /* rank in the sub-comm */
-        MPI_Comm_rank(comm, &sub_mpi_rank);
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
-        /* setup file access template */
-        acc_tpl = create_faccess_plist(comm, info, facc_type);
-        VRFY((acc_tpl >= 0), "");
+    /* create the file collectively */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
 
-        /* create the file collectively */
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
-        VRFY((fid >= 0), "H5Fcreate succeeded");
+    /* close the file */
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "");
 
-        /* close the file */
-        ret = H5Fclose(fid);
-        VRFY((ret >= 0), "");
+    /* delete the test file */
+    ret = H5Fdelete(filename, acc_tpl);
+    VRFY((ret >= 0), "H5Fdelete succeeded");
 
-        /* delete the test file */
-        ret = H5Fdelete(filename, acc_tpl);
-        VRFY((ret >= 0), "H5Fdelete succeeded");
-
-        /* Release file-access template */
-        ret = H5Pclose(acc_tpl);
-        VRFY((ret >= 0), "");
-    }
-    mrc = MPI_Comm_free(&comm);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
-    mrc = MPI_Barrier(MPI_COMM_WORLD);
-    VRFY((mrc == MPI_SUCCESS), "final MPI_Barrier succeeded");
+    /* Release file-access template */
+    ret = H5Pclose(acc_tpl);
+    VRFY((ret >= 0), "");
+  }
+  mrc = MPI_Comm_free(&comm);
+  VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
+  mrc = MPI_Barrier(MPI_COMM_WORLD);
+  VRFY((mrc == MPI_SUCCESS), "final MPI_Barrier succeeded");
 }
 
 #if 0
@@ -768,277 +766,282 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 #endif
 
 /*
- * NOTE:  See HDFFV-10894 and add tests later to verify MPI-specific properties in the
- *        incoming fapl that could conflict with the existing values in H5F_shared_t on
- *        multiple opens of the same file.
+ * NOTE:  See HDFFV-10894 and add tests later to verify MPI-specific properties
+ * in the incoming fapl that could conflict with the existing values in
+ * H5F_shared_t on multiple opens of the same file.
  */
-void
-test_file_properties(void)
-{
-    hid_t       fid          = H5I_INVALID_HID; /* HDF5 file ID */
-    hid_t       fapl_id      = H5I_INVALID_HID; /* File access plist */
-    hid_t       fapl_copy_id = H5I_INVALID_HID; /* File access plist */
-    hbool_t     is_coll;
-    htri_t      are_equal;
-    const char *filename;
-    MPI_Comm    comm     = MPI_COMM_WORLD;
-    MPI_Info    info     = MPI_INFO_NULL;
-    MPI_Comm    comm_out = MPI_COMM_NULL;
-    MPI_Info    info_out = MPI_INFO_NULL;
-    herr_t      ret;     /* Generic return value */
-    int         mpi_ret; /* MPI return value */
-    int         cmp;     /* Compare value */
+void test_file_properties(void) {
+  hid_t fid = H5I_INVALID_HID;          /* HDF5 file ID */
+  hid_t fapl_id = H5I_INVALID_HID;      /* File access plist */
+  hid_t fapl_copy_id = H5I_INVALID_HID; /* File access plist */
+  hbool_t is_coll;
+  htri_t are_equal;
+  const char *filename;
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Info info = MPI_INFO_NULL;
+  MPI_Comm comm_out = MPI_COMM_NULL;
+  MPI_Info info_out = MPI_INFO_NULL;
+  herr_t ret;  /* Generic return value */
+  int mpi_ret; /* MPI return value */
+  int cmp;     /* Compare value */
 
-    /* set up MPI parameters */
-    mpi_ret = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    VRFY((mpi_ret >= 0), "MPI_Comm_size succeeded");
-    mpi_ret = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    VRFY((mpi_ret >= 0), "MPI_Comm_rank succeeded");
+  /* set up MPI parameters */
+  mpi_ret = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  VRFY((mpi_ret >= 0), "MPI_Comm_size succeeded");
+  mpi_ret = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  VRFY((mpi_ret >= 0), "MPI_Comm_rank succeeded");
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file aren't supported with this connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file aren't supported with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    filename = (const char *)PARATESTFILE /* GetTestParameters() */;
+    return;
+  }
 
-    mpi_ret = MPI_Info_create(&info);
-    VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
-    mpi_ret = MPI_Info_set(info, "hdf_info_prop1", "xyz");
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
+  filename = (const char *)PARATESTFILE /* GetTestParameters() */;
 
-    /* setup file access plist */
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
-    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_fapl_mpio");
+  mpi_ret = MPI_Info_create(&info);
+  VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
+  mpi_ret = MPI_Info_set(info, "hdf_info_prop1", "xyz");
+  VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
 
-    /* Check getting and setting MPI properties
-     * (for use in VOL connectors, not the MPI-I/O VFD)
-     */
-    ret = H5Pset_mpi_params(fapl_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
-    ret = H5Pget_mpi_params(fapl_id, &comm_out, &info_out);
-    VRFY((ret >= 0), "H5Pget_mpi_params succeeded");
+  /* setup file access plist */
+  fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+  VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
+  ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_fapl_mpio");
 
-    /* Check the communicator */
-    VRFY((comm != comm_out), "Communicators should not be bitwise identical");
-    cmp     = MPI_UNEQUAL;
-    mpi_ret = MPI_Comm_compare(comm, comm_out, &cmp);
-    VRFY((ret >= 0), "MPI_Comm_compare succeeded");
-    VRFY((cmp == MPI_CONGRUENT), "Communicators should be congruent via MPI_Comm_compare");
+  /* Check getting and setting MPI properties
+   * (for use in VOL connectors, not the MPI-I/O VFD)
+   */
+  ret = H5Pset_mpi_params(fapl_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
+  ret = H5Pget_mpi_params(fapl_id, &comm_out, &info_out);
+  VRFY((ret >= 0), "H5Pget_mpi_params succeeded");
 
-    /* Check the info object */
-    VRFY((info != info_out), "Info objects should not be bitwise identical");
+  /* Check the communicator */
+  VRFY((comm != comm_out), "Communicators should not be bitwise identical");
+  cmp = MPI_UNEQUAL;
+  mpi_ret = MPI_Comm_compare(comm, comm_out, &cmp);
+  VRFY((ret >= 0), "MPI_Comm_compare succeeded");
+  VRFY((cmp == MPI_CONGRUENT),
+       "Communicators should be congruent via MPI_Comm_compare");
 
-    /* Free the obtained comm and info object */
-    mpi_ret = MPI_Comm_free(&comm_out);
-    VRFY((mpi_ret >= 0), "MPI_Comm_free succeeded");
-    mpi_ret = MPI_Info_free(&info_out);
-    VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+  /* Check the info object */
+  VRFY((info != info_out), "Info objects should not be bitwise identical");
 
-    /* Copy the fapl and ensure it's equal to the original */
-    fapl_copy_id = H5Pcopy(fapl_id);
-    VRFY((fapl_copy_id != H5I_INVALID_HID), "H5Pcopy");
-    are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((TRUE == are_equal), "H5Pequal");
+  /* Free the obtained comm and info object */
+  mpi_ret = MPI_Comm_free(&comm_out);
+  VRFY((mpi_ret >= 0), "MPI_Comm_free succeeded");
+  mpi_ret = MPI_Info_free(&info_out);
+  VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
 
-    /* Add a property to the copy and ensure it's different now */
-    mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "abc");
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
-    ret = H5Pset_mpi_params(fapl_copy_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
-    are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((FALSE == are_equal), "H5Pequal");
+  /* Copy the fapl and ensure it's equal to the original */
+  fapl_copy_id = H5Pcopy(fapl_id);
+  VRFY((fapl_copy_id != H5I_INVALID_HID), "H5Pcopy");
+  are_equal = H5Pequal(fapl_id, fapl_copy_id);
+  VRFY((TRUE == are_equal), "H5Pequal");
 
-    /* Add a property with the same key but a different value to the original
-     * and ensure they are still different.
-     */
-    mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "ijk");
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
-    ret = H5Pset_mpi_params(fapl_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
-    are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((FALSE == are_equal), "H5Pequal");
+  /* Add a property to the copy and ensure it's different now */
+  mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "abc");
+  VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
+  ret = H5Pset_mpi_params(fapl_copy_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
+  are_equal = H5Pequal(fapl_id, fapl_copy_id);
+  VRFY((FALSE == are_equal), "H5Pequal");
 
-    /* Set the second property in the original to the same
-     * value as the copy and ensure they are the same now.
-     */
-    mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "abc");
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
-    ret = H5Pset_mpi_params(fapl_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
-    are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((TRUE == are_equal), "H5Pequal");
+  /* Add a property with the same key but a different value to the original
+   * and ensure they are still different.
+   */
+  mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "ijk");
+  VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
+  ret = H5Pset_mpi_params(fapl_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
+  are_equal = H5Pequal(fapl_id, fapl_copy_id);
+  VRFY((FALSE == are_equal), "H5Pequal");
 
-    /* create the file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+  /* Set the second property in the original to the same
+   * value as the copy and ensure they are the same now.
+   */
+  mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "abc");
+  VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
+  ret = H5Pset_mpi_params(fapl_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
+  are_equal = H5Pequal(fapl_id, fapl_copy_id);
+  VRFY((TRUE == are_equal), "H5Pequal");
 
-    /* verify settings for file access properties */
+  /* create the file */
+  fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+  VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
 
-    /* Collective metadata writes */
-    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata writes");
+  /* verify settings for file access properties */
 
-    /* Collective metadata read API calling requirement */
-    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata API calls requirement");
+  /* Collective metadata writes */
+  ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+  VRFY((is_coll == FALSE),
+       "Incorrect property setting for coll metadata writes");
 
-    ret = H5Fclose(fid);
-    VRFY((ret >= 0), "H5Fclose succeeded");
+  /* Collective metadata read API calling requirement */
+  ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+  VRFY((is_coll == FALSE),
+       "Incorrect property setting for coll metadata API calls requirement");
 
-    /* Open the file with the MPI-IO driver */
-    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
-    fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+  ret = H5Fclose(fid);
+  VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* verify settings for file access properties */
+  /* Open the file with the MPI-IO driver */
+  ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
+  fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+  VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
 
-    /* Collective metadata writes */
-    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata writes");
+  /* verify settings for file access properties */
 
-    /* Collective metadata read API calling requirement */
-    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata API calls requirement");
+  /* Collective metadata writes */
+  ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+  VRFY((is_coll == FALSE),
+       "Incorrect property setting for coll metadata writes");
 
-    ret = H5Fclose(fid);
-    VRFY((ret >= 0), "H5Fclose succeeded");
+  /* Collective metadata read API calling requirement */
+  ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+  VRFY((is_coll == FALSE),
+       "Incorrect property setting for coll metadata API calls requirement");
 
-    /* Open the file with the MPI-IO driver w/ collective settings */
-    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
-    VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
-    /* Collective metadata writes */
-    ret = H5Pset_coll_metadata_write(fapl_id, TRUE);
-    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    /* Collective metadata read API calling requirement */
-    ret = H5Pset_all_coll_metadata_ops(fapl_id, TRUE);
-    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+  ret = H5Fclose(fid);
+  VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* verify settings for file access properties */
+  /* Open the file with the MPI-IO driver w/ collective settings */
+  ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+  VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
+  /* Collective metadata writes */
+  ret = H5Pset_coll_metadata_write(fapl_id, TRUE);
+  VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+  /* Collective metadata read API calling requirement */
+  ret = H5Pset_all_coll_metadata_ops(fapl_id, TRUE);
+  VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+  fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+  VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
 
-    /* Collective metadata writes */
-    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata writes");
+  /* verify settings for file access properties */
 
-    /* Collective metadata read API calling requirement */
-    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata API calls requirement");
+  /* Collective metadata writes */
+  ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+  VRFY((is_coll == TRUE),
+       "Incorrect property setting for coll metadata writes");
 
-    /* close fapl and retrieve it from file */
-    ret = H5Pclose(fapl_id);
-    VRFY((ret >= 0), "H5Pclose succeeded");
-    fapl_id = H5I_INVALID_HID;
+  /* Collective metadata read API calling requirement */
+  ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+  VRFY((is_coll == TRUE),
+       "Incorrect property setting for coll metadata API calls requirement");
 
-    fapl_id = H5Fget_access_plist(fid);
-    VRFY((fapl_id != H5I_INVALID_HID), "H5P_FILE_ACCESS");
+  /* close fapl and retrieve it from file */
+  ret = H5Pclose(fapl_id);
+  VRFY((ret >= 0), "H5Pclose succeeded");
+  fapl_id = H5I_INVALID_HID;
 
-    /* verify settings for file access properties */
+  fapl_id = H5Fget_access_plist(fid);
+  VRFY((fapl_id != H5I_INVALID_HID), "H5P_FILE_ACCESS");
 
-    /* Collective metadata writes */
-    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata writes");
+  /* verify settings for file access properties */
 
-    /* Collective metadata read API calling requirement */
-    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
-    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata API calls requirement");
+  /* Collective metadata writes */
+  ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+  VRFY((is_coll == TRUE),
+       "Incorrect property setting for coll metadata writes");
 
-    /* close file */
-    ret = H5Fclose(fid);
-    VRFY((ret >= 0), "H5Fclose succeeded");
+  /* Collective metadata read API calling requirement */
+  ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+  VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+  VRFY((is_coll == TRUE),
+       "Incorrect property setting for coll metadata API calls requirement");
 
-    /* Release file-access plist */
-    ret = H5Pclose(fapl_id);
-    VRFY((ret >= 0), "H5Pclose succeeded");
-    ret = H5Pclose(fapl_copy_id);
-    VRFY((ret >= 0), "H5Pclose succeeded");
+  /* close file */
+  ret = H5Fclose(fid);
+  VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* Free the MPI info object */
-    mpi_ret = MPI_Info_free(&info);
-    VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+  /* Release file-access plist */
+  ret = H5Pclose(fapl_id);
+  VRFY((ret >= 0), "H5Pclose succeeded");
+  ret = H5Pclose(fapl_copy_id);
+  VRFY((ret >= 0), "H5Pclose succeeded");
+
+  /* Free the MPI info object */
+  mpi_ret = MPI_Info_free(&info);
+  VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
 
 } /* end test_file_properties() */
 
-void
-test_delete(void)
-{
-    hid_t       fid      = H5I_INVALID_HID; /* HDF5 file ID */
-    hid_t       fapl_id  = H5I_INVALID_HID; /* File access plist */
-    const char *filename = NULL;
-    MPI_Comm    comm     = MPI_COMM_WORLD;
-    MPI_Info    info     = MPI_INFO_NULL;
-    htri_t      is_hdf5  = FAIL; /* Whether a file is an HDF5 file */
-    herr_t      ret;             /* Generic return value */
+void test_delete(void) {
+  hid_t fid = H5I_INVALID_HID;     /* HDF5 file ID */
+  hid_t fapl_id = H5I_INVALID_HID; /* File access plist */
+  const char *filename = NULL;
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Info info = MPI_INFO_NULL;
+  htri_t is_hdf5 = FAIL; /* Whether a file is an HDF5 file */
+  herr_t ret;            /* Generic return value */
 
-    filename = (const char *)PARATESTFILE /* GetTestParameters() */;
+  filename = (const char *)PARATESTFILE /* GetTestParameters() */;
 
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  /* set up MPI parameters */
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file or file more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
+  /* Make sure the connector supports the API functions being tested */
+  if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) ||
+      !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
+    if (MAINPROCESS) {
+      puts("SKIPPED");
+      printf("    API functions for basic file or file more aren't supported "
+             "with this "
+             "connector\n");
+      fflush(stdout);
     }
 
-    /* setup file access plist */
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
-    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
-    VRFY((SUCCEED == ret), "H5Pset_fapl_mpio");
+    return;
+  }
 
-    /* create the file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate");
+  /* setup file access plist */
+  fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+  VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
+  ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+  VRFY((SUCCEED == ret), "H5Pset_fapl_mpio");
 
-    /* close the file */
-    ret = H5Fclose(fid);
-    VRFY((SUCCEED == ret), "H5Fclose");
+  /* create the file */
+  fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+  VRFY((fid != H5I_INVALID_HID), "H5Fcreate");
 
-    /* Verify that the file is an HDF5 file */
-    is_hdf5 = H5Fis_accessible(filename, fapl_id);
-    VRFY((TRUE == is_hdf5), "H5Fis_accessible");
+  /* close the file */
+  ret = H5Fclose(fid);
+  VRFY((SUCCEED == ret), "H5Fclose");
 
-    /* Delete the file */
-    ret = H5Fdelete(filename, fapl_id);
-    VRFY((SUCCEED == ret), "H5Fdelete");
+  /* Verify that the file is an HDF5 file */
+  is_hdf5 = H5Fis_accessible(filename, fapl_id);
+  VRFY((TRUE == is_hdf5), "H5Fis_accessible");
 
-    /* Verify that the file is NO LONGER an HDF5 file */
-    /* This should fail since there is no file */
-    H5E_BEGIN_TRY
-    {
-        is_hdf5 = H5Fis_accessible(filename, fapl_id);
-    }
-    H5E_END_TRY
-    VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
+  /* Delete the file */
+  ret = H5Fdelete(filename, fapl_id);
+  VRFY((SUCCEED == ret), "H5Fdelete");
 
-    /* Release file-access plist */
-    ret = H5Pclose(fapl_id);
-    VRFY((SUCCEED == ret), "H5Pclose");
+  /* Verify that the file is NO LONGER an HDF5 file */
+  /* This should fail since there is no file */
+  H5E_BEGIN_TRY { is_hdf5 = H5Fis_accessible(filename, fapl_id); }
+  H5E_END_TRY
+  VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
+
+  /* Release file-access plist */
+  ret = H5Pclose(fapl_id);
+  VRFY((SUCCEED == ret), "H5Pclose");
 
 } /* end test_delete() */

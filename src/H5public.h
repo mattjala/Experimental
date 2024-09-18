@@ -123,14 +123,16 @@
  *          The #H5_VERSION_GE macro compares the version of the HDF5 library
  *          being used against the version number specified in the parameters.
  *
- *          For more information about release versioning, see \ref_h5lib_relver.
+ *          For more information about release versioning, see
+ * \ref_h5lib_relver.
  *
  * \since 1.8.7
  *
  */
-#define H5_VERSION_GE(Maj, Min, Rel)                                                                         \
-    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) ||                       \
-     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
+#define H5_VERSION_GE(Maj, Min, Rel)                                           \
+  (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) &&                        \
+    (H5_VERS_RELEASE >= Rel)) ||                                               \
+   ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
 
 /**
  * \brief Determines whether the version of the library being used is less
@@ -159,14 +161,16 @@
  *          The #H5_VERSION_LE macro compares the version of the HDF5 library
  *          being used against the version number specified in the parameters.
  *
- *          For more information about release versioning, see \ref_h5lib_relver.
+ *          For more information about release versioning, see
+ * \ref_h5lib_relver.
  *
  * \since 1.8.7
  *
  */
-#define H5_VERSION_LE(Maj, Min, Rel)                                                                         \
-    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
-     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
+#define H5_VERSION_LE(Maj, Min, Rel)                                           \
+  (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) &&                        \
+    (H5_VERS_RELEASE <= Rel)) ||                                               \
+   ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 
 /* Macros for various environment variables that HDF5 interprets */
 /**
@@ -295,21 +299,22 @@ typedef uint64_t hsize_t;
 #endif
 
 /**
- * The size of file objects. Used when negative values are needed to indicate errors.
+ * The size of file objects. Used when negative values are needed to indicate
+ * errors.
  *
  * \internal Defined as a (minimum) 64-bit integer type. Use of hssize_t
  * should be discouraged in new code.
  */
 typedef int64_t hssize_t;
-#define PRIdHSIZE          PRId64
-#define PRIiHSIZE          PRIi64
-#define PRIoHSIZE          PRIo64
-#define PRIuHSIZE          PRIu64
-#define PRIxHSIZE          PRIx64
-#define PRIXHSIZE          PRIX64
-#define H5_SIZEOF_HSIZE_T  8
+#define PRIdHSIZE PRId64
+#define PRIiHSIZE PRIi64
+#define PRIoHSIZE PRIo64
+#define PRIuHSIZE PRIu64
+#define PRIxHSIZE PRIx64
+#define PRIXHSIZE PRIX64
+#define H5_SIZEOF_HSIZE_T 8
 #define H5_SIZEOF_HSSIZE_T 8
-#define HSIZE_UNDEF        UINT64_MAX
+#define HSIZE_UNDEF UINT64_MAX
 
 /**
  * The address of an object in the file.
@@ -317,15 +322,15 @@ typedef int64_t hssize_t;
  * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
 typedef uint64_t haddr_t;
-#define PRIdHADDR           PRId64
-#define PRIoHADDR           PRIo64
-#define PRIuHADDR           PRIu64
-#define PRIxHADDR           PRIx64
-#define PRIXHADDR           PRIX64
-#define H5_SIZEOF_HADDR_T   8
-#define HADDR_UNDEF         UINT64_MAX
+#define PRIdHADDR PRId64
+#define PRIoHADDR PRIo64
+#define PRIuHADDR PRIu64
+#define PRIxHADDR PRIx64
+#define PRIXHADDR PRIX64
+#define H5_SIZEOF_HADDR_T 8
+#define HADDR_UNDEF UINT64_MAX
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
-#define HADDR_MAX           (HADDR_UNDEF - 1)
+#define HADDR_MAX (HADDR_UNDEF - 1)
 
 #ifdef H5_HAVE_PARALLEL
 #define HADDR_AS_MPI_TYPE MPI_UINT64_T
@@ -336,11 +341,11 @@ typedef uint64_t haddr_t;
  * Common iteration orders
  */
 typedef enum {
-    H5_ITER_UNKNOWN = -1, /**< Unknown order */
-    H5_ITER_INC,          /**< Increasing order */
-    H5_ITER_DEC,          /**< Decreasing order */
-    H5_ITER_NATIVE,       /**< No particular order, whatever is fastest */
-    H5_ITER_N             /**< Number of iteration orders */
+  H5_ITER_UNKNOWN = -1, /**< Unknown order */
+  H5_ITER_INC,          /**< Increasing order */
+  H5_ITER_DEC,          /**< Decreasing order */
+  H5_ITER_NATIVE,       /**< No particular order, whatever is fastest */
+  H5_ITER_N             /**< Number of iteration orders */
 } H5_iter_order_t;
 //! <!-- [H5_iter_order_t_snip] -->
 
@@ -349,8 +354,8 @@ typedef enum {
  *      that positive value to the function that called the iterator)
  */
 #define H5_ITER_ERROR (-1) /**< Error, stop iteration */
-#define H5_ITER_CONT  (0)  /**< Continue iteration */
-#define H5_ITER_STOP  (1)  /**< Stop iteration, short-circuit success */
+#define H5_ITER_CONT (0)   /**< Continue iteration */
+#define H5_ITER_STOP (1)   /**< Stop iteration, short-circuit success */
 
 //! <!-- [H5_index_t_snip] -->
 /**
@@ -359,10 +364,10 @@ typedef enum {
  * links in groups/attributes on objects.
  */
 typedef enum H5_index_t {
-    H5_INDEX_UNKNOWN = -1, /**< Unknown index type                   */
-    H5_INDEX_NAME,         /**< Index on names                       */
-    H5_INDEX_CRT_ORDER,    /**< Index on creation order              */
-    H5_INDEX_N             /**< Number of indices defined            */
+  H5_INDEX_UNKNOWN = -1, /**< Unknown index type                   */
+  H5_INDEX_NAME,         /**< Index on names                       */
+  H5_INDEX_CRT_ORDER,    /**< Index on creation order              */
+  H5_INDEX_N             /**< Number of indices defined            */
 } H5_index_t;
 //! <!-- [H5_index_t_snip] -->
 
@@ -371,8 +376,8 @@ typedef enum H5_index_t {
  */
 //! <!-- [H5_ih_info_t_snip] -->
 typedef struct H5_ih_info_t {
-    hsize_t index_size; /**< btree and/or list */
-    hsize_t heap_size;
+  hsize_t index_size; /**< btree and/or list */
+  hsize_t heap_size;
 } H5_ih_info_t;
 //! <!-- [H5_ih_info_t_snip] -->
 
@@ -392,7 +397,7 @@ typedef struct H5_ih_info_t {
  *            H5Lpublic.h and H5Opublic.h headers)
  */
 typedef struct H5O_token_t {
-    uint8_t __data[H5O_MAX_TOKEN_SIZE];
+  uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
 //! <!-- [H5O_token_t_snip] -->
 
@@ -555,8 +560,9 @@ H5_DLL herr_t H5garbage_collect(void);
  *
  * \since 1.6.0
  */
-H5_DLL herr_t H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
-                                     int arr_list_lim, int blk_global_lim, int blk_list_lim);
+H5_DLL herr_t H5set_free_list_limits(int reg_global_lim, int reg_list_lim,
+                                     int arr_global_lim, int arr_list_lim,
+                                     int blk_global_lim, int blk_list_lim);
 /**
  * \ingroup H5
  * \brief Gets the current size of the free lists used to manage memory
@@ -575,7 +581,8 @@ H5_DLL herr_t H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int a
  *
  * \since 1.10.7
  */
-H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size);
+H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size,
+                                    size_t *blk_size, size_t *fac_size);
 /**
  * \ingroup H5
  * \brief Returns the HDF library release number
@@ -590,7 +597,8 @@ H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *
  *          application.
  *
  */
-H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum);
+H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
+                               unsigned *relnum);
 /**
  * \ingroup H5
  * \brief Verifies that HDF5 library versions are consistent
@@ -638,7 +646,8 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *rel
  *          run.
  *
  */
-H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum);
+H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
+                              unsigned relnum);
 /**
  * \ingroup H5
  * \brief Checks whether the HDF5 library is closing.
@@ -678,8 +687,8 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
  * \param[in] mem Buffer to be freed. Can be NULL
  * \return \herr_t
  *
- * \details H5free_memory() frees the memory that has been allocated by the caller
- *          with H5allocate_memory() or by the HDF5 library on behalf of the
+ * \details H5free_memory() frees the memory that has been allocated by the
+ * caller with H5allocate_memory() or by the HDF5 library on behalf of the
  *          caller.
  *
  *          H5Tget_member_name() provides an example of memory allocation on
@@ -723,9 +732,8 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          will later be freed internally by the HDF5 library.
  *
  *          The boolean \p clear parameter specifies whether the buffer should
- *          be initialized. If clear is \c TRUE, all bits in the buffer are to be
- *          set to 0 (zero); if clear is \c FALSE, the buffer will not be
- *          initialized.
+ *          be initialized. If clear is \c TRUE, all bits in the buffer are to
+ * be set to 0 (zero); if clear is \c FALSE, the buffer will not be initialized.
  *
  *          This function is intended to have the semantics of malloc() and
  *          calloc(). However, unlike malloc() and calloc(), which allow for a
@@ -740,8 +748,8 @@ H5_DLL herr_t H5free_memory(void *mem);
  *            the same library that initially allocated it. In most cases, the
  *            HDF5 API uses resources that are allocated and freed either
  *            entirely by the user or entirely by the library, so this is not a
- *            problem. In rare cases, however, HDF5 API calls will free the memory
- *            that the user allocated. This function allows the user to safely
+ *            problem. In rare cases, however, HDF5 API calls will free the
+ * memory that the user allocated. This function allows the user to safely
  *            allocate this memory.\n
  *            It is particularly important to use this function to allocate
  *            memory in Microsoft Windows environments. In Windows, the C
@@ -791,7 +799,8 @@ H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
  *
  *          <table>
  *            <tr><td>\Code{H5resize_memory(buffer, size)}</td>
- *                <td>Resizes buffer. Returns pointer to resized buffer.</td></tr>
+ *                <td>Resizes buffer. Returns pointer to resized
+ buffer.</td></tr>
  *            <tr><td>\Code{H5resize_memory(NULL, size)}</td>
  *                <td>Allocates memory using HDF5 Library allocator.
  *                    Returns pointer to new buffer</td></tr>

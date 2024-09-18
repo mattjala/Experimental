@@ -25,10 +25,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5HFpkg.h"     /* Fractal heaps			*/
 #include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions			*/
 
 /****************/
 /* Local Macros */
@@ -69,27 +69,28 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+herr_t H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
-    assert(cparam);
+  /* Check arguments. */
+  assert(fh);
+  assert(cparam);
 
-    /* Get fractal heap creation parameters */
-    if (fh->hdr->id_len == (unsigned)(1 + fh->hdr->heap_off_size + fh->hdr->heap_len_size))
-        cparam->id_len = 0;
-    else if (fh->hdr->id_len == (unsigned)(1 + fh->hdr->sizeof_size + fh->hdr->sizeof_addr))
-        cparam->id_len = 1;
-    else
-        H5_CHECKED_ASSIGN(cparam->id_len, uint16_t, fh->hdr->id_len, unsigned);
-    cparam->max_man_size = fh->hdr->max_man_size;
-    H5MM_memcpy(&(cparam->managed), &(fh->hdr->man_dtable.cparam), sizeof(H5HF_dtable_cparam_t));
-    H5O_msg_copy(H5O_PLINE_ID, &(fh->hdr->pline), &(cparam->pline));
+  /* Get fractal heap creation parameters */
+  if (fh->hdr->id_len ==
+      (unsigned)(1 + fh->hdr->heap_off_size + fh->hdr->heap_len_size))
+    cparam->id_len = 0;
+  else if (fh->hdr->id_len ==
+           (unsigned)(1 + fh->hdr->sizeof_size + fh->hdr->sizeof_addr))
+    cparam->id_len = 1;
+  else
+    H5_CHECKED_ASSIGN(cparam->id_len, uint16_t, fh->hdr->id_len, unsigned);
+  cparam->max_man_size = fh->hdr->max_man_size;
+  H5MM_memcpy(&(cparam->managed), &(fh->hdr->man_dtable.cparam),
+              sizeof(H5HF_dtable_cparam_t));
+  H5O_msg_copy(H5O_PLINE_ID, &(fh->hdr->pline), &(cparam->pline));
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_cparam_test() */
 
 /*-------------------------------------------------------------------------
@@ -102,74 +103,75 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
  *
  *-------------------------------------------------------------------------
  */
-int
-H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
-{
-    int ret_value = 0; /* Return value */
+int H5HF_cmp_cparam_test(const H5HF_create_t *cparam1,
+                         const H5HF_create_t *cparam2) {
+  int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(cparam1);
-    assert(cparam2);
+  /* Check arguments. */
+  assert(cparam1);
+  assert(cparam2);
 
-    /* Compare doubling table parameters */
-    if (cparam1->managed.width < cparam2->managed.width)
+  /* Compare doubling table parameters */
+  if (cparam1->managed.width < cparam2->managed.width)
+    HGOTO_DONE(-1);
+  else if (cparam1->managed.width > cparam2->managed.width)
+    HGOTO_DONE(1);
+  if (cparam1->managed.start_block_size < cparam2->managed.start_block_size)
+    HGOTO_DONE(-1);
+  else if (cparam1->managed.start_block_size >
+           cparam2->managed.start_block_size)
+    HGOTO_DONE(1);
+  if (cparam1->managed.max_direct_size < cparam2->managed.max_direct_size)
+    HGOTO_DONE(-1);
+  else if (cparam1->managed.max_direct_size > cparam2->managed.max_direct_size)
+    HGOTO_DONE(1);
+  if (cparam1->managed.max_index < cparam2->managed.max_index)
+    HGOTO_DONE(-1);
+  else if (cparam1->managed.max_index > cparam2->managed.max_index)
+    HGOTO_DONE(1);
+  if (cparam1->managed.start_root_rows < cparam2->managed.start_root_rows)
+    HGOTO_DONE(-1);
+  else if (cparam1->managed.start_root_rows > cparam2->managed.start_root_rows)
+    HGOTO_DONE(1);
+
+  /* Compare other general parameters for heap */
+  if (cparam1->max_man_size < cparam2->max_man_size)
+    HGOTO_DONE(-1);
+  else if (cparam1->max_man_size > cparam2->max_man_size)
+    HGOTO_DONE(1);
+  if (cparam1->id_len < cparam2->id_len)
+    HGOTO_DONE(-1);
+  else if (cparam1->id_len > cparam2->id_len)
+    HGOTO_DONE(1);
+
+  /* Compare "important" parameters for any I/O pipeline filters */
+  if (cparam1->pline.nused < cparam2->pline.nused)
+    HGOTO_DONE(-1);
+  else if (cparam1->pline.nused > cparam2->pline.nused)
+    HGOTO_DONE(1);
+  else {
+    size_t u, v; /* Local index variables */
+
+    /* Compare each filter */
+    for (u = 0; u < cparam1->pline.nused; u++) {
+      /* Check filter ID */
+      if (cparam1->pline.filter[u].id < cparam2->pline.filter[u].id)
         HGOTO_DONE(-1);
-    else if (cparam1->managed.width > cparam2->managed.width)
-        HGOTO_DONE(1);
-    if (cparam1->managed.start_block_size < cparam2->managed.start_block_size)
-        HGOTO_DONE(-1);
-    else if (cparam1->managed.start_block_size > cparam2->managed.start_block_size)
-        HGOTO_DONE(1);
-    if (cparam1->managed.max_direct_size < cparam2->managed.max_direct_size)
-        HGOTO_DONE(-1);
-    else if (cparam1->managed.max_direct_size > cparam2->managed.max_direct_size)
-        HGOTO_DONE(1);
-    if (cparam1->managed.max_index < cparam2->managed.max_index)
-        HGOTO_DONE(-1);
-    else if (cparam1->managed.max_index > cparam2->managed.max_index)
-        HGOTO_DONE(1);
-    if (cparam1->managed.start_root_rows < cparam2->managed.start_root_rows)
-        HGOTO_DONE(-1);
-    else if (cparam1->managed.start_root_rows > cparam2->managed.start_root_rows)
+      else if (cparam1->pline.filter[u].id > cparam2->pline.filter[u].id)
         HGOTO_DONE(1);
 
-    /* Compare other general parameters for heap */
-    if (cparam1->max_man_size < cparam2->max_man_size)
+      /* Check filter flags */
+      if (cparam1->pline.filter[u].flags < cparam2->pline.filter[u].flags)
         HGOTO_DONE(-1);
-    else if (cparam1->max_man_size > cparam2->max_man_size)
+      else if (cparam1->pline.filter[u].flags > cparam2->pline.filter[u].flags)
         HGOTO_DONE(1);
-    if (cparam1->id_len < cparam2->id_len)
-        HGOTO_DONE(-1);
-    else if (cparam1->id_len > cparam2->id_len)
-        HGOTO_DONE(1);
-
-    /* Compare "important" parameters for any I/O pipeline filters */
-    if (cparam1->pline.nused < cparam2->pline.nused)
-        HGOTO_DONE(-1);
-    else if (cparam1->pline.nused > cparam2->pline.nused)
-        HGOTO_DONE(1);
-    else {
-        size_t u, v; /* Local index variables */
-
-        /* Compare each filter */
-        for (u = 0; u < cparam1->pline.nused; u++) {
-            /* Check filter ID */
-            if (cparam1->pline.filter[u].id < cparam2->pline.filter[u].id)
-                HGOTO_DONE(-1);
-            else if (cparam1->pline.filter[u].id > cparam2->pline.filter[u].id)
-                HGOTO_DONE(1);
-
-            /* Check filter flags */
-            if (cparam1->pline.filter[u].flags < cparam2->pline.filter[u].flags)
-                HGOTO_DONE(-1);
-            else if (cparam1->pline.filter[u].flags > cparam2->pline.filter[u].flags)
-                HGOTO_DONE(1);
 
 /* Don't worry about comparing the filter names right now... */
 /* (they are expanded during the encode/decode process, but aren't copied
- *      during the H5Z_append operation, generating false positive failures -QAK)
+ *      during the H5Z_append operation, generating false positive failures
+ * -QAK)
  */
 #if 0
             /* Check filter name */
@@ -183,25 +185,29 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
             } /* end if */
 #endif
 
-            /* Check # of filter parameters */
-            if (cparam1->pline.filter[u].cd_nelmts < cparam2->pline.filter[u].cd_nelmts)
-                HGOTO_DONE(-1);
-            else if (cparam1->pline.filter[u].cd_nelmts > cparam2->pline.filter[u].cd_nelmts)
-                HGOTO_DONE(1);
+      /* Check # of filter parameters */
+      if (cparam1->pline.filter[u].cd_nelmts <
+          cparam2->pline.filter[u].cd_nelmts)
+        HGOTO_DONE(-1);
+      else if (cparam1->pline.filter[u].cd_nelmts >
+               cparam2->pline.filter[u].cd_nelmts)
+        HGOTO_DONE(1);
 
-            /* Check filter parameters */
-            for (v = 0; v < cparam1->pline.filter[u].cd_nelmts; v++) {
-                if (cparam1->pline.filter[u].cd_values[v] < cparam2->pline.filter[u].cd_values[v])
-                    HGOTO_DONE(-1);
-                else if (cparam1->pline.filter[u].cd_values[v] > cparam2->pline.filter[u].cd_values[v])
-                    HGOTO_DONE(1);
-            } /* end for */
+      /* Check filter parameters */
+      for (v = 0; v < cparam1->pline.filter[u].cd_nelmts; v++) {
+        if (cparam1->pline.filter[u].cd_values[v] <
+            cparam2->pline.filter[u].cd_values[v])
+          HGOTO_DONE(-1);
+        else if (cparam1->pline.filter[u].cd_values[v] >
+                 cparam2->pline.filter[u].cd_values[v])
+          HGOTO_DONE(1);
+      } /* end for */
 
-        } /* end for */
-    }     /* end else */
+    } /* end for */
+  }   /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_cmp_cparam_test() */
 
 /*-------------------------------------------------------------------------
@@ -215,20 +221,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-unsigned
-H5HF_get_max_root_rows(const H5HF_t *fh)
-{
-    unsigned ret_value = 0; /* Return value */
+unsigned H5HF_get_max_root_rows(const H5HF_t *fh) {
+  unsigned ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
+  /* Check arguments. */
+  assert(fh);
 
-    /* Return max. # of rows in root indirect block */
-    ret_value = fh->hdr->man_dtable.max_root_rows;
+  /* Return max. # of rows in root indirect block */
+  ret_value = fh->hdr->man_dtable.max_root_rows;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_max_root_rows() */
 
 /*-------------------------------------------------------------------------
@@ -242,20 +246,18 @@ H5HF_get_max_root_rows(const H5HF_t *fh)
  *
  *-------------------------------------------------------------------------
  */
-unsigned
-H5HF_get_dtable_width_test(const H5HF_t *fh)
-{
-    unsigned ret_value = 0; /* Return value */
+unsigned H5HF_get_dtable_width_test(const H5HF_t *fh) {
+  unsigned ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
+  /* Check arguments. */
+  assert(fh);
 
-    /* Return width of doubling table */
-    ret_value = fh->hdr->man_dtable.cparam.width;
+  /* Return width of doubling table */
+  ret_value = fh->hdr->man_dtable.cparam.width;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_dtable_width_test() */
 
 /*-------------------------------------------------------------------------
@@ -269,20 +271,18 @@ H5HF_get_dtable_width_test(const H5HF_t *fh)
  *
  *-------------------------------------------------------------------------
  */
-unsigned
-H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
-{
-    unsigned ret_value = 0; /* Return value */
+unsigned H5HF_get_dtable_max_drows_test(const H5HF_t *fh) {
+  unsigned ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
+  /* Check arguments. */
+  assert(fh);
 
-    /* Return max. # of direct blocks in any indirect block */
-    ret_value = fh->hdr->man_dtable.max_direct_rows;
+  /* Return max. # of direct blocks in any indirect block */
+  ret_value = fh->hdr->man_dtable.max_direct_rows;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_dtable_max_drows_test() */
 
 /*-------------------------------------------------------------------------
@@ -300,21 +300,22 @@ H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
  *
  *-------------------------------------------------------------------------
  */
-unsigned
-H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
-{
-    unsigned ret_value = 0; /* Return value */
+unsigned H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos) {
+  unsigned ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
-    assert(pos);
+  /* Check arguments. */
+  assert(fh);
+  assert(pos);
 
-    /* Return max. # of direct blocks in this indirect block row */
-    ret_value = pos + (fh->hdr->man_dtable.max_direct_bits - fh->hdr->man_dtable.first_row_bits) + 1;
+  /* Return max. # of direct blocks in this indirect block row */
+  ret_value = pos +
+              (fh->hdr->man_dtable.max_direct_bits -
+               fh->hdr->man_dtable.first_row_bits) +
+              1;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_iblock_max_drows_test() */
 
 /*-------------------------------------------------------------------------
@@ -328,20 +329,18 @@ H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
-H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row)
-{
-    hsize_t ret_value = 0; /* Return value */
+hsize_t H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row) {
+  hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
+  /* Check arguments. */
+  assert(fh);
 
-    /* Return direct block free space */
-    ret_value = fh->hdr->man_dtable.row_block_size[row];
+  /* Return direct block free space */
+  ret_value = fh->hdr->man_dtable.row_block_size[row];
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_dblock_size_test() */
 
 /*-------------------------------------------------------------------------
@@ -356,20 +355,18 @@ H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row)
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
-H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row)
-{
-    hsize_t ret_value = 0; /* Return value */
+hsize_t H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row) {
+  hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
+  /* Check arguments. */
+  assert(fh);
 
-    /* Return direct block free space */
-    ret_value = fh->hdr->man_dtable.row_tot_dblock_free[row];
+  /* Return direct block free space */
+  ret_value = fh->hdr->man_dtable.row_tot_dblock_free[row];
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_dblock_free_test() */
 
 /*-------------------------------------------------------------------------
@@ -383,24 +380,23 @@ H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
-{
-    const uint8_t *id = (const uint8_t *)_id; /* Object ID */
+herr_t H5HF_get_id_off_test(const H5HF_t *fh, const void *_id,
+                            hsize_t *obj_off) {
+  const uint8_t *id = (const uint8_t *)_id; /* Object ID */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
-    assert(fh->hdr);
-    assert(id);
-    assert(obj_off);
+  /* Check arguments. */
+  assert(fh);
+  assert(fh->hdr);
+  assert(id);
+  assert(obj_off);
 
-    /* Get the offset for a 'normal' heap ID */
-    id++;
-    UINT64DECODE_VAR(id, *obj_off, fh->hdr->heap_off_size);
+  /* Get the offset for a 'normal' heap ID */
+  id++;
+  UINT64DECODE_VAR(id, *obj_off, fh->hdr->heap_off_size);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_id_off_test() */
 
 /*-------------------------------------------------------------------------
@@ -413,21 +409,19 @@ H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
-{
-    const uint8_t *id = (const uint8_t *)_id; /* Object ID */
+herr_t H5HF_get_id_type_test(const void *_id, unsigned char *obj_type) {
+  const uint8_t *id = (const uint8_t *)_id; /* Object ID */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(id);
-    assert(obj_type);
+  /* Check arguments. */
+  assert(id);
+  assert(obj_type);
 
-    /* Get the type for a heap ID */
-    *obj_type = (uint8_t)(*id & H5HF_ID_TYPE_MASK);
+  /* Get the type for a heap ID */
+  *obj_type = (uint8_t)(*id & H5HF_ID_TYPE_MASK);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_id_type_test() */
 
 /*-------------------------------------------------------------------------
@@ -440,22 +434,21 @@ H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool_t *len_extended)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+herr_t H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len,
+                               hbool_t *len_extended) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
-    assert(fh->hdr);
-    assert(max_len);
-    assert(len_extended);
+  /* Check arguments. */
+  assert(fh);
+  assert(fh->hdr);
+  assert(max_len);
+  assert(len_extended);
 
-    /* Retrieve information about tiny object's ID encoding in a heap */
-    *max_len      = fh->hdr->tiny_max_len;
-    *len_extended = fh->hdr->tiny_len_extended;
+  /* Retrieve information about tiny object's ID encoding in a heap */
+  *max_len = fh->hdr->tiny_max_len;
+  *len_extended = fh->hdr->tiny_len_extended;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_tiny_info_test() */
 
 /*-------------------------------------------------------------------------
@@ -468,20 +461,19 @@ H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool_t *len_extended
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id, hbool_t *ids_direct)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+herr_t H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id,
+                               hbool_t *ids_direct) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check arguments. */
-    assert(fh);
-    assert(fh->hdr);
-    assert(ids_direct);
+  /* Check arguments. */
+  assert(fh);
+  assert(fh->hdr);
+  assert(ids_direct);
 
-    /* Retrieve information about tiny object's ID encoding in a heap */
-    if (next_id)
-        *next_id = fh->hdr->huge_next_id;
-    *ids_direct = fh->hdr->huge_ids_direct;
+  /* Retrieve information about tiny object's ID encoding in a heap */
+  if (next_id)
+    *next_id = fh->hdr->huge_next_id;
+  *ids_direct = fh->hdr->huge_ids_direct;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_huge_info_test() */

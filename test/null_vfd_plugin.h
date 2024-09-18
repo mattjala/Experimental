@@ -16,8 +16,8 @@
 #ifndef H5FDnull_H
 #define H5FDnull_H
 
-#define H5FD_NULL      (H5FD_null_init())
-#define NULL_VFD_NAME  "null_vfd_plugin"
+#define H5FD_NULL (H5FD_null_init())
+#define NULL_VFD_NAME "null_vfd_plugin"
 #define NULL_VFD_VALUE ((H5FD_class_value_t)200)
 
 #ifdef __cplusplus

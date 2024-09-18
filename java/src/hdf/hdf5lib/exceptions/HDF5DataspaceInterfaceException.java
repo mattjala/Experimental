@@ -19,22 +19,22 @@ package hdf.hdf5lib.exceptions;
  */
 
 public class HDF5DataspaceInterfaceException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5DataspaceInterfaceException</code> with no
-     * specified detail message.
-     */
-    public HDF5DataspaceInterfaceException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5DataspaceInterfaceException</code> with no
+   * specified detail message.
+   */
+  public HDF5DataspaceInterfaceException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5DataspaceInterfaceException</code> with the
-     * specified detail message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5DataspaceInterfaceException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5DataspaceInterfaceException</code> with the
+   * specified detail message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5DataspaceInterfaceException(String s) { super(s); }
 }

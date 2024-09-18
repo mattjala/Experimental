@@ -30,5 +30,4 @@ package hdf.hdf5lib.callbacks;
  *
  * @defgroup JCALL HDF5 Library Java Callbacks
  */
-public interface Callbacks {
-}
+public interface Callbacks {}

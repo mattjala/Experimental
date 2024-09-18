@@ -62,71 +62,71 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker, size_t buf_offset,
-               size_t buf_size)
-{
-    size_t u, v; /* Local index variable */
+herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
+                      const uint8_t *marker, size_t buf_offset,
+                      size_t buf_size) {
+  size_t u, v; /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /*
-     * Check arguments.
-     */
-    assert(stream);
-    assert(indent >= 0);
-    assert(buf);
-    assert(marker);
-    assert(buf_size > 0);
+  /*
+   * Check arguments.
+   */
+  assert(stream);
+  assert(indent >= 0);
+  assert(buf);
+  assert(marker);
+  assert(buf_size > 0);
 
-    /*
-     * Print the buffer in a VMS-style octal dump.
-     */
-    fprintf(stream, "%*sData follows (`__' indicates free region)...\n", indent, "");
-    for (u = 0; u < buf_size; u += 16) {
-        uint8_t c;
+  /*
+   * Print the buffer in a VMS-style octal dump.
+   */
+  fprintf(stream, "%*sData follows (`__' indicates free region)...\n", indent,
+          "");
+  for (u = 0; u < buf_size; u += 16) {
+    uint8_t c;
 
-        fprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
+    fprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
 
-        /* Print the hex values */
-        for (v = 0; v < 16; v++) {
-            if (u + v < buf_size) {
-                if (marker[u + v])
-                    fprintf(stream, "__ ");
-                else {
-                    c = buf[buf_offset + u + v];
-                    fprintf(stream, "%02x ", c);
-                } /* end else */
-            }     /* end if */
-            else
-                fprintf(stream, "   ");
+    /* Print the hex values */
+    for (v = 0; v < 16; v++) {
+      if (u + v < buf_size) {
+        if (marker[u + v])
+          fprintf(stream, "__ ");
+        else {
+          c = buf[buf_offset + u + v];
+          fprintf(stream, "%02x ", c);
+        } /* end else */
+      }   /* end if */
+      else
+        fprintf(stream, "   ");
 
-            if (7 == v)
-                HDfputc(' ', stream);
-        } /* end for */
+      if (7 == v)
         HDfputc(' ', stream);
+    } /* end for */
+    HDfputc(' ', stream);
 
-        /* Print the character values */
-        for (v = 0; v < 16; v++) {
-            if (u + v < buf_size) {
-                if (marker[u + v])
-                    HDfputc(' ', stream);
-                else {
-                    c = buf[buf_offset + u + v];
+    /* Print the character values */
+    for (v = 0; v < 16; v++) {
+      if (u + v < buf_size) {
+        if (marker[u + v])
+          HDfputc(' ', stream);
+        else {
+          c = buf[buf_offset + u + v];
 
-                    if (isprint(c))
-                        HDfputc(c, stream);
-                    else
-                        HDfputc('.', stream);
-                } /* end else */
-            }     /* end if */
+          if (isprint(c))
+            HDfputc(c, stream);
+          else
+            HDfputc('.', stream);
+        } /* end else */
+      }   /* end if */
 
-            if (7 == v)
-                HDfputc(' ', stream);
-        } /* end for */
-
-        HDfputc('\n', stream);
+      if (7 == v)
+        HDfputc(' ', stream);
     } /* end for */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    HDfputc('\n', stream);
+  } /* end for */
+
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5_buffer_dump() */

@@ -15,31 +15,30 @@
 #define H5DUMP_MAX_RANK H5S_MAX_RANK
 
 #define ATTRIBUTE_DATA 0
-#define DATASET_DATA   1
-#define ENUM_DATA      2
-#define COL            3
+#define DATASET_DATA 1
+#define ENUM_DATA 2
+#define COL 3
 
 /* Macros for displaying objects */
-#define begin_obj(obj, name, begin)                                                                          \
-    do {                                                                                                     \
-        if ((name)) {                                                                                        \
-            PRINTSTREAM(rawoutstream, "%s \"%s\" %s", (obj), (name), (begin));                               \
-        }                                                                                                    \
-        else {                                                                                               \
-            PRINTSTREAM(rawoutstream, "%s %s", (obj), (begin));                                              \
-        }                                                                                                    \
-    } while (0)
+#define begin_obj(obj, name, begin)                                            \
+  do {                                                                         \
+    if ((name)) {                                                              \
+      PRINTSTREAM(rawoutstream, "%s \"%s\" %s", (obj), (name), (begin));       \
+    } else {                                                                   \
+      PRINTSTREAM(rawoutstream, "%s %s", (obj), (begin));                      \
+    }                                                                          \
+  } while (0)
 
-#define end_obj(obj, end)                                                                                    \
-    do {                                                                                                     \
-        if (HDstrlen(end)) {                                                                                 \
-            PRINTSTREAM(rawoutstream, "%s", end);                                                            \
-            if (HDstrlen(obj))                                                                               \
-                PRINTVALSTREAM(rawoutstream, " ");                                                           \
-        }                                                                                                    \
-        if (HDstrlen(obj))                                                                                   \
-            PRINTSTREAM(rawoutstream, "%s", obj);                                                            \
-    } while (0)
+#define end_obj(obj, end)                                                      \
+  do {                                                                         \
+    if (HDstrlen(end)) {                                                       \
+      PRINTSTREAM(rawoutstream, "%s", end);                                    \
+      if (HDstrlen(obj))                                                       \
+        PRINTVALSTREAM(rawoutstream, " ");                                     \
+    }                                                                          \
+    if (HDstrlen(obj))                                                         \
+      PRINTSTREAM(rawoutstream, "%s", obj);                                    \
+  } while (0)
 
 /* 3 private values: can't be set, but can be read.
    Note: these are defined in H5Zprivate, they are

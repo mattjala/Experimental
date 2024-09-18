@@ -44,8 +44,8 @@ static const char *FileHeader = "\n\
 /* Do NOT use fprintf in this file as it is not linked with the library,
  * which contains the H5system.c file in which the function is defined.
  */
-#include "H5Tpublic.h"
 #include "H5Rpublic.h"
+#include "H5Tpublic.h"
 
 #if defined(__has_attribute)
 #if __has_attribute(no_sanitize_address)
@@ -64,17 +64,17 @@ static const char *FileHeader = "\n\
  * was detected.
  */
 typedef struct detected_t {
-    const char   *varname;
-    unsigned int  size;             /* total byte size                  */
-    unsigned int  precision;        /* meaningful bits                  */
-    unsigned int  offset;           /* bit offset to meaningful bits    */
-    int           perm[32];         /* for detection of byte order      */
-    hbool_t       is_vax;           /* for vax (float & double) only    */
-    unsigned int  sign;             /* location of sign bit             */
-    unsigned int  mpos, msize, imp; /* information about mantissa       */
-    unsigned int  epos, esize;      /* information about exponent       */
-    unsigned long bias;             /* exponent bias for floating pt    */
-    unsigned int  comp_align;       /* alignment for structure          */
+  const char *varname;
+  unsigned int size;             /* total byte size                  */
+  unsigned int precision;        /* meaningful bits                  */
+  unsigned int offset;           /* bit offset to meaningful bits    */
+  int perm[32];                  /* for detection of byte order      */
+  hbool_t is_vax;                /* for vax (float & double) only    */
+  unsigned int sign;             /* location of sign bit             */
+  unsigned int mpos, msize, imp; /* information about mantissa       */
+  unsigned int epos, esize;      /* information about exponent       */
+  unsigned long bias;            /* exponent bias for floating pt    */
+  unsigned int comp_align;       /* alignment for structure          */
 } detected_t;
 
 FILE *rawoutstream = NULL;
@@ -85,17 +85,19 @@ static detected_t d_g[MAXDETECT];
 H5_GCC_DIAG_ON("larger-than=")
 static volatile int nd_g = 0;
 
-static void         print_results(int nd, detected_t *d);
-static void         iprint(detected_t *);
-static int          byte_cmp(int, const void *, const void *, const unsigned char *);
-static unsigned int bit_cmp(unsigned int, int *, void *, void *, const unsigned char *);
-static void         fix_order(int, int, int *, const char **);
-static unsigned int imp_bit(unsigned int, int *, void *, void *, const unsigned char *);
+static void print_results(int nd, detected_t *d);
+static void iprint(detected_t *);
+static int byte_cmp(int, const void *, const void *, const unsigned char *);
+static unsigned int bit_cmp(unsigned int, int *, void *, void *,
+                            const unsigned char *);
+static void fix_order(int, int, int *, const char **);
+static unsigned int imp_bit(unsigned int, int *, void *, void *,
+                            const unsigned char *);
 static unsigned int find_bias(unsigned int, unsigned int, int *, void *);
-static void         precision(detected_t *);
-static void         print_header(void);
-static void         detect_C89_floats(void);
-static void         detect_C99_floats(void);
+static void precision(detected_t *);
+static void print_header(void);
+static void detect_C89_floats(void);
+static void detect_C99_floats(void);
 
 /*-------------------------------------------------------------------------
  * Function:    precision
@@ -105,12 +107,10 @@ static void         detect_C99_floats(void);
  * Return:      void
  *-------------------------------------------------------------------------
  */
-static void
-precision(detected_t *d)
-{
-    /* A floating point */
-    d->offset    = MIN3(d->mpos, d->epos, d->sign);
-    d->precision = d->msize + d->esize + 1;
+static void precision(detected_t *d) {
+  /* A floating point */
+  d->offset = MIN3(d->mpos, d->epos, d->sign);
+  d->precision = d->msize + d->esize + 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -123,102 +123,104 @@ precision(detected_t *d)
  *              initializes a detected_t structure with those properties.
  *-------------------------------------------------------------------------
  */
-#define DETECT_F(TYPE, VAR, INFO)                                                                            \
-    {                                                                                                        \
-        TYPE          _v1, _v2, _v3;                                                                         \
-        unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];                                              \
-        unsigned char _pad_mask[sizeof(TYPE)];                                                               \
-        unsigned char _byte_mask;                                                                            \
-        int           _i, _j, _last = (-1);                                                                  \
-        const char   *_mesg;                                                                                 \
-                                                                                                             \
-        memset(&INFO, 0, sizeof(INFO));                                                                      \
-        INFO.varname = #VAR;                                                                                 \
-        INFO.size    = sizeof(TYPE);                                                                         \
-                                                                                                             \
-        /* Initialize padding mask */                                                                        \
-        memset(_pad_mask, 0, sizeof(_pad_mask));                                                             \
-                                                                                                             \
-        /* Padding bits.  Set a variable to 4.0, then flip each bit and see if                               \
-         * the modified variable is equal ("==") to the original.  Build a                                   \
-         * padding bitmask to indicate which bits in the type are padding (i.e.                              \
-         * have no effect on the value and should be ignored by subsequent                                   \
-         * steps).  This is necessary because padding bits can change arbitrarily                            \
-         * and interfere with detection of the various properties below unless we                            \
-         * know to ignore them. */                                                                           \
-        _v1 = (TYPE)4.0L;                                                                                    \
-        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                     \
-        for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                                           \
-            for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
-                _buf1[_i] ^= _byte_mask;                                                                     \
-                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                     \
-                H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
-                if (_v1 != _v2)                                                                              \
-                    _pad_mask[_i] |= _byte_mask;                                                             \
-                H5_GCC_CLANG_DIAG_ON("float-equal")                                                          \
-                _buf1[_i] ^= _byte_mask;                                                                     \
-            } /* end for */                                                                                  \
-                                                                                                             \
-        /* Byte Order */                                                                                     \
-        for (_i = 0, _v1 = (TYPE)0.0L, _v2 = (TYPE)1.0L; _i < (int)sizeof(TYPE); _i++) {                     \
-            _v3 = _v1;                                                                                       \
-            _v1 += _v2;                                                                                      \
-            _v2 /= (TYPE)256.0L;                                                                             \
-            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                 \
-            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                                 \
-            _j = byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                                            \
-            if (_j >= 0) {                                                                                   \
-                INFO.perm[_i] = _j;                                                                          \
-                _last         = _i;                                                                          \
-            }                                                                                                \
-        }                                                                                                    \
-        fix_order(sizeof(TYPE), _last, INFO.perm, (const char **)&_mesg);                                    \
-                                                                                                             \
-        if (!strcmp(_mesg, "VAX"))                                                                           \
-            INFO.is_vax = TRUE;                                                                              \
-                                                                                                             \
-        /* Implicit mantissa bit */                                                                          \
-        _v1      = (TYPE)0.5L;                                                                               \
-        _v2      = (TYPE)1.0L;                                                                               \
-        INFO.imp = imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                                  \
-                                                                                                             \
-        /* Sign bit */                                                                                       \
-        _v1       = (TYPE)1.0L;                                                                              \
-        _v2       = (TYPE)-1.0L;                                                                             \
-        INFO.sign = bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                                 \
-                                                                                                             \
-        /* Mantissa */                                                                                       \
-        INFO.mpos = 0;                                                                                       \
-                                                                                                             \
-        _v1        = (TYPE)1.0L;                                                                             \
-        _v2        = (TYPE)1.5L;                                                                             \
-        INFO.msize = bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                                \
-        INFO.msize += 1 + (unsigned int)(INFO.imp ? 0 : 1) - INFO.mpos;                                      \
-                                                                                                             \
-        /* Exponent */                                                                                       \
-        INFO.epos = INFO.mpos + INFO.msize;                                                                  \
-                                                                                                             \
-        INFO.esize = INFO.sign - INFO.epos;                                                                  \
-                                                                                                             \
-        _v1       = (TYPE)1.0L;                                                                              \
-        INFO.bias = find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                       \
-        precision(&(INFO));                                                                                  \
-        if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||                             \
-            !strcmp(INFO.varname, "LDOUBLE")) {                                                              \
-            COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
-        }                                                                                                    \
-    }
+#define DETECT_F(TYPE, VAR, INFO)                                              \
+  {                                                                            \
+    TYPE _v1, _v2, _v3;                                                        \
+    unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];                    \
+    unsigned char _pad_mask[sizeof(TYPE)];                                     \
+    unsigned char _byte_mask;                                                  \
+    int _i, _j, _last = (-1);                                                  \
+    const char *_mesg;                                                         \
+                                                                               \
+    memset(&INFO, 0, sizeof(INFO));                                            \
+    INFO.varname = #VAR;                                                       \
+    INFO.size = sizeof(TYPE);                                                  \
+                                                                               \
+    /* Initialize padding mask */                                              \
+    memset(_pad_mask, 0, sizeof(_pad_mask));                                   \
+                                                                               \
+    /* Padding bits.  Set a variable to 4.0, then flip each bit and see if     \
+     * the modified variable is equal ("==") to the original.  Build a         \
+     * padding bitmask to indicate which bits in the type are padding (i.e.    \
+     * have no effect on the value and should be ignored by subsequent         \
+     * steps).  This is necessary because padding bits can change arbitrarily  \
+     * and interfere with detection of the various properties below unless we  \
+     * know to ignore them. */                                                 \
+    _v1 = (TYPE)4.0L;                                                          \
+    memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                           \
+    for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                 \
+      for (_byte_mask = (unsigned char)1; _byte_mask;                          \
+           _byte_mask = (unsigned char)(_byte_mask << 1)) {                    \
+        _buf1[_i] ^= _byte_mask;                                               \
+        memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));               \
+        H5_GCC_CLANG_DIAG_OFF("float-equal")                                   \
+        if (_v1 != _v2)                                                        \
+          _pad_mask[_i] |= _byte_mask;                                         \
+        H5_GCC_CLANG_DIAG_ON("float-equal")                                    \
+        _buf1[_i] ^= _byte_mask;                                               \
+      } /* end for */                                                          \
+                                                                               \
+    /* Byte Order */                                                           \
+    for (_i = 0, _v1 = (TYPE)0.0L, _v2 = (TYPE)1.0L; _i < (int)sizeof(TYPE);   \
+         _i++) {                                                               \
+      _v3 = _v1;                                                               \
+      _v1 += _v2;                                                              \
+      _v2 /= (TYPE)256.0L;                                                     \
+      memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                         \
+      memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                         \
+      _j = byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                    \
+      if (_j >= 0) {                                                           \
+        INFO.perm[_i] = _j;                                                    \
+        _last = _i;                                                            \
+      }                                                                        \
+    }                                                                          \
+    fix_order(sizeof(TYPE), _last, INFO.perm, (const char **)&_mesg);          \
+                                                                               \
+    if (!strcmp(_mesg, "VAX"))                                                 \
+      INFO.is_vax = TRUE;                                                      \
+                                                                               \
+    /* Implicit mantissa bit */                                                \
+    _v1 = (TYPE)0.5L;                                                          \
+    _v2 = (TYPE)1.0L;                                                          \
+    INFO.imp = imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);        \
+                                                                               \
+    /* Sign bit */                                                             \
+    _v1 = (TYPE)1.0L;                                                          \
+    _v2 = (TYPE)-1.0L;                                                         \
+    INFO.sign = bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);       \
+                                                                               \
+    /* Mantissa */                                                             \
+    INFO.mpos = 0;                                                             \
+                                                                               \
+    _v1 = (TYPE)1.0L;                                                          \
+    _v2 = (TYPE)1.5L;                                                          \
+    INFO.msize = bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);      \
+    INFO.msize += 1 + (unsigned int)(INFO.imp ? 0 : 1) - INFO.mpos;            \
+                                                                               \
+    /* Exponent */                                                             \
+    INFO.epos = INFO.mpos + INFO.msize;                                        \
+                                                                               \
+    INFO.esize = INFO.sign - INFO.epos;                                        \
+                                                                               \
+    _v1 = (TYPE)1.0L;                                                          \
+    INFO.bias = find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);             \
+    precision(&(INFO));                                                        \
+    if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||   \
+        !strcmp(INFO.varname, "LDOUBLE")) {                                    \
+      COMP_ALIGNMENT(TYPE, INFO.comp_align);                                   \
+    }                                                                          \
+  }
 
 /* Detect alignment for C structure */
-#define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                                                     \
-    {                                                                                                        \
-        struct {                                                                                             \
-            char c;                                                                                          \
-            TYPE x;                                                                                          \
-        } s;                                                                                                 \
-                                                                                                             \
-        COMP_ALIGN = (unsigned int)((char *)(&(s.x)) - (char *)(&s));                                        \
-    }
+#define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                       \
+  {                                                                            \
+    struct {                                                                   \
+      char c;                                                                  \
+      TYPE x;                                                                  \
+    } s;                                                                       \
+                                                                               \
+    COMP_ALIGN = (unsigned int)((char *)(&(s.x)) - (char *)(&s));              \
+  }
 
 /*-------------------------------------------------------------------------
  * Function:    print_results
@@ -228,14 +230,12 @@ precision(detected_t *d)
  * Return:      void
  *-------------------------------------------------------------------------
  */
-static void
-print_results(int nd, detected_t *d)
-{
-    int byte_order = 0; /*byte order of data types*/
-    int i, j;
+static void print_results(int nd, detected_t *d) {
+  int byte_order = 0; /*byte order of data types*/
+  int i, j;
 
-    /* Include files */
-    fprintf(rawoutstream, "\
+  /* Include files */
+  fprintf(rawoutstream, "\
 /****************/\n\
 /* Module Setup */\n\
 /****************/\n\
@@ -288,14 +288,14 @@ print_results(int nd, detected_t *d)
 /*********************/\n\
 \n\
 \n");
-    fprintf(rawoutstream, "\n\
+  fprintf(rawoutstream, "\n\
 /*******************/\n\
 /* Local Variables */\n\
 /*******************/\n\
 \n");
 
-    /* The interface initialization function */
-    fprintf(rawoutstream, "\n\
+  /* The interface initialization function */
+  fprintf(rawoutstream, "\n\
 \n\
 /*-------------------------------------------------------------------------\n\
  * Function:    H5T__init_native\n\
@@ -319,59 +319,61 @@ H5T__init_native(void)\n\
 \n\
     FUNC_ENTER_PACKAGE\n");
 
-    for (i = 0; i < nd; i++) {
-        /* The native endianness of this machine */
-        /* The INFO.perm now contains `-1' for bytes that aren't used and
-         * are always zero.  This happens on the Cray for `short' where
-         * sizeof(short) is 8, but only the low-order 4 bytes are ever used.
-         */
-        if (d[i].is_vax) /* the type is a VAX floating number */
-            byte_order = -1;
-        else {
-            for (j = 0; j < 32; j++) {
-                /*Find the 1st containing valid data*/
-                if (d[i].perm[j] > -1) {
-                    byte_order = d[i].perm[j];
-                    break;
-                }
-            }
+  for (i = 0; i < nd; i++) {
+    /* The native endianness of this machine */
+    /* The INFO.perm now contains `-1' for bytes that aren't used and
+     * are always zero.  This happens on the Cray for `short' where
+     * sizeof(short) is 8, but only the low-order 4 bytes are ever used.
+     */
+    if (d[i].is_vax) /* the type is a VAX floating number */
+      byte_order = -1;
+    else {
+      for (j = 0; j < 32; j++) {
+        /*Find the 1st containing valid data*/
+        if (d[i].perm[j] > -1) {
+          byte_order = d[i].perm[j];
+          break;
         }
+      }
+    }
 
-        /* Print a comment to describe this section of definitions. */
-        fprintf(rawoutstream, "\n   /*\n");
-        iprint(d + i);
-        fprintf(rawoutstream, "    */\n");
+    /* Print a comment to describe this section of definitions. */
+    fprintf(rawoutstream, "\n   /*\n");
+    iprint(d + i);
+    fprintf(rawoutstream, "    */\n");
 
-        /* The part common to fixed and floating types */
-        fprintf(rawoutstream, "\
+    /* The part common to fixed and floating types */
+    fprintf(rawoutstream, "\
     if(NULL == (dt = H5T__alloc()))\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, \"datatype allocation failed\");\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
     dt->shared->type = H5T_FLOAT;\n\
     dt->shared->size = %d;\n",
-                d[i].size); /*size            */
+            d[i].size); /*size            */
 
-        if (byte_order == -1)
-            fprintf(rawoutstream, "\
+    if (byte_order == -1)
+      fprintf(rawoutstream, "\
     dt->shared->u.atomic.order = H5T_ORDER_VAX;\n");
-        else if (byte_order == 0)
-            fprintf(rawoutstream, "\
+    else if (byte_order == 0)
+      fprintf(rawoutstream, "\
     dt->shared->u.atomic.order = H5T_ORDER_LE;\n");
-        else
-            fprintf(rawoutstream, "\
+    else
+      fprintf(rawoutstream, "\
     dt->shared->u.atomic.order = H5T_ORDER_BE;\n");
 
-        fprintf(rawoutstream, "\
+    fprintf(rawoutstream, "\
     dt->shared->u.atomic.offset = %d;\n\
     dt->shared->u.atomic.prec = %d;\n\
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
-                d[i].offset,                          /*offset        */
-                d[i].precision);                      /*precision        */
-        /*assert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
+            d[i].offset,                          /*offset        */
+            d[i].precision);                      /*precision        */
+    /*assert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that
+                                                     byte-order doesn't change
+                                                   */
 
-        /* The part unique to floating point types */
-        fprintf(rawoutstream, "\
+    /* The part unique to floating point types */
+    fprintf(rawoutstream, "\
 dt->shared->u.atomic.u.f.sign = %d;\n\
 dt->shared->u.atomic.u.f.epos = %d;\n\
 dt->shared->u.atomic.u.f.esize = %d;\n\
@@ -380,45 +382,44 @@ dt->shared->u.atomic.u.f.mpos = %d;\n\
 dt->shared->u.atomic.u.f.msize = %d;\n\
 dt->shared->u.atomic.u.f.norm = H5T_NORM_%s;\n\
 dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
-                d[i].sign,                      /*sign location */
-                d[i].epos,                      /*exponent loc    */
-                d[i].esize,                     /*exponent size */
-                (unsigned long)(d[i].bias),     /*exponent bias */
-                d[i].mpos,                      /*mantissa loc    */
-                d[i].msize,                     /*mantissa size */
-                d[i].imp ? "IMPLIED" : "NONE"); /*normalization */
+            d[i].sign,                      /*sign location */
+            d[i].epos,                      /*exponent loc    */
+            d[i].esize,                     /*exponent size */
+            (unsigned long)(d[i].bias),     /*exponent bias */
+            d[i].mpos,                      /*mantissa loc    */
+            d[i].msize,                     /*mantissa size */
+            d[i].imp ? "IMPLIED" : "NONE"); /*normalization */
 
-        /* Register the type */
-        fprintf(rawoutstream, "\
+    /* Register the type */
+    fprintf(rawoutstream, "\
     if((H5T_NATIVE_%s_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, \"can't register ID for built-in datatype\");\n",
-                d[i].varname);
+            d[i].varname);
 
-        /* Variables for alignment of compound datatype */
-        if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
-            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") || !strcmp(d[i].varname, "LLONG") ||
-            !strcmp(d[i].varname, "FLOAT") || !strcmp(d[i].varname, "DOUBLE") ||
-            !strcmp(d[i].varname, "LDOUBLE")) {
-            fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
-                    (unsigned long)(d[i].comp_align));
-        }
+    /* Variables for alignment of compound datatype */
+    if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
+        !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") ||
+        !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
+        !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
+      fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
+              (unsigned long)(d[i].comp_align));
     }
+  }
 
-    /* Consider VAX a little-endian machine */
-    if (byte_order == 0 || byte_order == -1) {
-        fprintf(rawoutstream, "\n\
+  /* Consider VAX a little-endian machine */
+  if (byte_order == 0 || byte_order == -1) {
+    fprintf(rawoutstream, "\n\
     /* Set the native order for this machine */\n\
     H5T_native_order_g = H5T_ORDER_%s;\n",
-                "LE");
-    }
-    else {
-        fprintf(rawoutstream, "\n\
+            "LE");
+  } else {
+    fprintf(rawoutstream, "\n\
     /* Set the native order for this machine */\n\
     H5T_native_order_g = H5T_ORDER_%s;\n",
-                "BE");
-    }
+            "BE");
+  }
 
-    fprintf(rawoutstream, "\
+  fprintf(rawoutstream, "\
 \n\
 done:\n\
     if(ret_value < 0) {\n\
@@ -441,62 +442,58 @@ done:\n\
 
  *-------------------------------------------------------------------------
  */
-static void
-iprint(detected_t *d)
-{
-    unsigned int pass;
+static void iprint(detected_t *d) {
+  unsigned int pass;
 
-    for (pass = (d->size - 1) / 4;; --pass) {
-        unsigned int i, k;
-        /*
-         * Print the byte ordering above the bit fields.
-         */
-        fprintf(rawoutstream, "    * ");
-        for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
-            fprintf(rawoutstream, "%4d", d->perm[i]);
-            if (i > pass * 4)
-                fputs("     ", rawoutstream);
-            if (!i)
-                break;
-        }
-
-        /*
-         * Print the bit fields
-         */
-        fprintf(rawoutstream, "\n    * ");
-        for (i = MIN(pass * 4 + 3, d->size - 1), k = MIN(pass * 32 + 31, 8 * d->size - 1); i >= pass * 4;
-             --i) {
-            unsigned int j;
-
-            for (j = 8; j > 0; --j) {
-                if (k == d->sign) {
-                    fputc('S', rawoutstream);
-                }
-                else if (k >= d->epos && k < d->epos + d->esize) {
-                    fputc('E', rawoutstream);
-                }
-                else if (k >= d->mpos && k < d->mpos + d->msize) {
-                    fputc('M', rawoutstream);
-                }
-                else {
-                    fputc('?', rawoutstream); /*unknown floating point bit */
-                }
-                --k;
-            }
-            if (i > pass * 4)
-                fputc(' ', rawoutstream);
-            if (!i)
-                break;
-        }
-        fputc('\n', rawoutstream);
-        if (!pass)
-            break;
+  for (pass = (d->size - 1) / 4;; --pass) {
+    unsigned int i, k;
+    /*
+     * Print the byte ordering above the bit fields.
+     */
+    fprintf(rawoutstream, "    * ");
+    for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
+      fprintf(rawoutstream, "%4d", d->perm[i]);
+      if (i > pass * 4)
+        fputs("     ", rawoutstream);
+      if (!i)
+        break;
     }
 
     /*
-     * Is there an implicit bit in the mantissa.
+     * Print the bit fields
      */
-    fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
+    fprintf(rawoutstream, "\n    * ");
+    for (i = MIN(pass * 4 + 3, d->size - 1),
+        k = MIN(pass * 32 + 31, 8 * d->size - 1);
+         i >= pass * 4; --i) {
+      unsigned int j;
+
+      for (j = 8; j > 0; --j) {
+        if (k == d->sign) {
+          fputc('S', rawoutstream);
+        } else if (k >= d->epos && k < d->epos + d->esize) {
+          fputc('E', rawoutstream);
+        } else if (k >= d->mpos && k < d->mpos + d->msize) {
+          fputc('M', rawoutstream);
+        } else {
+          fputc('?', rawoutstream); /*unknown floating point bit */
+        }
+        --k;
+      }
+      if (i > pass * 4)
+        fputc(' ', rawoutstream);
+      if (!i)
+        break;
+    }
+    fputc('\n', rawoutstream);
+    if (!pass)
+      break;
+  }
+
+  /*
+   * Is there an implicit bit in the mantissa.
+   */
+  fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
 }
 
 /*-------------------------------------------------------------------------
@@ -511,18 +508,17 @@ iprint(detected_t *d)
  *              Failure:    -1 if all bytes are the same.
  *-------------------------------------------------------------------------
  */
-static int
-byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
-{
-    int                  i;
-    const unsigned char *a = (const unsigned char *)_a;
-    const unsigned char *b = (const unsigned char *)_b;
+static int byte_cmp(int n, const void *_a, const void *_b,
+                    const unsigned char *pad_mask) {
+  int i;
+  const unsigned char *a = (const unsigned char *)_a;
+  const unsigned char *b = (const unsigned char *)_b;
 
-    for (i = 0; i < n; i++)
-        if ((a[i] & pad_mask[i]) != (b[i] & pad_mask[i]))
-            return i;
+  for (i = 0; i < n; i++)
+    if ((a[i] & pad_mask[i]) != (b[i] & pad_mask[i]))
+      return i;
 
-    return -1;
+  return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -538,31 +534,30 @@ byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
  *
  *-------------------------------------------------------------------------
  */
-static unsigned int
-bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char *pad_mask)
-{
-    unsigned int   i;
-    unsigned char *a = (unsigned char *)_a;
-    unsigned char *b = (unsigned char *)_b;
-    unsigned char  aa, bb;
+static unsigned int bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b,
+                            const unsigned char *pad_mask) {
+  unsigned int i;
+  unsigned char *a = (unsigned char *)_a;
+  unsigned char *b = (unsigned char *)_b;
+  unsigned char aa, bb;
 
-    for (i = 0; i < nbytes; i++) {
-        assert(perm[i] < (int)nbytes);
-        if ((aa = (unsigned char)(a[perm[i]] & pad_mask[perm[i]])) !=
-            (bb = (unsigned char)(b[perm[i]] & pad_mask[perm[i]]))) {
-            unsigned int j;
+  for (i = 0; i < nbytes; i++) {
+    assert(perm[i] < (int)nbytes);
+    if ((aa = (unsigned char)(a[perm[i]] & pad_mask[perm[i]])) !=
+        (bb = (unsigned char)(b[perm[i]] & pad_mask[perm[i]]))) {
+      unsigned int j;
 
-            for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
-                if ((aa & 1) != (bb & 1))
-                    return i * 8 + j;
-            }
-            fprintf(stderr, "INTERNAL ERROR");
-            abort();
-        }
+      for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
+        if ((aa & 1) != (bb & 1))
+          return i * 8 + j;
+      }
+      fprintf(stderr, "INTERNAL ERROR");
+      abort();
     }
-    fprintf(stderr, "INTERNAL ERROR");
-    abort();
-    return 0;
+  }
+  fprintf(stderr, "INTERNAL ERROR");
+  abort();
+  return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -579,53 +574,49 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char 
  * Return:      void
  *-------------------------------------------------------------------------
  */
-static void
-fix_order(int n, int last, int *perm, const char **mesg)
-{
-    int i;
+static void fix_order(int n, int last, int *perm, const char **mesg) {
+  int i;
 
-    if (last > 1) {
-        /*
-         * We have at least three points to consider.
-         */
-        if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
-            /*
-             * Little endian.
-             */
-            if (mesg)
-                *mesg = "Little-endian";
-            for (i = 0; i < n; i++)
-                perm[i] = i;
-        }
-        else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
-            /*
-             * Big endian.
-             */
-            if (mesg)
-                *mesg = "Big-endian";
-            for (i = 0; i < n; i++)
-                perm[i] = (n - 1) - i;
-        }
-        else {
-            /*
-             * Bi-endian machines like VAX.
-             * (NOTE: This is not an actual determination of the VAX-endianness.
-             *          It could have some other endianness and fall into this
-             *          case - JKM & QAK)
-             */
-            assert(0 == n % 2);
-            if (mesg)
-                *mesg = "VAX";
-            for (i = 0; i < n; i += 2) {
-                perm[i]     = (n - 2) - i;
-                perm[i + 1] = (n - 1) - i;
-            }
-        }
+  if (last > 1) {
+    /*
+     * We have at least three points to consider.
+     */
+    if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
+      /*
+       * Little endian.
+       */
+      if (mesg)
+        *mesg = "Little-endian";
+      for (i = 0; i < n; i++)
+        perm[i] = i;
+    } else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
+      /*
+       * Big endian.
+       */
+      if (mesg)
+        *mesg = "Big-endian";
+      for (i = 0; i < n; i++)
+        perm[i] = (n - 1) - i;
+    } else {
+      /*
+       * Bi-endian machines like VAX.
+       * (NOTE: This is not an actual determination of the VAX-endianness.
+       *          It could have some other endianness and fall into this
+       *          case - JKM & QAK)
+       */
+      assert(0 == n % 2);
+      if (mesg)
+        *mesg = "VAX";
+      for (i = 0; i < n; i += 2) {
+        perm[i] = (n - 2) - i;
+        perm[i + 1] = (n - 1) - i;
+      }
     }
-    else {
-        fprintf(stderr, "Failed to detect byte order of %d-byte floating point.\n", n);
-        exit(1);
-    }
+  } else {
+    fprintf(stderr, "Failed to detect byte order of %d-byte floating point.\n",
+            n);
+    exit(1);
+  }
 }
 
 /*-------------------------------------------------------------------------
@@ -655,30 +646,29 @@ fix_order(int n, int last, int *perm, const char **mesg)
  *
  *-------------------------------------------------------------------------
  */
-static unsigned int
-imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_mask)
-{
-    unsigned char *a = (unsigned char *)_a;
-    unsigned char *b = (unsigned char *)_b;
-    unsigned int   changed, major, minor;
-    unsigned int   msmb; /* most significant mantissa bit */
+static unsigned int imp_bit(unsigned int n, int *perm, void *_a, void *_b,
+                            const unsigned char *pad_mask) {
+  unsigned char *a = (unsigned char *)_a;
+  unsigned char *b = (unsigned char *)_b;
+  unsigned int changed, major, minor;
+  unsigned int msmb; /* most significant mantissa bit */
 
-    /*
-     * Look for the least significant bit that has changed between
-     * A and B.  This is the least significant bit of the exponent.
-     */
-    changed = bit_cmp(n, perm, a, b, pad_mask);
+  /*
+   * Look for the least significant bit that has changed between
+   * A and B.  This is the least significant bit of the exponent.
+   */
+  changed = bit_cmp(n, perm, a, b, pad_mask);
 
-    /*
-     * The bit to the right (less significant) of the changed bit should
-     * be the most significant bit of the mantissa.  If it is non-zero
-     * then the format does not remove the leading `1' of the mantissa.
-     */
-    msmb  = changed - 1;
-    major = msmb / 8;
-    minor = msmb % 8;
+  /*
+   * The bit to the right (less significant) of the changed bit should
+   * be the most significant bit of the mantissa.  If it is non-zero
+   * then the format does not remove the leading `1' of the mantissa.
+   */
+  msmb = changed - 1;
+  major = msmb / 8;
+  minor = msmb % 8;
 
-    return (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
+  return (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -692,23 +682,22 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static unsigned int
-find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
-{
-    unsigned char *a = (unsigned char *)_a;
-    unsigned char  mask;
-    unsigned int   b, shift = 0, nbits, bias = 0;
+find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a) {
+  unsigned char *a = (unsigned char *)_a;
+  unsigned char mask;
+  unsigned int b, shift = 0, nbits, bias = 0;
 
-    while (esize > 0) {
-        nbits = MIN(esize, (8 - epos % 8));
-        mask  = (unsigned char)((1 << nbits) - 1);
-        b     = (unsigned int)(a[perm[epos / 8]] >> (epos % 8)) & mask;
-        bias |= b << shift;
+  while (esize > 0) {
+    nbits = MIN(esize, (8 - epos % 8));
+    mask = (unsigned char)((1 << nbits) - 1);
+    b = (unsigned int)(a[perm[epos / 8]] >> (epos % 8)) & mask;
+    bias |= b << shift;
 
-        shift += nbits;
-        esize -= nbits;
-        epos += nbits;
-    }
-    return bias;
+    shift += nbits;
+    esize -= nbits;
+    epos += nbits;
+  }
+  return bias;
 }
 
 /*-------------------------------------------------------------------------
@@ -719,24 +708,22 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
  * Return:      void
  *-------------------------------------------------------------------------
  */
-static void
-print_header(void)
-{
+static void print_header(void) {
 
-    time_t      now = HDtime(NULL);
-    struct tm  *tm  = HDlocaltime(&now);
-    char        real_name[30];
-    char        host_name[256];
-    int         i;
-    const char *s;
+  time_t now = HDtime(NULL);
+  struct tm *tm = HDlocaltime(&now);
+  char real_name[30];
+  char host_name[256];
+  int i;
+  const char *s;
 #ifdef H5_HAVE_GETPWUID
-    struct passwd *pwd = NULL;
+  struct passwd *pwd = NULL;
 #else
-    int pwd      = 1;
+  int pwd = 1;
 #endif
-    static const char *month_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    static const char *purpose      = "\
+  static const char *month_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+  static const char *purpose = "\
 This machine-generated source code contains\n\
 information about the various integer and\n\
 floating point numeric formats found on this\n\
@@ -774,79 +761,79 @@ the radix point is still assumed to be\n\
 before the first `M' but after the implicit\n\
 bit.\n";
 
-    /*
-     * The real name is the first item from the passwd gecos field.
-     */
+  /*
+   * The real name is the first item from the passwd gecos field.
+   */
 #ifdef H5_HAVE_GETPWUID
-    {
-        size_t n;
-        char  *comma;
-        if ((pwd = getpwuid(getuid()))) {
-            if ((comma = strchr(pwd->pw_gecos, ','))) {
-                n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
-                strncpy(real_name, pwd->pw_gecos, n);
-                real_name[n] = '\0';
-            }
-            else {
-                strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
-                real_name[sizeof(real_name) - 1] = '\0';
-            }
-        }
-        else
-            real_name[0] = '\0';
-    }
+  {
+    size_t n;
+    char *comma;
+    if ((pwd = getpwuid(getuid()))) {
+      if ((comma = strchr(pwd->pw_gecos, ','))) {
+        n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
+        strncpy(real_name, pwd->pw_gecos, n);
+        real_name[n] = '\0';
+      } else {
+        strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+        real_name[sizeof(real_name) - 1] = '\0';
+      }
+    } else
+      real_name[0] = '\0';
+  }
 #else
-    real_name[0] = '\0';
+  real_name[0] = '\0';
 #endif
 
-    /*
-     * The FQDM of this host or the empty string.
-     */
+  /*
+   * The FQDM of this host or the empty string.
+   */
 #ifdef H5_HAVE_GETHOSTNAME
-    if (gethostname(host_name, sizeof(host_name)) < 0) {
-        host_name[0] = '\0';
-    }
-#else
+  if (gethostname(host_name, sizeof(host_name)) < 0) {
     host_name[0] = '\0';
+  }
+#else
+  host_name[0] = '\0';
 #endif
 
-    /*
-     * The file header: warning, copyright notice, build information.
-     */
-    fprintf(rawoutstream, "/* Generated automatically by H5detect -- do not edit */\n\n\n");
-    fputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
+  /*
+   * The file header: warning, copyright notice, build information.
+   */
+  fprintf(rawoutstream,
+          "/* Generated automatically by H5detect -- do not edit */\n\n\n");
+  fputs(FileHeader,
+        rawoutstream); /*the copyright notice--see top of this file */
 
-    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
-            1900 + tm->tm_year);
-    if (pwd || real_name[0] || host_name[0]) {
-        fprintf(rawoutstream, " *\t\t\t");
-        if (real_name[0])
-            fprintf(rawoutstream, "%s <", real_name);
+  fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n",
+          month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
+  if (pwd || real_name[0] || host_name[0]) {
+    fprintf(rawoutstream, " *\t\t\t");
+    if (real_name[0])
+      fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
-        if (pwd)
-            fputs(pwd->pw_name, rawoutstream);
+    if (pwd)
+      fputs(pwd->pw_name, rawoutstream);
 #endif
-        if (host_name[0])
-            fprintf(rawoutstream, "@%s", host_name);
-        if (real_name[0])
-            fprintf(rawoutstream, ">");
-        fputc('\n', rawoutstream);
-    }
-    fprintf(rawoutstream, " *\n * Purpose:\t\t");
-    for (s = purpose; *s; s++) {
-        fputc(*s, rawoutstream);
-        if ('\n' == *s && s[1])
-            fprintf(rawoutstream, " *\t\t\t");
-    }
+    if (host_name[0])
+      fprintf(rawoutstream, "@%s", host_name);
+    if (real_name[0])
+      fprintf(rawoutstream, ">");
+    fputc('\n', rawoutstream);
+  }
+  fprintf(rawoutstream, " *\n * Purpose:\t\t");
+  for (s = purpose; *s; s++) {
+    fputc(*s, rawoutstream);
+    if ('\n' == *s && s[1])
+      fprintf(rawoutstream, " *\t\t\t");
+  }
 
-    fprintf(rawoutstream, " *\n");
-    fprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
-    fprintf(rawoutstream, " *\tIt was generated by code in `H5detect.c'.\n");
+  fprintf(rawoutstream, " *\n");
+  fprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
+  fprintf(rawoutstream, " *\tIt was generated by code in `H5detect.c'.\n");
 
-    fprintf(rawoutstream, " *\n *");
-    for (i = 0; i < 73; i++)
-        fputc('-', rawoutstream);
-    fprintf(rawoutstream, "\n */\n\n");
+  fprintf(rawoutstream, " *\n *");
+  for (i = 0; i < 73; i++)
+    fputc('-', rawoutstream);
+  fprintf(rawoutstream, "\n */\n\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -857,13 +844,11 @@ bit.\n";
  * Return:      void
  *-------------------------------------------------------------------------
  */
-static void HDF_NO_UBSAN
-detect_C89_floats(void)
-{
-    DETECT_F(float, FLOAT, d_g[nd_g]);
-    nd_g++;
-    DETECT_F(double, DOUBLE, d_g[nd_g]);
-    nd_g++;
+static void HDF_NO_UBSAN detect_C89_floats(void) {
+  DETECT_F(float, FLOAT, d_g[nd_g]);
+  nd_g++;
+  DETECT_F(double, DOUBLE, d_g[nd_g]);
+  nd_g++;
 }
 
 /*-------------------------------------------------------------------------
@@ -874,21 +859,19 @@ detect_C89_floats(void)
  * Return:      void
  *-------------------------------------------------------------------------
  */
-static void HDF_NO_UBSAN
-detect_C99_floats(void)
-{
+static void HDF_NO_UBSAN detect_C99_floats(void) {
 #if H5_SIZEOF_DOUBLE == H5_SIZEOF_LONG_DOUBLE
-    /*
-     * If sizeof(double)==sizeof(long double) then assume that `long double'
-     * isn't supported and use `double' instead.  This suppresses warnings on
-     * some systems and `long double' is probably the same as `double' here
-     * anyway.
-     */
-    DETECT_F(double, LDOUBLE, d_g[nd_g]);
-    nd_g++;
+  /*
+   * If sizeof(double)==sizeof(long double) then assume that `long double'
+   * isn't supported and use `double' instead.  This suppresses warnings on
+   * some systems and `long double' is probably the same as `double' here
+   * anyway.
+   */
+  DETECT_F(double, LDOUBLE, d_g[nd_g]);
+  nd_g++;
 #else
-    DETECT_F(long double, LDOUBLE, d_g[nd_g]);
-    nd_g++;
+  DETECT_F(long double, LDOUBLE, d_g[nd_g]);
+  nd_g++;
 #endif
 }
 
@@ -901,41 +884,39 @@ detect_C99_floats(void)
  *
  *-------------------------------------------------------------------------
  */
-int HDF_NO_UBSAN
-main(int argc, char *argv[])
-{
-    char *fname = NULL;
-    FILE *f; /* temporary holding place for the stream pointer
-              * so that rawoutstream is changed only when succeeded */
+int HDF_NO_UBSAN main(int argc, char *argv[]) {
+  char *fname = NULL;
+  FILE *f; /* temporary holding place for the stream pointer
+            * so that rawoutstream is changed only when succeeded */
 
-    if (argc > 1)
-        fname = argv[1];
+  if (argc > 1)
+    fname = argv[1];
 
-    /* First check if filename is string "NULL" */
-    if (fname != NULL) {
-        /* binary output */
-        if ((f = fopen(fname, "w")) != NULL)
-            rawoutstream = f;
-    }
-    if (!rawoutstream)
-        rawoutstream = stdout;
+  /* First check if filename is string "NULL" */
+  if (fname != NULL) {
+    /* binary output */
+    if ((f = fopen(fname, "w")) != NULL)
+      rawoutstream = f;
+  }
+  if (!rawoutstream)
+    rawoutstream = stdout;
 
-    print_header();
+  print_header();
 
-    /* C89 floating point types */
-    detect_C89_floats();
+  /* C89 floating point types */
+  detect_C89_floats();
 
-    /* C99 floating point types */
-    detect_C99_floats();
+  /* C99 floating point types */
+  detect_C99_floats();
 
-    print_results(nd_g, d_g);
+  print_results(nd_g, d_g);
 
-    if (rawoutstream && rawoutstream != stdout) {
-        if (fclose(rawoutstream))
-            fprintf(stderr, "closing rawoutstream");
-        else
-            rawoutstream = NULL;
-    }
+  if (rawoutstream && rawoutstream != stdout) {
+    if (fclose(rawoutstream))
+      fprintf(stderr, "closing rawoutstream");
+    else
+      rawoutstream = NULL;
+  }
 
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

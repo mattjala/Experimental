@@ -29,9 +29,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions                    */
 #include "H5Eprivate.h" /* Error handling                       */
 #include "H5VLpkg.h"    /* Virtual Object Layer                 */
+#include "H5private.h"  /* Generic Functions                    */
 
 /****************/
 /* Local Macros */
@@ -75,17 +75,16 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5VL__reparse_def_vol_conn_variable_test(void)
-{
-    herr_t ret_value = SUCCEED;
+herr_t H5VL__reparse_def_vol_conn_variable_test(void) {
+  herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Re-check for the HDF5_VOL_CONNECTOR environment variable */
-    if (H5VL__set_def_conn() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize default VOL connector");
+  /* Re-check for the HDF5_VOL_CONNECTOR environment variable */
+  if (H5VL__set_def_conn() < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL,
+                "unable to initialize default VOL connector");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__reparse_def_vol_conn_variable_test() */

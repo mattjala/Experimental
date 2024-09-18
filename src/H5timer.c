@@ -39,9 +39,9 @@
 #define H5TIMER_TIME_STRING_LEN 1536
 
 /* Conversion factors */
-#define H5_SEC_PER_DAY  (24.0 * 60.0 * 60.0)
+#define H5_SEC_PER_DAY (24.0 * 60.0 * 60.0)
 #define H5_SEC_PER_HOUR (60.0 * 60.0)
-#define H5_SEC_PER_MIN  (60.0)
+#define H5_SEC_PER_MIN (60.0)
 
 /******************/
 /* Local Typedefs */
@@ -89,49 +89,42 @@
  *
  *-------------------------------------------------------------------------
  */
-void
-H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds)
-{
-    double bw;
+void H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes,
+                  double nseconds) {
+  double bw;
 
-    if (nseconds <= 0.0)
-        HDstrcpy(buf, "       NaN");
-    else {
-        bw = nbytes / nseconds;
-        if (H5_DBL_ABS_EQUAL(bw, 0.0))
-            HDstrcpy(buf, "0.000  B/s");
-        else if (bw < 1.0)
-            HDsnprintf(buf, bufsize, "%10.4e", bw);
-        else if (bw < (double)H5_KB) {
-            HDsnprintf(buf, bufsize, "%05.4f", bw);
-            HDstrcpy(buf + 5, "  B/s");
-        }
-        else if (bw < (double)H5_MB) {
-            HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_KB);
-            HDstrcpy(buf + 5, " kB/s");
-        }
-        else if (bw < (double)H5_GB) {
-            HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_MB);
-            HDstrcpy(buf + 5, " MB/s");
-        }
-        else if (bw < (double)H5_TB) {
-            HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_GB);
-            HDstrcpy(buf + 5, " GB/s");
-        }
-        else if (bw < (double)H5_PB) {
-            HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_TB);
-            HDstrcpy(buf + 5, " TB/s");
-        }
-        else if (bw < (double)H5_EB) {
-            HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_PB);
-            HDstrcpy(buf + 5, " PB/s");
-        }
-        else {
-            HDsnprintf(buf, bufsize, "%10.4e", bw);
-            if (HDstrlen(buf) > 10)
-                HDsnprintf(buf, bufsize, "%10.3e", bw);
-        } /* end else-if */
-    }     /* end else */
+  if (nseconds <= 0.0)
+    HDstrcpy(buf, "       NaN");
+  else {
+    bw = nbytes / nseconds;
+    if (H5_DBL_ABS_EQUAL(bw, 0.0))
+      HDstrcpy(buf, "0.000  B/s");
+    else if (bw < 1.0)
+      HDsnprintf(buf, bufsize, "%10.4e", bw);
+    else if (bw < (double)H5_KB) {
+      HDsnprintf(buf, bufsize, "%05.4f", bw);
+      HDstrcpy(buf + 5, "  B/s");
+    } else if (bw < (double)H5_MB) {
+      HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_KB);
+      HDstrcpy(buf + 5, " kB/s");
+    } else if (bw < (double)H5_GB) {
+      HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_MB);
+      HDstrcpy(buf + 5, " MB/s");
+    } else if (bw < (double)H5_TB) {
+      HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_GB);
+      HDstrcpy(buf + 5, " GB/s");
+    } else if (bw < (double)H5_PB) {
+      HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_TB);
+      HDstrcpy(buf + 5, " TB/s");
+    } else if (bw < (double)H5_EB) {
+      HDsnprintf(buf, bufsize, "%05.4f", bw / (double)H5_PB);
+      HDstrcpy(buf + 5, " PB/s");
+    } else {
+      HDsnprintf(buf, bufsize, "%10.4e", bw);
+      if (HDstrlen(buf) > 10)
+        HDsnprintf(buf, bufsize, "%10.3e", bw);
+    } /* end else-if */
+  }   /* end else */
 } /* end H5_bandwidth() */
 
 /*-------------------------------------------------------------------------
@@ -143,105 +136,102 @@ H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds)
  *
  *-------------------------------------------------------------------------
  */
-time_t
-H5_now(void)
-{
-    time_t now; /* Current time */
+time_t H5_now(void) {
+  time_t now; /* Current time */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
-    {
-        struct timeval now_tv;
+  {
+    struct timeval now_tv;
 
-        HDgettimeofday(&now_tv, NULL);
-        now = now_tv.tv_sec;
-    }
+    HDgettimeofday(&now_tv, NULL);
+    now = now_tv.tv_sec;
+  }
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    now = HDtime(NULL);
+  now = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
-    return (now);
+  return (now);
 } /* end H5_now() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5_now_usec
  *
- * Purpose:	Retrieves the current time, as microseconds after the UNIX epoch.
+ * Purpose:	Retrieves the current time, as microseconds after the UNIX
+ *epoch.
  *
  * Return:	# of microseconds from the epoch (can't fail)
  *
  *-------------------------------------------------------------------------
  */
-uint64_t
-H5_now_usec(void)
-{
-    uint64_t now; /* Current time, in microseconds */
+uint64_t H5_now_usec(void) {
+  uint64_t now; /* Current time, in microseconds */
 
 #if defined(H5_HAVE_CLOCK_GETTIME)
-    {
-        struct timespec ts;
+  {
+    struct timespec ts;
 
-        clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_MONOTONIC, &ts);
 
-        /* Cast all values in this expression to uint64_t to ensure that all intermediate
-         * calculations are done in 64 bit, to prevent overflow */
-        now = ((uint64_t)ts.tv_sec * ((uint64_t)1000 * (uint64_t)1000)) +
-              ((uint64_t)ts.tv_nsec / (uint64_t)1000);
-    }
+    /* Cast all values in this expression to uint64_t to ensure that all
+     * intermediate calculations are done in 64 bit, to prevent overflow */
+    now = ((uint64_t)ts.tv_sec * ((uint64_t)1000 * (uint64_t)1000)) +
+          ((uint64_t)ts.tv_nsec / (uint64_t)1000);
+  }
 #elif defined(H5_HAVE_GETTIMEOFDAY)
-    {
-        struct timeval now_tv;
+  {
+    struct timeval now_tv;
 
-        HDgettimeofday(&now_tv, NULL);
+    HDgettimeofday(&now_tv, NULL);
 
-        /* Cast all values in this expression to uint64_t to ensure that all intermediate
-         * calculations are done in 64 bit, to prevent overflow */
-        now = ((uint64_t)now_tv.tv_sec * ((uint64_t)1000 * (uint64_t)1000)) + (uint64_t)now_tv.tv_usec;
-    }
+    /* Cast all values in this expression to uint64_t to ensure that all
+     * intermediate calculations are done in 64 bit, to prevent overflow */
+    now = ((uint64_t)now_tv.tv_sec * ((uint64_t)1000 * (uint64_t)1000)) +
+          (uint64_t)now_tv.tv_usec;
+  }
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    /* Cast all values in this expression to uint64_t to ensure that all intermediate calculations
-     * are done in 64 bit, to prevent overflow */
-    now       = ((uint64_t)HDtime(NULL) * ((uint64_t)1000 * (uint64_t)1000));
+  /* Cast all values in this expression to uint64_t to ensure that all
+   * intermediate calculations are done in 64 bit, to prevent overflow */
+  now = ((uint64_t)HDtime(NULL) * ((uint64_t)1000 * (uint64_t)1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
-    return (now);
+  return (now);
 } /* end H5_now_usec() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5_get_time
  *
- * Purpose:     Get the current time, as the time of seconds after the UNIX epoch
+ * Purpose:     Get the current time, as the time of seconds after the UNIX
+ *epoch
  *
  * Return:      Success:    A non-negative time value
  *              Failure:    -1.0 (in theory, can't currently fail)
  *
  *--------------------------------------------------------------------------
  */
-double
-H5_get_time(void)
-{
-    double ret_value = 0.0;
+double H5_get_time(void) {
+  double ret_value = 0.0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if defined(H5_HAVE_CLOCK_GETTIME)
-    {
-        struct timespec ts;
+  {
+    struct timespec ts;
 
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / 1000000000.0);
-    }
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / 1000000000.0);
+  }
 #elif defined(H5_HAVE_GETTIMEOFDAY)
-    {
-        struct timeval now_tv;
+  {
+    struct timeval now_tv;
 
-        HDgettimeofday(&now_tv, NULL);
-        ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / 1000000.0);
-    }
+    HDgettimeofday(&now_tv, NULL);
+    ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / 1000000.0);
+  }
 #else
-    ret_value = (double)HDtime(NULL);
+  ret_value = (double)HDtime(NULL);
 #endif
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_get_time() */
 
 /*-------------------------------------------------------------------------
@@ -255,51 +245,51 @@ H5_get_time(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
-{
-    /* Sanity check */
-    assert(times);
+static herr_t H5__timer_get_timevals(H5_timevals_t *times /*in,out*/) {
+  /* Sanity check */
+  assert(times);
 
-    /* Windows call handles both system/user and elapsed times */
+  /* Windows call handles both system/user and elapsed times */
 #ifdef H5_HAVE_WIN32_API
-    if (H5_get_win32_times(times) < 0) {
-        times->elapsed = -1.0;
-        times->system  = -1.0;
-        times->user    = -1.0;
+  if (H5_get_win32_times(times) < 0) {
+    times->elapsed = -1.0;
+    times->system = -1.0;
+    times->user = -1.0;
 
-        return -1;
-    } /* end if */
+    return -1;
+  }   /* end if */
 #else /* H5_HAVE_WIN32_API */
 
-    /*************************
-     * System and user times *
-     *************************/
+  /*************************
+   * System and user times *
+   *************************/
 #if defined(H5_HAVE_GETRUSAGE)
-    {
-        struct rusage res;
+  {
+    struct rusage res;
 
-        if (getrusage(RUSAGE_SELF, &res) < 0)
-            return -1;
-        times->system = (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / 1.0E6);
-        times->user   = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
-    }
+    if (getrusage(RUSAGE_SELF, &res) < 0)
+      return -1;
+    times->system =
+        (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / 1.0E6);
+    times->user =
+        (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
+  }
 #else
-    /* No suitable way to get system/user times */
-    /* This is not an error condition, they just won't be available */
-    times->system = -1.0;
-    times->user   = -1.0;
+  /* No suitable way to get system/user times */
+  /* This is not an error condition, they just won't be available */
+  times->system = -1.0;
+  times->user = -1.0;
 #endif
 
-    /****************
-     * Elapsed time *
-     ****************/
+  /****************
+   * Elapsed time *
+   ****************/
 
-    times->elapsed = H5_get_time();
+  times->elapsed = H5_get_time();
 
 #endif /* H5_HAVE_WIN32_API */
 
-    return 0;
+  return 0;
 } /* end H5__timer_get_timevals() */
 
 /*-------------------------------------------------------------------------
@@ -352,16 +342,14 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_timer_init(H5_timer_t *timer /*in,out*/)
-{
-    /* Sanity check */
-    assert(timer);
+herr_t H5_timer_init(H5_timer_t *timer /*in,out*/) {
+  /* Sanity check */
+  assert(timer);
 
-    /* Initialize everything */
-    memset(timer, 0, sizeof(H5_timer_t));
+  /* Initialize everything */
+  memset(timer, 0, sizeof(H5_timer_t));
 
-    return 0;
+  return 0;
 } /* end H5_timer_init() */
 
 /*-------------------------------------------------------------------------
@@ -374,21 +362,19 @@ H5_timer_init(H5_timer_t *timer /*in,out*/)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_timer_start(H5_timer_t *timer /*in,out*/)
-{
-    /* Sanity check */
-    assert(timer);
+herr_t H5_timer_start(H5_timer_t *timer /*in,out*/) {
+  /* Sanity check */
+  assert(timer);
 
-    /* Start the timer
-     * This sets the "initial" times to the system-defined start times.
-     */
-    if (H5__timer_get_timevals(&(timer->initial)) < 0)
-        return -1;
+  /* Start the timer
+   * This sets the "initial" times to the system-defined start times.
+   */
+  if (H5__timer_get_timevals(&(timer->initial)) < 0)
+    return -1;
 
-    timer->is_running = TRUE;
+  timer->is_running = TRUE;
 
-    return 0;
+  return 0;
 } /* end H5_timer_start() */
 
 /*-------------------------------------------------------------------------
@@ -401,31 +387,31 @@ H5_timer_start(H5_timer_t *timer /*in,out*/)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_timer_stop(H5_timer_t *timer /*in,out*/)
-{
-    /* Sanity check */
-    assert(timer);
+herr_t H5_timer_stop(H5_timer_t *timer /*in,out*/) {
+  /* Sanity check */
+  assert(timer);
 
-    /* Stop the timer */
-    if (H5__timer_get_timevals(&(timer->final_interval)) < 0)
-        return -1;
+  /* Stop the timer */
+  if (H5__timer_get_timevals(&(timer->final_interval)) < 0)
+    return -1;
 
-    /* The "final" times are stored as intervals (final - initial)
-     * for more useful reporting to the user.
-     */
-    timer->final_interval.elapsed = timer->final_interval.elapsed - timer->initial.elapsed;
-    timer->final_interval.system  = timer->final_interval.system - timer->initial.system;
-    timer->final_interval.user    = timer->final_interval.user - timer->initial.user;
+  /* The "final" times are stored as intervals (final - initial)
+   * for more useful reporting to the user.
+   */
+  timer->final_interval.elapsed =
+      timer->final_interval.elapsed - timer->initial.elapsed;
+  timer->final_interval.system =
+      timer->final_interval.system - timer->initial.system;
+  timer->final_interval.user = timer->final_interval.user - timer->initial.user;
 
-    /* Add the intervals to the elapsed time */
-    timer->total.elapsed += timer->final_interval.elapsed;
-    timer->total.system += timer->final_interval.system;
-    timer->total.user += timer->final_interval.user;
+  /* Add the intervals to the elapsed time */
+  timer->total.elapsed += timer->final_interval.elapsed;
+  timer->total.system += timer->final_interval.system;
+  timer->total.user += timer->final_interval.user;
 
-    timer->is_running = FALSE;
+  timer->is_running = FALSE;
 
-    return 0;
+  return 0;
 } /* end H5_timer_stop() */
 
 /*-------------------------------------------------------------------------
@@ -449,32 +435,30 @@ H5_timer_stop(H5_timer_t *timer /*in,out*/)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
-{
-    /* Sanity check */
-    assert(times);
+herr_t H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/) {
+  /* Sanity check */
+  assert(times);
 
-    if (timer.is_running) {
-        H5_timevals_t now;
+  if (timer.is_running) {
+    H5_timevals_t now;
 
-        /* Get the current times and report the current intervals without
-         * stopping the timer.
-         */
-        if (H5__timer_get_timevals(&now) < 0)
-            return -1;
+    /* Get the current times and report the current intervals without
+     * stopping the timer.
+     */
+    if (H5__timer_get_timevals(&now) < 0)
+      return -1;
 
-        times->elapsed = now.elapsed - timer.initial.elapsed;
-        times->system  = now.system - timer.initial.system;
-        times->user    = now.user - timer.initial.user;
-    } /* end if */
-    else {
-        times->elapsed = timer.final_interval.elapsed;
-        times->system  = timer.final_interval.system;
-        times->user    = timer.final_interval.user;
-    } /* end else */
+    times->elapsed = now.elapsed - timer.initial.elapsed;
+    times->system = now.system - timer.initial.system;
+    times->user = now.user - timer.initial.user;
+  } /* end if */
+  else {
+    times->elapsed = timer.final_interval.elapsed;
+    times->system = timer.final_interval.system;
+    times->user = timer.final_interval.user;
+  } /* end else */
 
-    return 0;
+  return 0;
 } /* end H5_timer_get_times() */
 
 /*-------------------------------------------------------------------------
@@ -501,32 +485,32 @@ H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
-{
-    /* Sanity check */
-    assert(times);
+herr_t H5_timer_get_total_times(H5_timer_t timer,
+                                H5_timevals_t *times /*in,out*/) {
+  /* Sanity check */
+  assert(times);
 
-    if (timer.is_running) {
-        H5_timevals_t now;
+  if (timer.is_running) {
+    H5_timevals_t now;
 
-        /* Get the current times and report the current totals without
-         * stopping the timer.
-         */
-        if (H5__timer_get_timevals(&now) < 0)
-            return -1;
+    /* Get the current times and report the current totals without
+     * stopping the timer.
+     */
+    if (H5__timer_get_timevals(&now) < 0)
+      return -1;
 
-        times->elapsed = timer.total.elapsed + (now.elapsed - timer.initial.elapsed);
-        times->system  = timer.total.system + (now.system - timer.initial.system);
-        times->user    = timer.total.user + (now.user - timer.initial.user);
-    } /* end if */
-    else {
-        times->elapsed = timer.total.elapsed;
-        times->system  = timer.total.system;
-        times->user    = timer.total.user;
-    } /* end else */
+    times->elapsed =
+        timer.total.elapsed + (now.elapsed - timer.initial.elapsed);
+    times->system = timer.total.system + (now.system - timer.initial.system);
+    times->user = timer.total.user + (now.user - timer.initial.user);
+  } /* end if */
+  else {
+    times->elapsed = timer.total.elapsed;
+    times->system = timer.total.system;
+    times->user = timer.total.user;
+  } /* end else */
 
-    return 0;
+  return 0;
 } /* end H5_timer_get_total_times() */
 
 /*-------------------------------------------------------------------------
@@ -551,72 +535,72 @@ H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
  *
  *-------------------------------------------------------------------------
  */
-char *
-H5_timer_get_time_string(double seconds)
-{
-    char *s; /* output string */
+char *H5_timer_get_time_string(double seconds) {
+  char *s; /* output string */
 
-    /* Used when the time is greater than 59 seconds */
-    double days          = 0.0;
-    double hours         = 0.0;
-    double minutes       = 0.0;
-    double remainder_sec = 0.0;
+  /* Used when the time is greater than 59 seconds */
+  double days = 0.0;
+  double hours = 0.0;
+  double minutes = 0.0;
+  double remainder_sec = 0.0;
 
-    /* Extract larger time units from count of seconds */
-    if (seconds > 60.0) {
-        /* Set initial # of seconds */
-        remainder_sec = seconds;
+  /* Extract larger time units from count of seconds */
+  if (seconds > 60.0) {
+    /* Set initial # of seconds */
+    remainder_sec = seconds;
 
-        /* Extract days */
-        days = HDfloor(remainder_sec / H5_SEC_PER_DAY);
-        remainder_sec -= (days * H5_SEC_PER_DAY);
+    /* Extract days */
+    days = HDfloor(remainder_sec / H5_SEC_PER_DAY);
+    remainder_sec -= (days * H5_SEC_PER_DAY);
 
-        /* Extract hours */
-        hours = HDfloor(remainder_sec / H5_SEC_PER_HOUR);
-        remainder_sec -= (hours * H5_SEC_PER_HOUR);
+    /* Extract hours */
+    hours = HDfloor(remainder_sec / H5_SEC_PER_HOUR);
+    remainder_sec -= (hours * H5_SEC_PER_HOUR);
 
-        /* Extract minutes */
-        minutes = HDfloor(remainder_sec / H5_SEC_PER_MIN);
-        remainder_sec -= (minutes * H5_SEC_PER_MIN);
+    /* Extract minutes */
+    minutes = HDfloor(remainder_sec / H5_SEC_PER_MIN);
+    remainder_sec -= (minutes * H5_SEC_PER_MIN);
 
-        /* The # of seconds left is in remainder_sec */
-    } /* end if */
+    /* The # of seconds left is in remainder_sec */
+  } /* end if */
 
-    /* Allocate */
-    if (NULL == (s = (char *)calloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
-        return NULL;
+  /* Allocate */
+  if (NULL == (s = (char *)calloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
+    return NULL;
 
-    /* Do we need a format string? Some people might like a certain
-     * number of milliseconds or s before spilling to the next highest
-     * time unit.  Perhaps this could be passed as an integer.
-     * (name? round_up_size? ?)
-     */
-    if (seconds < 0.0)
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "N/A");
-    else if (H5_DBL_ABS_EQUAL(0.0, seconds))
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "0.0 s");
-    else if (seconds < 1.0E-6)
-        /* t < 1 us, Print time in ns */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f ns", seconds * 1.0E9);
-    else if (seconds < 1.0E-3)
-        /* t < 1 ms, Print time in us */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.1f us", seconds * 1.0E6);
-    else if (seconds < 1.0)
-        /* t < 1 s, Print time in ms */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.1f ms", seconds * 1.0E3);
-    else if (seconds < H5_SEC_PER_MIN)
-        /* t < 1 m, Print time in s */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.2f s", seconds);
-    else if (seconds < H5_SEC_PER_HOUR)
-        /* t < 1 h, Print time in m and s */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f m %.f s", minutes, remainder_sec);
-    else if (seconds < H5_SEC_PER_DAY)
-        /* t < 1 d, Print time in h, m and s */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f h %.f m %.f s", hours, minutes, remainder_sec);
-    else
-        /* Print time in d, h, m and s */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f d %.f h %.f m %.f s", days, hours, minutes,
-                   remainder_sec);
+  /* Do we need a format string? Some people might like a certain
+   * number of milliseconds or s before spilling to the next highest
+   * time unit.  Perhaps this could be passed as an integer.
+   * (name? round_up_size? ?)
+   */
+  if (seconds < 0.0)
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "N/A");
+  else if (H5_DBL_ABS_EQUAL(0.0, seconds))
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "0.0 s");
+  else if (seconds < 1.0E-6)
+    /* t < 1 us, Print time in ns */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f ns", seconds * 1.0E9);
+  else if (seconds < 1.0E-3)
+    /* t < 1 ms, Print time in us */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.1f us", seconds * 1.0E6);
+  else if (seconds < 1.0)
+    /* t < 1 s, Print time in ms */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.1f ms", seconds * 1.0E3);
+  else if (seconds < H5_SEC_PER_MIN)
+    /* t < 1 m, Print time in s */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.2f s", seconds);
+  else if (seconds < H5_SEC_PER_HOUR)
+    /* t < 1 h, Print time in m and s */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f m %.f s", minutes,
+               remainder_sec);
+  else if (seconds < H5_SEC_PER_DAY)
+    /* t < 1 d, Print time in h, m and s */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f h %.f m %.f s", hours, minutes,
+               remainder_sec);
+  else
+    /* Print time in d, h, m and s */
+    HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f d %.f h %.f m %.f s", days,
+               hours, minutes, remainder_sec);
 
-    return s;
+  return s;
 } /* end H5_timer_get_time_string() */

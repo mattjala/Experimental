@@ -18,41 +18,41 @@
 #ifndef HDF5_H
 #define HDF5_H
 
-#include "H5public.h"
-#include "H5Apublic.h"  /* Attributes                               */
 #include "H5ACpublic.h" /* Metadata cache                           */
+#include "H5Apublic.h"  /* Attributes                               */
 #include "H5Dpublic.h"  /* Datasets                                 */
-#include "H5Epublic.h"  /* Errors                                   */
 #include "H5ESpublic.h" /* Event Sets                               */
-#include "H5Fpublic.h"  /* Files                                    */
+#include "H5Epublic.h"  /* Errors                                   */
 #include "H5FDpublic.h" /* File drivers                             */
+#include "H5Fpublic.h"  /* Files                                    */
 #include "H5Gpublic.h"  /* Groups                                   */
 #include "H5Ipublic.h"  /* ID management                            */
 #include "H5Lpublic.h"  /* Links                                    */
-#include "H5Mpublic.h"  /* Maps                                     */
 #include "H5MMpublic.h" /* Memory management                        */
+#include "H5Mpublic.h"  /* Maps                                     */
 #include "H5Opublic.h"  /* Object headers                           */
-#include "H5Ppublic.h"  /* Property lists                           */
 #include "H5PLpublic.h" /* Plugins                                  */
+#include "H5Ppublic.h"  /* Property lists                           */
 #include "H5Rpublic.h"  /* References                               */
 #include "H5Spublic.h"  /* Dataspaces                               */
 #include "H5Tpublic.h"  /* Datatypes                                */
 #include "H5VLpublic.h" /* Virtual Object Layer                     */
 #include "H5Zpublic.h"  /* Data filters                             */
+#include "H5public.h"
 
 /* Plugin/component developer headers */
 #include "H5ESdevelop.h" /* Event Sets */
 #include "H5FDdevelop.h" /* File drivers */
 #include "H5Idevelop.h"  /* ID management */
 #include "H5Ldevelop.h"  /* Links */
-#include "H5Tdevelop.h"  /* Datatypes */
 #include "H5TSdevelop.h" /* Threadsafety */
+#include "H5Tdevelop.h"  /* Datatypes */
 #include "H5Zdevelop.h"  /* Data filters */
 
 /* Virtual object layer (VOL) connector developer support */
 #include "H5VLconnector.h"          /* VOL connector author routines */
 #include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
+#include "H5VLnative.h" /* Native VOL connector macros, for VOL connector authors */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"     /* Files stored entirely in memory          */
@@ -71,8 +71,8 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
-#include "H5FDsubfiling.h" /* Subfiling VFD                            */
 #include "H5FDioc.h"       /* I/O Concentrator VFD                     */
+#include "H5FDsubfiling.h" /* Subfiling VFD                            */
 
 /* Virtual object layer (VOL) connectors */
 #include "H5VLnative.h"   /* Native VOL connector                     */

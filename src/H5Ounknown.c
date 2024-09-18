@@ -21,10 +21,10 @@
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
-#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
 #include "H5Opkg.h"      /* Object headers			*/
+#include "H5private.h"   /* Generic Functions			*/
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O__unknown_free(void *_mesg);
@@ -65,14 +65,12 @@ H5FL_DEFINE(H5O_unknown_t);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__unknown_free(void *mesg)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+static herr_t H5O__unknown_free(void *mesg) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    assert(mesg);
+  assert(mesg);
 
-    mesg = H5FL_FREE(H5O_unknown_t, mesg);
+  mesg = H5FL_FREE(H5O_unknown_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__unknown_free() */

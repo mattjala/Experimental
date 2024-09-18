@@ -16,8 +16,8 @@
 #ifndef H5Spublic_H
 #define H5Spublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
+#include "H5public.h"  /* Generic Functions                        */
 
 /* Define special dataspaces for dataset I/O operations */
 
@@ -53,93 +53,93 @@
 #define H5S_MAX_RANK 32
 
 /* Flags for selection iterators */
-#define H5S_SEL_ITER_GET_SEQ_LIST_SORTED                                                                     \
-    0x0001 /**< Retrieve elements from iterator in increasing offset order, for                              \
-            * each call to retrieve sequences. Currently, this only applies to                               \
-            * point selections, as hyperslab selections are always returned in                               \
-            * increasing offset order. Note that the order is only increasing                                \
-            * for each call to H5Sget_seq_list(), the next set of sequences                                  \
-            * could start with an earlier offset than the previous one.                                      \
-            */
-#define H5S_SEL_ITER_SHARE_WITH_DATASPACE                                                                    \
-    0x0002 /**< Don't copy the dataspace selection when creating the selection                               \
-            * iterator. This can improve performance of creating the iterator,                               \
-            * but the dataspace \Bold{MUST NOT} be modified or closed until the                              \
-            * selection iterator is closed or the iterator's behavior will be                                \
-            * undefined.                                                                                     \
-            */
+#define H5S_SEL_ITER_GET_SEQ_LIST_SORTED                                       \
+  0x0001 /**< Retrieve elements from iterator in increasing offset order, for  \
+          * each call to retrieve sequences. Currently, this only applies to   \
+          * point selections, as hyperslab selections are always returned in   \
+          * increasing offset order. Note that the order is only increasing    \
+          * for each call to H5Sget_seq_list(), the next set of sequences      \
+          * could start with an earlier offset than the previous one.          \
+          */
+#define H5S_SEL_ITER_SHARE_WITH_DATASPACE                                      \
+  0x0002 /**< Don't copy the dataspace selection when creating the selection   \
+          * iterator. This can improve performance of creating the iterator,   \
+          * but the dataspace \Bold{MUST NOT} be modified or closed until the  \
+          * selection iterator is closed or the iterator's behavior will be    \
+          * undefined.                                                         \
+          */
 
 /**
  * Types of dataspaces
  */
 typedef enum H5S_class_t {
-    H5S_NO_CLASS = -1, /**< Error                                      */
-    H5S_SCALAR   = 0,  /**< Singleton (scalar)                         */
-    H5S_SIMPLE   = 1,  /**< Regular grid                               */
-    H5S_NULL     = 2   /**< Empty set                                  */
+  H5S_NO_CLASS = -1, /**< Error                                      */
+  H5S_SCALAR = 0,    /**< Singleton (scalar)                         */
+  H5S_SIMPLE = 1,    /**< Regular grid                               */
+  H5S_NULL = 2       /**< Empty set                                  */
 } H5S_class_t;
 
 /**
  * Different ways of combining selections
  */
 typedef enum H5S_seloper_t {
-    H5S_SELECT_NOOP = -1, /**< Error                                     */
-    H5S_SELECT_SET  = 0,  /**< Select "set" operation 		             */
-    H5S_SELECT_OR,        /**< Binary "or" operation for hyperslabs
-                           * (add new selection to existing selection)
-                           * \code
-                           * Original region:  AAAAAAAAAA
-                           * New region:             BBBBBBBBBB
-                           * A or B:           CCCCCCCCCCCCCCCC
-                           * \endcode
-                           */
-    H5S_SELECT_AND,       /**< Binary "and" operation for hyperslabs
-                           * (only leave overlapped regions in selection)
-                           * \code
-                           * Original region:  AAAAAAAAAA
-                           * New region:             BBBBBBBBBB
-                           * A and B:                CCCC
-                           * \endcode
-                           */
-    H5S_SELECT_XOR,       /**< Binary "xor" operation for hyperslabs
-                           * (only leave non-overlapped regions in selection)
-                           * \code
-                           * Original region:  AAAAAAAAAA
-                           * New region:             BBBBBBBBBB
-                           * A xor B:          CCCCCC    CCCCCC
-                           * \endcode
-                           */
-    H5S_SELECT_NOTB,      /**< Binary "not" operation for hyperslabs
-                           * (only leave non-overlapped regions in original selection)
-                           * \code
-                           * Original region:  AAAAAAAAAA
-                           * New region:             BBBBBBBBBB
-                           * A not B:          CCCCCC
-                           * \endcode
-                           */
-    H5S_SELECT_NOTA,      /**< Binary "not" operation for hyperslabs
-                           * (only leave non-overlapped regions in new selection)
-                           * \code
-                           * Original region:  AAAAAAAAAA
-                           * New region:             BBBBBBBBBB
-                           * B not A:                    CCCCCC
-                           * \endcode
-                           */
-    H5S_SELECT_APPEND,    /**< Append elements to end of point selection */
-    H5S_SELECT_PREPEND,   /**< Prepend elements to beginning of point selection */
-    H5S_SELECT_INVALID    /**< Invalid upper bound on selection operations */
+  H5S_SELECT_NOOP = -1, /**< Error                                     */
+  H5S_SELECT_SET = 0,   /**< Select "set" operation 		             */
+  H5S_SELECT_OR,        /**< Binary "or" operation for hyperslabs
+                         * (add new selection to existing selection)
+                         * \code
+                         * Original region:  AAAAAAAAAA
+                         * New region:             BBBBBBBBBB
+                         * A or B:           CCCCCCCCCCCCCCCC
+                         * \endcode
+                         */
+  H5S_SELECT_AND,       /**< Binary "and" operation for hyperslabs
+                         * (only leave overlapped regions in selection)
+                         * \code
+                         * Original region:  AAAAAAAAAA
+                         * New region:             BBBBBBBBBB
+                         * A and B:                CCCC
+                         * \endcode
+                         */
+  H5S_SELECT_XOR,       /**< Binary "xor" operation for hyperslabs
+                         * (only leave non-overlapped regions in selection)
+                         * \code
+                         * Original region:  AAAAAAAAAA
+                         * New region:             BBBBBBBBBB
+                         * A xor B:          CCCCCC    CCCCCC
+                         * \endcode
+                         */
+  H5S_SELECT_NOTB,      /**< Binary "not" operation for hyperslabs
+                         * (only leave non-overlapped regions in original selection)
+                         * \code
+                         * Original region:  AAAAAAAAAA
+                         * New region:             BBBBBBBBBB
+                         * A not B:          CCCCCC
+                         * \endcode
+                         */
+  H5S_SELECT_NOTA,      /**< Binary "not" operation for hyperslabs
+                         * (only leave non-overlapped regions in new selection)
+                         * \code
+                         * Original region:  AAAAAAAAAA
+                         * New region:             BBBBBBBBBB
+                         * B not A:                    CCCCCC
+                         * \endcode
+                         */
+  H5S_SELECT_APPEND,    /**< Append elements to end of point selection */
+  H5S_SELECT_PREPEND,   /**< Prepend elements to beginning of point selection */
+  H5S_SELECT_INVALID    /**< Invalid upper bound on selection operations */
 } H5S_seloper_t;
 
 /**
  * Selection type
  */
 typedef enum {
-    H5S_SEL_ERROR      = -1, /**< Error                                 */
-    H5S_SEL_NONE       = 0,  /**< Empty selection                       */
-    H5S_SEL_POINTS     = 1,  /**< Set of points                         */
-    H5S_SEL_HYPERSLABS = 2,  /**< Hyperslab                             */
-    H5S_SEL_ALL        = 3,  /**< Everything	                        */
-    H5S_SEL_N                /**< Sentinel \internal THIS MUST BE LAST	*/
+  H5S_SEL_ERROR = -1,     /**< Error                                 */
+  H5S_SEL_NONE = 0,       /**< Empty selection                       */
+  H5S_SEL_POINTS = 1,     /**< Set of points                         */
+  H5S_SEL_HYPERSLABS = 2, /**< Hyperslab                             */
+  H5S_SEL_ALL = 3,        /**< Everything	                        */
+  H5S_SEL_N               /**< Sentinel \internal THIS MUST BE LAST	*/
 } H5S_sel_type;
 
 #ifdef __cplusplus
@@ -158,8 +158,8 @@ extern "C" {
  * \return \herr_t
  *
  * \details H5Sclose() releases a dataspace. Further access through the
- *          dataspace identifier is illegal. Failure to release a dataspace with this
- *          call will result in resource leaks.
+ *          dataspace identifier is illegal. Failure to release a dataspace with
+ * this call will result in resource leaks.
  *
  * \version 1.4.0 Fortran subroutine introduced in this release.
  * \since 1.0.0
@@ -193,8 +193,9 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  * \since 1.10.6
  *
  */
-H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
-                                  const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
+H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
+                                  const hsize_t start[], const hsize_t stride[],
+                                  const hsize_t count[], const hsize_t block[]);
 /**
  * \ingroup H5S
  *
@@ -216,7 +217,8 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_
  * \since 1.10.6
  *
  */
-H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
+H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
+                               hid_t space2_id);
 /**
  * \ingroup H5S
  *
@@ -252,16 +254,17 @@ H5_DLL hid_t H5Scopy(hid_t space_id);
  *
  *          A scalar dataspace, #H5S_SCALAR, has a single element, though that
  *          element may be of a complex datatype, such as a compound or array
- *          datatype. By convention, the rank of a scalar dataspace is always \p 0
- *          (zero); think of it geometrically as a single, dimensionless point,
- *          though that point can be complex.
+ *          datatype. By convention, the rank of a scalar dataspace is always \p
+ * 0 (zero); think of it geometrically as a single, dimensionless point, though
+ * that point can be complex.
  *
- *          A simple dataspace, #H5S_SIMPLE, consists of a regular array of elements.
+ *          A simple dataspace, #H5S_SIMPLE, consists of a regular array of
+ * elements.
  *
  *          A null dataspace, #H5S_NULL, has no data elements.
  *
- *          The dataspace identifier returned by this function can be released with
- *          H5Sclose() so that resource leaks will not occur.
+ *          The dataspace identifier returned by this function can be released
+ * with H5Sclose() so that resource leaks will not occur.
  *
  * \version 1.4.0 Fortran subroutine introduced.
  * \since 1.0.0
@@ -320,7 +323,8 @@ H5_DLL hid_t H5Screate(H5S_class_t type);
  * \since 1.0.0
  *
  */
-H5_DLL hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[]);
+H5_DLL hid_t H5Screate_simple(int rank, const hsize_t dims[],
+                              const hsize_t maxdims[]);
 /**
  * \ingroup H5S
  *
@@ -376,10 +380,12 @@ H5_DLL hid_t H5Sdecode(const void *buf);
  *
  *          The file access property list \p fapl_id is used to control the
  *          encoding via the \a libver_bounds property (see
- *          H5Pset_libver_bounds()). If the \a libver_bounds property is missing,
- *          H5Sencode2() proceeds as if the \a libver_bounds property were set to
+ *          H5Pset_libver_bounds()). If the \a libver_bounds property is
+ * missing, H5Sencode2() proceeds as if the \a libver_bounds property were set
+ * to
  *          (#H5F_LIBVER_EARLIEST, #H5F_LIBVER_LATEST). (Functionally,
- *          H5Sencode1() is identical to H5Sencode2() with \a libver_bounds set to
+ *          H5Sencode1() is identical to H5Sencode2() with \a libver_bounds set
+ * to
  *          (#H5F_LIBVER_EARLIEST, #H5F_LIBVER_LATEST).)
  *
  *          The types of data space that are addressed in this function are
@@ -466,7 +472,8 @@ H5_DLL htri_t H5Sextent_equal(hid_t space1_id, hid_t space2_id);
  * \since 1.10.0
  *
  */
-H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[], hsize_t count[],
+H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
+                                       hsize_t stride[], hsize_t count[],
                                        hsize_t block[]);
 /**
  * \ingroup H5S
@@ -503,7 +510,8 @@ H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t s
  * \since 1.2.0
  *
  */
-H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[], hsize_t end[]);
+H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[],
+                                   hsize_t end[]);
 /**
  * \ingroup H5S
  *
@@ -562,7 +570,8 @@ H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
  * \since 1.2.0
  *
  */
-H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints,
+H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
+                                           hsize_t numpoints,
                                            hsize_t buf[/*numpoints*/]);
 /**
  * \ingroup H5S
@@ -595,7 +604,8 @@ H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hs
  * \since 1.2.0
  *
  */
-H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks,
+H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
+                                            hsize_t numblocks,
                                             hsize_t buf[/*numblocks*/]);
 /**
  * \ingroup H5S
@@ -699,7 +709,8 @@ H5_DLL H5S_sel_type H5Sget_select_type(hid_t spaceid);
  * \since 1.0.0
  *
  */
-H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
+H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[],
+                                     hsize_t maxdims[]);
 /**
  * \ingroup H5S
  *
@@ -817,7 +828,8 @@ H5_DLL htri_t H5Sis_simple(hid_t space_id);
  * \since 1.10.6
  *
  */
-H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
+H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op,
+                               hid_t space2_id);
 /**
  * \ingroup H5S
  *
@@ -875,7 +887,8 @@ H5_DLL herr_t H5Ssel_iter_close(hid_t sel_iter_id);
  * \since 1.12.0
  *
  */
-H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags);
+H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size,
+                                unsigned flags);
 /**
  * \ingroup H5S
  *
@@ -922,8 +935,10 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size_t *nseq,
-                                       size_t *nelmts, hsize_t *off, size_t *len);
+H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq,
+                                       size_t maxelmts, size_t *nseq,
+                                       size_t *nelmts, hsize_t *off,
+                                       size_t *len);
 /**
  * \ingroup H5S
  *
@@ -1094,11 +1109,12 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          \n      0 0 0 0 13 5 11 17 7 21 29 21
  *
  * \version 1.6.4 C coord parameter type changed to \p const hsize_t.
- * \version 1.6.4 Fortran \p coord parameter type changed to \p INTEGER(HSIZE_T).
- * \since 1.0.0
+ * \version 1.6.4 Fortran \p coord parameter type changed to \p
+ * INTEGER(HSIZE_T). \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord);
+H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
+                                 size_t num_elem, const hsize_t *coord);
 /**
  * \ingroup H5S
  *
@@ -1192,10 +1208,10 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_el
  *          [1,1], \p stride is [4,4], \p count is [3,7], and \p block is [2,2].
  *          In C, these settings will specify a hyperslab consisting of 21
  *          2x2 blocks of array elements starting with location (1,1) with the
- *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.;
- *          in Fortran, they will specify a hyperslab consisting of 21 2x2
- *          blocks of array elements starting with location (2,2) with the
- *          selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
+ *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5),
+ * etc.; in Fortran, they will specify a hyperslab consisting of 21 2x2 blocks
+ * of array elements starting with location (2,2) with the selected blocks at
+ * locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
  *
  *          Regions selected with this function call default to C order
  *          iteration when I/O is performed.
@@ -1204,8 +1220,9 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_el
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
-                                  const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
+H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
+                                  const hsize_t start[], const hsize_t stride[],
+                                  const hsize_t count[], const hsize_t block[]);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -1227,7 +1244,8 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_
  * \since 1.10.6
  *
  */
-H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *end);
+H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start,
+                                        const hsize_t *end);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -1266,7 +1284,8 @@ H5_DLL herr_t H5Sselect_none(hid_t spaceid);
  * \since 1.10.6
  *
  */
-H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id,
+H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id,
+                                            hid_t dst_space_id,
                                             hid_t src_intersect_space_id);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
@@ -1352,7 +1371,8 @@ H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[], const hsize_t max[]);
+H5_DLL herr_t H5Sset_extent_simple(hid_t space_id, int rank,
+                                   const hsize_t dims[], const hsize_t max[]);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

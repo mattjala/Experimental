@@ -22,13 +22,14 @@
  *      reporting macros.
  */
 #define H5M_MODULE
-#define H5_MY_PKG     H5M
+#define H5_MY_PKG H5M
 #define H5_MY_PKG_ERR H5E_MAP
 
 /**
  * \page H5M_UG The HDF5 VOL Data Mapping
- * \Bold{The HDF5 Data Mapping can only be used with the HDF5 VOL connectors that
- * implement map objects.} The native HDF5 library does not support this feature.
+ * \Bold{The HDF5 Data Mapping can only be used with the HDF5 VOL connectors
+ * that implement map objects.} The native HDF5 library does not support this
+ * feature.
  *
  * \section sec_map The HDF5 Map Object
  *
@@ -43,8 +44,8 @@
 /**
  * \defgroup H5M VOL Mapping (H5M)
  *
- * \details \Bold{The interface can only be used with the HDF5 VOL connectors that
- *          implement map objects.} The native HDF5 library does not support this
+ * \details \Bold{The interface can only be used with the HDF5 VOL connectors
+ * that implement map objects.} The native HDF5 library does not support this
  *          feature.
  *
  *          While the HDF5 data model is a flexible way to store data, some
@@ -71,13 +72,12 @@
  * vls_type_id = H5Tcopy(H5T_C_S1);
  * H5Tset_size(vls_type_id, H5T_VARIABLE);
  * file_id = H5Fcreate("file.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
- * map_id = H5Mcreate(file_id, "map", vls_type_id, H5T_NATIVE_UINT64, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- * H5Mput(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &IDs[0], H5P_DEFAULT);
- * H5Mput(map_id, vls_type_id, &names[1], H5T_NATIVE_UINT64, &IDs[1], H5P_DEFAULT);
- * H5Mget(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &val_out, H5P_DEFAULT);
- * if(val_out != IDs[0])
- *   ERROR;
- * H5Mclose(map_id);
+ * map_id = H5Mcreate(file_id, "map", vls_type_id, H5T_NATIVE_UINT64,
+ * H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); H5Mput(map_id, vls_type_id,
+ * &names[0], H5T_NATIVE_UINT64, &IDs[0], H5P_DEFAULT); H5Mput(map_id,
+ * vls_type_id, &names[1], H5T_NATIVE_UINT64, &IDs[1], H5P_DEFAULT);
+ * H5Mget(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &val_out,
+ * H5P_DEFAULT); if(val_out != IDs[0]) ERROR; H5Mclose(map_id);
  * H5Tclose(vls_type_id);
  * H5Fclose(file_id);
  * \endcode

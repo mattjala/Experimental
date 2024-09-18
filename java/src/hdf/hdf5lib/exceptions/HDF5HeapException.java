@@ -19,22 +19,22 @@ package hdf.hdf5lib.exceptions;
  */
 
 public class HDF5HeapException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5HeapException</code> with no specified detail
-     * message.
-     */
-    public HDF5HeapException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5HeapException</code> with no specified detail
+   * message.
+   */
+  public HDF5HeapException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5HeapException</code> with the specified detail
-     * message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5HeapException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5HeapException</code> with the specified detail
+   * message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5HeapException(String s) { super(s); }
 }

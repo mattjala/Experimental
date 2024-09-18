@@ -27,13 +27,13 @@
 /* Headers */
 /***********/
 
-#include "H5private.h"   /* Generic Functions                    */
 #include "H5Eprivate.h"  /* Error handling                       */
 #include "H5FLprivate.h" /* Free lists                           */
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5SLprivate.h" /* Skip lists				 */
 #include "H5VLpkg.h"     /* Virtual Object Layer                 */
+#include "H5private.h"   /* Generic Functions                    */
 
 /****************/
 /* Local Macros */
@@ -45,8 +45,8 @@
 
 /* Dynamic operation info */
 typedef struct H5VL_dyn_op_t {
-    char *op_name; /* Name of operation */
-    int   op_val;  /* Value of operation */
+  char *op_name; /* Name of operation */
+  int op_val;    /* Value of operation */
 } H5VL_dyn_op_t;
 
 /********************/
@@ -113,15 +113,13 @@ H5FL_DEFINE_STATIC(H5VL_dyn_op_t);
  *
  *---------------------------------------------------------------------------
  */
-static void
-H5VL__release_dyn_op(H5VL_dyn_op_t *dyn_op)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+static void H5VL__release_dyn_op(H5VL_dyn_op_t *dyn_op) {
+  FUNC_ENTER_PACKAGE_NOERR
 
-    H5MM_xfree(dyn_op->op_name);
-    H5FL_FREE(H5VL_dyn_op_t, dyn_op);
+  H5MM_xfree(dyn_op->op_name);
+  H5FL_FREE(H5VL_dyn_op_t, dyn_op);
 
-    FUNC_LEAVE_NOAPI_VOID
+  FUNC_LEAVE_NOAPI_VOID
 } /* H5VL__release_dyn_op() */
 
 /*---------------------------------------------------------------------------
@@ -134,17 +132,16 @@ H5VL__release_dyn_op(H5VL_dyn_op_t *dyn_op)
  *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5VL__term_opt_operation_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
-{
-    H5VL_dyn_op_t *item = (H5VL_dyn_op_t *)_item; /* Item to release */
+static herr_t H5VL__term_opt_operation_cb(void *_item, void H5_ATTR_UNUSED *key,
+                                          void H5_ATTR_UNUSED *op_data) {
+  H5VL_dyn_op_t *item = (H5VL_dyn_op_t *)_item; /* Item to release */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Release the dynamically registered operation info */
-    H5VL__release_dyn_op(item);
+  /* Release the dynamically registered operation info */
+  H5VL__release_dyn_op(item);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL__term_opt_operation_cb() */
 
 /*---------------------------------------------------------------------------
@@ -158,22 +155,20 @@ H5VL__term_opt_operation_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_
  *
  *---------------------------------------------------------------------------
  */
-herr_t
-H5VL__term_opt_operation(void)
-{
-    size_t subcls; /* Index over the elements of operation array */
+herr_t H5VL__term_opt_operation(void) {
+  size_t subcls; /* Index over the elements of operation array */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Iterate over the VOL subclasses */
-    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++) {
-        if (H5VL_opt_ops_g[subcls]) {
-            H5SL_destroy(H5VL_opt_ops_g[subcls], H5VL__term_opt_operation_cb, NULL);
-            H5VL_opt_ops_g[subcls] = NULL;
-        }
+  /* Iterate over the VOL subclasses */
+  for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++) {
+    if (H5VL_opt_ops_g[subcls]) {
+      H5SL_destroy(H5VL_opt_ops_g[subcls], H5VL__term_opt_operation_cb, NULL);
+      H5VL_opt_ops_g[subcls] = NULL;
     }
+  }
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL__term_opt_operation() */
 
 /*---------------------------------------------------------------------------
@@ -186,45 +181,48 @@ H5VL__term_opt_operation(void)
  *
  *---------------------------------------------------------------------------
  */
-herr_t
-H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val)
-{
-    H5VL_dyn_op_t *new_op;              /* Info about new operation */
-    herr_t         ret_value = SUCCEED; /* Return value */
+herr_t H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name,
+                                    int *op_val) {
+  H5VL_dyn_op_t *new_op;      /* Info about new operation */
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    assert(op_val);
-    assert(op_name && *op_name);
+  /* Sanity checks */
+  assert(op_val);
+  assert(op_name && *op_name);
 
-    /* Check for duplicate operation */
-    if (H5VL_opt_ops_g[subcls]) {
-        if (NULL != H5SL_search(H5VL_opt_ops_g[subcls], op_name))
-            HGOTO_ERROR(H5E_VOL, H5E_EXISTS, FAIL, "operation name already exists");
-    } /* end if */
-    else {
-        /* Create skip list for operation of this subclass */
-        if (NULL == (H5VL_opt_ops_g[subcls] = H5SL_create(H5SL_TYPE_STR, NULL)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create skip list for operations");
-    } /* end else */
+  /* Check for duplicate operation */
+  if (H5VL_opt_ops_g[subcls]) {
+    if (NULL != H5SL_search(H5VL_opt_ops_g[subcls], op_name))
+      HGOTO_ERROR(H5E_VOL, H5E_EXISTS, FAIL, "operation name already exists");
+  } /* end if */
+  else {
+    /* Create skip list for operation of this subclass */
+    if (NULL == (H5VL_opt_ops_g[subcls] = H5SL_create(H5SL_TYPE_STR, NULL)))
+      HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL,
+                  "can't create skip list for operations");
+  } /* end else */
 
-    /* Register new operation */
-    if (NULL == (new_op = H5FL_CALLOC(H5VL_dyn_op_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate memory for dynamic operation info");
-    if (NULL == (new_op->op_name = H5MM_strdup(op_name)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate name for dynamic operation info");
-    new_op->op_val = H5VL_opt_vals_g[subcls]++;
+  /* Register new operation */
+  if (NULL == (new_op = H5FL_CALLOC(H5VL_dyn_op_t)))
+    HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL,
+                "can't allocate memory for dynamic operation info");
+  if (NULL == (new_op->op_name = H5MM_strdup(op_name)))
+    HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL,
+                "can't allocate name for dynamic operation info");
+  new_op->op_val = H5VL_opt_vals_g[subcls]++;
 
-    /* Insert into subclass's skip list */
-    if (H5SL_insert(H5VL_opt_ops_g[subcls], new_op, new_op->op_name) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert operation info into skip list");
+  /* Insert into subclass's skip list */
+  if (H5SL_insert(H5VL_opt_ops_g[subcls], new_op, new_op->op_name) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL,
+                "can't insert operation info into skip list");
 
-    /* Return the next operation value to the caller */
-    *op_val = new_op->op_val;
+  /* Return the next operation value to the caller */
+  *op_val = new_op->op_val;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__register_opt_operation() */
 
 /*---------------------------------------------------------------------------
@@ -236,20 +234,18 @@ done:
  *
  *---------------------------------------------------------------------------
  */
-size_t
-H5VL__num_opt_operation(void)
-{
-    size_t subcls;        /* Index over the elements of operation array */
-    size_t ret_value = 0; /* Return value */
+size_t H5VL__num_opt_operation(void) {
+  size_t subcls;        /* Index over the elements of operation array */
+  size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* Iterate over the VOL subclasses */
-    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
-        if (H5VL_opt_ops_g[subcls])
-            ret_value += H5SL_count(H5VL_opt_ops_g[subcls]);
+  /* Iterate over the VOL subclasses */
+  for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
+    if (H5VL_opt_ops_g[subcls])
+      ret_value += H5SL_count(H5VL_opt_ops_g[subcls]);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__num_opt_operation() */
 
 /*---------------------------------------------------------------------------
@@ -262,76 +258,78 @@ H5VL__num_opt_operation(void)
  *
  *---------------------------------------------------------------------------
  */
-herr_t
-H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name,
+                                int *op_val) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    assert(op_val);
-    assert(op_name && *op_name);
+  /* Sanity checks */
+  assert(op_val);
+  assert(op_name && *op_name);
 
-    /* Check for dynamic operations in the VOL subclass */
-    if (H5VL_opt_ops_g[subcls]) {
-        H5VL_dyn_op_t *dyn_op; /* Info about operation */
+  /* Check for dynamic operations in the VOL subclass */
+  if (H5VL_opt_ops_g[subcls]) {
+    H5VL_dyn_op_t *dyn_op; /* Info about operation */
 
-        /* Search for dynamic operation with correct name */
-        if (NULL == (dyn_op = H5SL_search(H5VL_opt_ops_g[subcls], op_name)))
-            HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
+    /* Search for dynamic operation with correct name */
+    if (NULL == (dyn_op = H5SL_search(H5VL_opt_ops_g[subcls], op_name)))
+      HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL,
+                  "operation name isn't registered");
 
-        /* Set operation value for user */
-        *op_val = dyn_op->op_val;
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
+    /* Set operation value for user */
+    *op_val = dyn_op->op_val;
+  } /* end if */
+  else
+    HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__find_opt_operation() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL__unregister_opt_operation
  *
- * Purpose:     Unregister a optional operation for a VOL object subclass, by name.
+ * Purpose:     Unregister a optional operation for a VOL object subclass, by
+ *name.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
  *---------------------------------------------------------------------------
  */
-herr_t
-H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5VL__unregister_opt_operation(H5VL_subclass_t subcls,
+                                      const char *op_name) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    assert(op_name && *op_name);
+  /* Sanity checks */
+  assert(op_name && *op_name);
 
-    /* Check for dynamic operations in the VOL subclass */
-    if (H5VL_opt_ops_g[subcls]) {
-        H5VL_dyn_op_t *dyn_op; /* Info about operation */
+  /* Check for dynamic operations in the VOL subclass */
+  if (H5VL_opt_ops_g[subcls]) {
+    H5VL_dyn_op_t *dyn_op; /* Info about operation */
 
-        /* Search for dynamic operation with correct name */
-        if (NULL == (dyn_op = H5SL_remove(H5VL_opt_ops_g[subcls], op_name)))
-            HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
+    /* Search for dynamic operation with correct name */
+    if (NULL == (dyn_op = H5SL_remove(H5VL_opt_ops_g[subcls], op_name)))
+      HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL,
+                  "operation name isn't registered");
 
-        /* Release the info for the operation */
-        H5VL__release_dyn_op(dyn_op);
+    /* Release the info for the operation */
+    H5VL__release_dyn_op(dyn_op);
 
-        /* Close the skip list, if no more operations in it */
-        if (0 == H5SL_count(H5VL_opt_ops_g[subcls])) {
-            if (H5SL_close(H5VL_opt_ops_g[subcls]) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "can't close dyn op skip list");
-            H5VL_opt_ops_g[subcls] = NULL;
-        } /* end if */
-    }     /* end if */
-    else
-        HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
+    /* Close the skip list, if no more operations in it */
+    if (0 == H5SL_count(H5VL_opt_ops_g[subcls])) {
+      if (H5SL_close(H5VL_opt_ops_g[subcls]) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL,
+                    "can't close dyn op skip list");
+      H5VL_opt_ops_g[subcls] = NULL;
+    } /* end if */
+  }   /* end if */
+  else
+    HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__unregister_opt_operation() */
