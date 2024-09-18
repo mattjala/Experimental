@@ -19,22 +19,22 @@ package hdf.hdf5lib.exceptions;
  */
 
 public class HDF5MetaDataCacheException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5MetaDataCacheException</code> with no specified
-     * detail message.
-     */
-    public HDF5MetaDataCacheException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5MetaDataCacheException</code> with no specified
+   * detail message.
+   */
+  public HDF5MetaDataCacheException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5MetaDataCacheException</code> with the specified
-     * detail message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5MetaDataCacheException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5MetaDataCacheException</code> with the specified
+   * detail message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5MetaDataCacheException(String s) { super(s); }
 }

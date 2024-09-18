@@ -12,8 +12,8 @@
 
 /*
  * Purpose: This file contains declarations which define macros for the
- *          H5FD driver package.  Including this header means that the source file
- *          is part of the H5FD driver package.
+ *          H5FD driver package.  Including this header means that the source
+ * file is part of the H5FD driver package.
  */
 #ifndef H5FDdrvr_module_H
 #define H5FDdrvr_module_H
@@ -21,7 +21,7 @@
 /* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#define H5_MY_PKG     H5FD
+#define H5_MY_PKG H5FD
 #define H5_MY_PKG_ERR H5E_FILE
 
 #endif /* H5FDdrvr_module_H */

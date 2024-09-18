@@ -18,22 +18,22 @@ package hdf.hdf5lib.exceptions;
  * This sub-class represents HDF5 major error code <b>H5E_ATTR</b>
  */
 public class HDF5AttributeException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5AttributeException</code> with no specified
-     * detail message.
-     */
-    public HDF5AttributeException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5AttributeException</code> with no specified
+   * detail message.
+   */
+  public HDF5AttributeException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5AttributeException</code> with the specified
-     * detail message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5AttributeException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5AttributeException</code> with the specified
+   * detail message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5AttributeException(String s) { super(s); }
 }

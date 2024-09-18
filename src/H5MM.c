@@ -26,9 +26,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions			*/
 
 /****************/
 /* Local Macros */
@@ -69,17 +69,15 @@
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-void *
-H5MM_malloc(size_t size)
-{
-    void *ret_value = NULL;
+void *H5MM_malloc(size_t size) {
+  void *ret_value = NULL;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = malloc(size);
+  ret_value = malloc(size);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_malloc() */
 
 /*-------------------------------------------------------------------------
@@ -98,17 +96,15 @@ H5MM_malloc(size_t size)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-void *
-H5MM_calloc(size_t size)
-{
-    void *ret_value = NULL;
+void *H5MM_calloc(size_t size) {
+  void *ret_value = NULL;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = calloc(1, size);
+  ret_value = calloc(1, size);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_calloc() */
 
 /*-------------------------------------------------------------------------
@@ -129,26 +125,24 @@ H5MM_calloc(size_t size)
  *              Failure:    NULL (input buffer is unchanged on failure)
  *-------------------------------------------------------------------------
  */
-void *
-H5MM_realloc(void *mem, size_t size)
-{
-    void *ret_value = NULL;
+void *H5MM_realloc(void *mem, size_t size) {
+  void *ret_value = NULL;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (NULL == mem && 0 == size)
-        /* Not defined in the standard, return NULL */
-        ret_value = NULL;
-    else {
-        ret_value = realloc(mem, size);
+  if (NULL == mem && 0 == size)
+    /* Not defined in the standard, return NULL */
+    ret_value = NULL;
+  else {
+    ret_value = realloc(mem, size);
 
-        /* Some platforms do not return NULL if size is zero. */
-        if (0 == size)
-            ret_value = NULL;
-    }
+    /* Some platforms do not return NULL if size is zero. */
+    if (0 == size)
+      ret_value = NULL;
+  }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */
 
 /*-------------------------------------------------------------------------
@@ -161,18 +155,16 @@ H5MM_realloc(void *mem, size_t size)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-char *
-H5MM_xstrdup(const char *s)
-{
-    char *ret_value = NULL;
+char *H5MM_xstrdup(const char *s) {
+  char *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    if (s)
-        if (NULL == (ret_value = HDstrdup(s)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
+  if (s)
+    if (NULL == (ret_value = HDstrdup(s)))
+      HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_xstrdup() */
 
 /*-------------------------------------------------------------------------
@@ -188,20 +180,18 @@ done:
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-char *
-H5MM_strdup(const char *s)
-{
-    char *ret_value = NULL;
+char *H5MM_strdup(const char *s) {
+  char *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed");
-    if (NULL == (ret_value = HDstrdup(s)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
+  if (!s)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed");
+  if (NULL == (ret_value = HDstrdup(s)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strdup() */
 
 /*-------------------------------------------------------------------------
@@ -220,21 +210,19 @@ done:
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-char *
-H5MM_strndup(const char *s, size_t n)
-{
-    char *ret_value = NULL;
+char *H5MM_strndup(const char *s, size_t n) {
+  char *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed");
+  if (!s)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed");
 
-    if (NULL == (ret_value = HDstrndup(s, n)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
+  if (NULL == (ret_value = HDstrndup(s, n)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strndup() */
 
 /*-------------------------------------------------------------------------
@@ -249,15 +237,13 @@ done:
  *              Failure:    never fails
  *-------------------------------------------------------------------------
  */
-void *
-H5MM_xfree(void *mem)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+void *H5MM_xfree(void *mem) {
+  /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    free(mem);
+  free(mem);
 
-    FUNC_LEAVE_NOAPI(NULL)
+  FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree() */
 
 /*-------------------------------------------------------------------------
@@ -271,16 +257,14 @@ H5MM_xfree(void *mem)
  *              Failure:    never fails
  *-------------------------------------------------------------------------
  */
-void *
-H5MM_xfree_const(const void *mem)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+void *H5MM_xfree_const(const void *mem) {
+  /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Cast through uintptr_t to de-const memory */
-    H5MM_xfree((void *)(uintptr_t)mem);
+  /* Cast through uintptr_t to de-const memory */
+  H5MM_xfree((void *)(uintptr_t)mem);
 
-    FUNC_LEAVE_NOAPI(NULL)
+  FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree_const() */
 
 /*-------------------------------------------------------------------------
@@ -293,23 +277,22 @@ H5MM_xfree_const(const void *mem)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-void *
-H5MM_memcpy(void *dest, const void *src, size_t n)
-{
-    void *ret = NULL;
+void *H5MM_memcpy(void *dest, const void *src, size_t n) {
+  void *ret = NULL;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+  /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(dest);
-    assert(src);
+  assert(dest);
+  assert(src);
 
-    /* Check for buffer overlap */
-    assert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
+  /* Check for buffer overlap */
+  assert((char *)dest >= (const char *)src + n ||
+         (const char *)src >= (char *)dest + n);
 
-    /* Copy */
-    ret = memcpy(dest, src, n);
+  /* Copy */
+  ret = memcpy(dest, src, n);
 
-    FUNC_LEAVE_NOAPI(ret)
+  FUNC_LEAVE_NOAPI(ret)
 
 } /* end H5MM_memcpy() */

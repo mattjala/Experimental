@@ -97,7 +97,8 @@ static char srcdir_path[1024];
 /* Buffer to construct file in and return pointer to */
 static char srcdir_testpath[1024];
 
-/*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
+/*  The strings that correspond to library version bounds H5F_libver_t in
+ * H5Fpublic.h */
 /*  This is used by h5_get_version_string() */
 const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
                               "v18",      /* H5F_LIBVER_V18 = 1       */
@@ -110,15 +111,16 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
 static H5E_auto2_t err_func = NULL;
 
 /* Global variables for testing */
-size_t   n_tests_run_g     = 0;
-size_t   n_tests_passed_g  = 0;
-size_t   n_tests_failed_g  = 0;
-size_t   n_tests_skipped_g = 0;
-uint64_t vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
+size_t n_tests_run_g = 0;
+size_t n_tests_passed_g = 0;
+size_t n_tests_failed_g = 0;
+size_t n_tests_skipped_g = 0;
+uint64_t vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
-                              size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
+static char *h5_fixname_real(const char *base_name, hid_t fapl,
+                             const char *_suffix, char *fullname, size_t size,
+                             hbool_t nest_printf, hbool_t subst_for_superblock);
 
 /*-------------------------------------------------------------------------
  * Function:  h5_errors
@@ -131,12 +133,10 @@ static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_su
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
-{
-    H5_FAILED();
-    H5Eprint2(estack, stdout);
-    return 0;
+static herr_t h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data) {
+  H5_FAILED();
+  H5Eprint2(estack, stdout);
+  return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -149,17 +149,15 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_clean_files(const char *base_name[], hid_t fapl)
-{
-    int i;
+void h5_clean_files(const char *base_name[], hid_t fapl) {
+  int i;
 
-    for (i = 0; base_name[i]; i++) {
-        h5_delete_test_file(base_name[i], fapl);
-    }
+  for (i = 0; base_name[i]; i++) {
+    h5_delete_test_file(base_name[i], fapl);
+  }
 
-    /* Close the FAPL used to access the file */
-    H5Pclose(fapl);
+  /* Close the FAPL used to access the file */
+  H5Pclose(fapl);
 } /* end h5_clean_files() */
 
 /*-------------------------------------------------------------------------
@@ -176,20 +174,15 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_delete_test_file(const char *base_name, hid_t fapl)
-{
-    char filename[1024]; /* VFD-dependent filename to delete */
+void h5_delete_test_file(const char *base_name, hid_t fapl) {
+  char filename[1024]; /* VFD-dependent filename to delete */
 
-    /* Get the VFD-dependent filename */
-    if (NULL == h5_fixname(base_name, fapl, filename, sizeof(filename)))
-        return;
+  /* Get the VFD-dependent filename */
+  if (NULL == h5_fixname(base_name, fapl, filename, sizeof(filename)))
+    return;
 
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(filename, fapl);
-    }
-    H5E_END_TRY
+  H5E_BEGIN_TRY { H5Fdelete(filename, fapl); }
+  H5E_END_TRY
 
 } /* end h5_delete_test_file() */
 
@@ -210,14 +203,12 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_delete_all_test_files(const char *base_name[], hid_t fapl)
-{
-    int i; /* iterator                             */
+void h5_delete_all_test_files(const char *base_name[], hid_t fapl) {
+  int i; /* iterator                             */
 
-    for (i = 0; base_name[i]; i++) {
-        h5_delete_test_file(base_name[i], fapl);
-    } /* end for */
+  for (i = 0; base_name[i]; i++) {
+    h5_delete_test_file(base_name[i], fapl);
+  } /* end for */
 
 } /* end h5_delete_all_test_files() */
 
@@ -232,22 +223,20 @@ h5_delete_all_test_files(const char *base_name[], hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-int
-h5_cleanup(const char *base_name[], hid_t fapl)
-{
-    int retval = 0;
+int h5_cleanup(const char *base_name[], hid_t fapl) {
+  int retval = 0;
 
-    if (GetTestCleanup()) {
-        /* Clean up files in base_name, and the FAPL */
-        h5_clean_files(base_name, fapl);
+  if (GetTestCleanup()) {
+    /* Clean up files in base_name, and the FAPL */
+    h5_clean_files(base_name, fapl);
 
-        retval = 1;
-    } /* end if */
+    retval = 1;
+  } /* end if */
 
-    /* Restore the original error reporting routine */
-    h5_restore_err();
+  /* Restore the original error reporting routine */
+  h5_restore_err();
 
-    return retval;
+  return retval;
 } /* end h5_cleanup() */
 
 /*-------------------------------------------------------------------------
@@ -265,12 +254,10 @@ h5_cleanup(const char *base_name[], hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_test_shutdown(void)
-{
+void h5_test_shutdown(void) {
 
-    /* Restore the original error reporting routine */
-    h5_restore_err();
+  /* Restore the original error reporting routine */
+  h5_restore_err();
 } /* end h5_test_shutdown() */
 
 /*-------------------------------------------------------------------------
@@ -282,13 +269,11 @@ h5_test_shutdown(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_restore_err(void)
-{
-    /* Restore the original error reporting routine */
-    assert(err_func != NULL);
-    H5Eset_auto2(H5E_DEFAULT, err_func, NULL);
-    err_func = NULL;
+void h5_restore_err(void) {
+  /* Restore the original error reporting routine */
+  assert(err_func != NULL);
+  H5Eset_auto2(H5E_DEFAULT, err_func, NULL);
+  err_func = NULL;
 }
 
 /*-------------------------------------------------------------------------
@@ -299,17 +284,15 @@ h5_restore_err(void)
  * Return:      void
  *-------------------------------------------------------------------------
  */
-void
-h5_reset(void)
-{
-    fflush(stdout);
-    fflush(stderr);
-    H5close();
+void h5_reset(void) {
+  fflush(stdout);
+  fflush(stderr);
+  H5close();
 
-    /* Save current error stack reporting routine and redirect to our local one */
-    assert(err_func == NULL);
-    H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
-    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+  /* Save current error stack reporting routine and redirect to our local one */
+  assert(err_func == NULL);
+  H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
+  H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 }
 
 /*-------------------------------------------------------------------------
@@ -326,17 +309,15 @@ h5_reset(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_test_init(void)
-{
-    fflush(stdout);
-    fflush(stderr);
-    H5close();
+void h5_test_init(void) {
+  fflush(stdout);
+  fflush(stderr);
+  H5close();
 
-    /* Save current error stack reporting routine and redirect to our local one */
-    assert(err_func == NULL);
-    H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
-    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+  /* Save current error stack reporting routine and redirect to our local one */
+  assert(err_func == NULL);
+  H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
+  H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 } /* end h5_test_init() */
 
 /*-------------------------------------------------------------------------
@@ -358,10 +339,10 @@ h5_test_init(void)
  *
  *-------------------------------------------------------------------------
  */
-char *
-h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
-{
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
+char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
+                 size_t size) {
+  return (
+      h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
 }
 
 /*-------------------------------------------------------------------------
@@ -380,10 +361,10 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-char *
-h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
-{
-    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
+char *h5_fixname_superblock(const char *base_name, hid_t fapl_id,
+                            char *fullname, size_t size) {
+  return (
+      h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
 }
 
 /*-------------------------------------------------------------------------
@@ -399,10 +380,9 @@ h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size
  *
  *-------------------------------------------------------------------------
  */
-char *
-h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
-{
-    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE, FALSE));
+char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname,
+                           size_t size) {
+  return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE, FALSE));
 }
 
 /*-------------------------------------------------------------------------
@@ -421,10 +401,9 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
  *
  *-------------------------------------------------------------------------
  */
-char *
-h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
-{
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE, FALSE));
+char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname,
+                        size_t size) {
+  return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE, FALSE));
 }
 
 /*-------------------------------------------------------------------------
@@ -446,232 +425,226 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  *
  *-------------------------------------------------------------------------
  */
-static char *
-h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname, size_t size,
-                hbool_t nest_printf, hbool_t subst_for_superblock)
-{
-    const char *prefix         = NULL;
-    const char *driver_env_var = NULL; /* HDF5_DRIVER environment variable     */
-    char       *ptr, last = '\0';
-    const char *suffix = _suffix;
-    size_t      i, j;
-    hid_t       driver     = -1;
-    int         isppdriver = 0; /* if the driver is MPI parallel */
+static char *h5_fixname_real(const char *base_name, hid_t fapl,
+                             const char *_suffix, char *fullname, size_t size,
+                             hbool_t nest_printf,
+                             hbool_t subst_for_superblock) {
+  const char *prefix = NULL;
+  const char *driver_env_var = NULL; /* HDF5_DRIVER environment variable     */
+  char *ptr, last = '\0';
+  const char *suffix = _suffix;
+  size_t i, j;
+  hid_t driver = -1;
+  int isppdriver = 0; /* if the driver is MPI parallel */
 
-    if (!base_name || !fullname || size < 1)
-        return NULL;
+  if (!base_name || !fullname || size < 1)
+    return NULL;
 
-    memset(fullname, 0, size);
+  memset(fullname, 0, size);
 
-    /* Determine if driver is set by environment variable. If it is,
-     * only generate a suffix if fixing the filename for the superblock
-     * file. */
-    driver_env_var = HDgetenv(HDF5_DRIVER);
-    if (driver_env_var && (H5P_DEFAULT == fapl) && subst_for_superblock)
-        fapl = H5P_FILE_ACCESS_DEFAULT;
+  /* Determine if driver is set by environment variable. If it is,
+   * only generate a suffix if fixing the filename for the superblock
+   * file. */
+  driver_env_var = HDgetenv(HDF5_DRIVER);
+  if (driver_env_var && (H5P_DEFAULT == fapl) && subst_for_superblock)
+    fapl = H5P_FILE_ACCESS_DEFAULT;
 
-    /* figure out the suffix */
-    if (H5P_DEFAULT != fapl) {
-        if ((driver = H5Pget_driver(fapl)) < 0)
-            return NULL;
+  /* figure out the suffix */
+  if (H5P_DEFAULT != fapl) {
+    if ((driver = H5Pget_driver(fapl)) < 0)
+      return NULL;
 
-        if (suffix) {
-            if (H5FD_FAMILY == driver) {
-                if (subst_for_superblock)
-                    suffix = "-000000.h5";
-                else
-                    suffix = nest_printf ? "-%%06d.h5" : "-%06d.h5";
-            }
-            else if (H5FD_MULTI == driver) {
+    if (suffix) {
+      if (H5FD_FAMILY == driver) {
+        if (subst_for_superblock)
+          suffix = "-000000.h5";
+        else
+          suffix = nest_printf ? "-%%06d.h5" : "-%06d.h5";
+      } else if (H5FD_MULTI == driver) {
 
-                /* Check the HDF5_DRIVER environment variable in case
-                 * we are using the split driver since both of those
-                 * use the multi VFD under the hood.
-                 */
+        /* Check the HDF5_DRIVER environment variable in case
+         * we are using the split driver since both of those
+         * use the multi VFD under the hood.
+         */
 #ifdef HDF5_DRIVER
-                /* Use the environment variable, then the compile-time constant */
-                if (!driver_env_var)
-                    driver_env_var = HDF5_DRIVER;
+        /* Use the environment variable, then the compile-time constant */
+        if (!driver_env_var)
+          driver_env_var = HDF5_DRIVER;
 #endif
-                if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
-                    /* split VFD */
-                    if (subst_for_superblock)
-                        suffix = ".h5.meta";
-                }
-                else {
-                    /* multi VFD */
-                    if (subst_for_superblock)
-                        suffix = "-s.h5";
-                    else
-                        suffix = NULL;
-                }
-            }
+        if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
+          /* split VFD */
+          if (subst_for_superblock)
+            suffix = ".h5.meta";
+        } else {
+          /* multi VFD */
+          if (subst_for_superblock)
+            suffix = "-s.h5";
+          else
+            suffix = NULL;
         }
+      }
     }
+  }
 
-    /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
-     * could be of value -1 if it is not defined.
-     */
-    isppdriver = ((H5P_DEFAULT != fapl) || driver_env_var) && (H5FD_MPIO == driver);
+  /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
+   * could be of value -1 if it is not defined.
+   */
+  isppdriver =
+      ((H5P_DEFAULT != fapl) || driver_env_var) && (H5FD_MPIO == driver);
 
-    /* Check HDF5_NOCLEANUP environment setting.
-     * (The #ifdef is needed to prevent compile failure in case MPI is not
-     * configured.)
-     */
-    if (isppdriver) {
+  /* Check HDF5_NOCLEANUP environment setting.
+   * (The #ifdef is needed to prevent compile failure in case MPI is not
+   * configured.)
+   */
+  if (isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-        if (getenv_all(MPI_COMM_WORLD, 0, HDF5_NOCLEANUP))
-            SetTestNoCleanup();
+    if (getenv_all(MPI_COMM_WORLD, 0, HDF5_NOCLEANUP))
+      SetTestNoCleanup();
 #endif /* H5_HAVE_PARALLEL */
-    }
-    else {
-        if (HDgetenv(HDF5_NOCLEANUP))
-            SetTestNoCleanup();
-    }
+  } else {
+    if (HDgetenv(HDF5_NOCLEANUP))
+      SetTestNoCleanup();
+  }
 
-    /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
-     * HDF5_PREFIX.
-     * Use different ones depending on parallel or serial driver used.
-     * (The #ifdef is needed to prevent compile failure in case MPI is not
-     * configured.)
-     */
-    if (isppdriver) {
+  /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
+   * HDF5_PREFIX.
+   * Use different ones depending on parallel or serial driver used.
+   * (The #ifdef is needed to prevent compile failure in case MPI is not
+   * configured.)
+   */
+  if (isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-        /*
-         * For parallel:
-         *      First use command line option, then the environment
-         *      variable, then try the constant
-         */
-        static int explained = 0;
+    /*
+     * For parallel:
+     *      First use command line option, then the environment
+     *      variable, then try the constant
+     */
+    static int explained = 0;
 
-        prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
+    prefix = (paraprefix ? paraprefix
+                         : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
 
-        if (!prefix && !explained) {
-            /* print hint by process 0 once. */
-            int mpi_rank;
+    if (!prefix && !explained) {
+      /* print hint by process 0 once. */
+      int mpi_rank;
 
-            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-            if (mpi_rank == 0)
-                printf("*** Hint ***\n"
-                       "You can use environment variable HDF5_PARAPREFIX to "
-                       "run parallel test files in a\n"
-                       "different directory or to add file type prefix. e.g.,\n"
-                       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-                       "   export HDF5_PARAPREFIX\n"
-                       "*** End of Hint ***\n");
+      if (mpi_rank == 0)
+        printf("*** Hint ***\n"
+               "You can use environment variable HDF5_PARAPREFIX to "
+               "run parallel test files in a\n"
+               "different directory or to add file type prefix. e.g.,\n"
+               "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+               "   export HDF5_PARAPREFIX\n"
+               "*** End of Hint ***\n");
 
-            explained = TRUE;
+      explained = TRUE;
 #ifdef HDF5_PARAPREFIX
-            prefix = HDF5_PARAPREFIX;
+      prefix = HDF5_PARAPREFIX;
 #endif /* HDF5_PARAPREFIX */
-        }
-#endif /* H5_HAVE_PARALLEL */
     }
-    else {
-        /*
-         * For serial:
-         *      First use the environment variable, then try the constant
-         */
-        prefix = HDgetenv("HDF5_PREFIX");
+#endif /* H5_HAVE_PARALLEL */
+  } else {
+    /*
+     * For serial:
+     *      First use the environment variable, then try the constant
+     */
+    prefix = HDgetenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
-        if (!prefix)
-            prefix = HDF5_PREFIX;
+    if (!prefix)
+      prefix = HDF5_PREFIX;
 #endif /* HDF5_PREFIX */
-    }
+  }
 
-    /* Prepend the prefix value to the base name */
-    if (prefix && *prefix) {
-        if (isppdriver) {
-            /* This is a parallel system */
-            char *subdir;
+  /* Prepend the prefix value to the base name */
+  if (prefix && *prefix) {
+    if (isppdriver) {
+      /* This is a parallel system */
+      char *subdir;
 
-            if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
-                /*
-                 * If the prefix specifies the HDF5_PARAPREFIX directory, then
-                 * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
-                 * directory instead.
-                 */
-                char *user, *login;
+      if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
+        /*
+         * If the prefix specifies the HDF5_PARAPREFIX directory, then
+         * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
+         * directory instead.
+         */
+        char *user, *login;
 
-                user   = HDgetenv("USER");
-                login  = HDgetenv("LOGIN");
-                subdir = (user ? user : login);
+        user = HDgetenv("USER");
+        login = HDgetenv("LOGIN");
+        subdir = (user ? user : login);
 
-                if (subdir) {
-                    for (i = 0; i < size && prefix[i]; i++)
-                        fullname[i] = prefix[i];
+        if (subdir) {
+          for (i = 0; i < size && prefix[i]; i++)
+            fullname[i] = prefix[i];
 
-                    fullname[i++] = '/';
+          fullname[i++] = '/';
 
-                    for (j = 0; i < size && subdir[j]; ++i, ++j)
-                        fullname[i] = subdir[j];
-                }
-            }
-
-            if (!fullname[0]) {
-                /* We didn't append the prefix yet */
-                HDstrncpy(fullname, prefix, size);
-                fullname[size - 1] = '\0';
-            }
-
-            if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
-                /*
-                 * Append the base_name with a slash first. Multiple
-                 * slashes are handled below.
-                 */
-                h5_stat_t buf;
-
-                if (HDstat(fullname, &buf) < 0)
-                    /* The directory doesn't exist just yet */
-                    if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST)
-                        /*
-                         * We couldn't make the "/tmp/${USER,LOGIN}"
-                         * subdirectory.  Default to PREFIX's original
-                         * prefix value.
-                         */
-                        HDstrcpy(fullname, prefix);
-
-                HDstrcat(fullname, "/");
-                HDstrcat(fullname, base_name);
-            }
-            else {
-                /* Buffer is too small */
-                return NULL;
-            }
+          for (j = 0; i < size && subdir[j]; ++i, ++j)
+            fullname[i] = subdir[j];
         }
-        else {
-            if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
-                /* Buffer is too small */
-                return NULL;
-        }
-    }
-    else if (HDstrlen(base_name) >= size) {
+      }
+
+      if (!fullname[0]) {
+        /* We didn't append the prefix yet */
+        HDstrncpy(fullname, prefix, size);
+        fullname[size - 1] = '\0';
+      }
+
+      if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
+        /*
+         * Append the base_name with a slash first. Multiple
+         * slashes are handled below.
+         */
+        h5_stat_t buf;
+
+        if (HDstat(fullname, &buf) < 0)
+          /* The directory doesn't exist just yet */
+          if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST)
+            /*
+             * We couldn't make the "/tmp/${USER,LOGIN}"
+             * subdirectory.  Default to PREFIX's original
+             * prefix value.
+             */
+            HDstrcpy(fullname, prefix);
+
+        HDstrcat(fullname, "/");
+        HDstrcat(fullname, base_name);
+      } else {
+        /* Buffer is too small */
+        return NULL;
+      }
+    } else {
+      if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
         /* Buffer is too small */
         return NULL;
     }
-    else {
-        HDstrcpy(fullname, base_name);
-    }
+  } else if (HDstrlen(base_name) >= size) {
+    /* Buffer is too small */
+    return NULL;
+  } else {
+    HDstrcpy(fullname, base_name);
+  }
 
-    /* Append a suffix */
-    if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
-            return NULL;
+  /* Append a suffix */
+  if (suffix) {
+    if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+      return NULL;
 
-        HDstrcat(fullname, suffix);
-    }
+    HDstrcat(fullname, suffix);
+  }
 
-    /* Remove any double slashes in the filename */
-    for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
-        if (*ptr != '/' || last != '/')
-            fullname[j++] = *ptr;
+  /* Remove any double slashes in the filename */
+  for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
+    if (*ptr != '/' || last != '/')
+      fullname[j++] = *ptr;
 
-        last = *ptr;
-    }
+    last = *ptr;
+  }
 
-    return fullname;
+  return fullname;
 }
 
 /*-------------------------------------------------------------------------
@@ -689,17 +662,15 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE const char *
-h5_rmprefix(const char *filename)
-{
-    const char *ret_ptr;
+H5_ATTR_PURE const char *h5_rmprefix(const char *filename) {
+  const char *ret_ptr;
 
-    if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
-        ret_ptr = filename;
-    else
-        ret_ptr++;
+  if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
+    ret_ptr = filename;
+  else
+    ret_ptr++;
 
-    return (ret_ptr);
+  return (ret_ptr);
 }
 
 /*-------------------------------------------------------------------------
@@ -714,24 +685,22 @@ h5_rmprefix(const char *filename)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-h5_fileaccess(void)
-{
-    hid_t fapl_id = H5I_INVALID_HID;
+hid_t h5_fileaccess(void) {
+  hid_t fapl_id = H5I_INVALID_HID;
 
-    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto error;
+  if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    goto error;
 
-    /* Check for libver bounds */
-    if (h5_get_libver_fapl(fapl_id) < 0)
-        goto error;
+  /* Check for libver bounds */
+  if (h5_get_libver_fapl(fapl_id) < 0)
+    goto error;
 
-    return fapl_id;
+  return fapl_id;
 
 error:
-    if (fapl_id != H5I_INVALID_HID)
-        H5Pclose(fapl_id);
-    return H5I_INVALID_HID;
+  if (fapl_id != H5I_INVALID_HID)
+    H5Pclose(fapl_id);
+  return H5I_INVALID_HID;
 } /* end h5_fileaccess() */
 
 /*-------------------------------------------------------------------------
@@ -746,83 +715,80 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-h5_fileaccess_flags(unsigned flags)
-{
-    hid_t fapl_id = H5I_INVALID_HID;
+hid_t h5_fileaccess_flags(unsigned flags) {
+  hid_t fapl_id = H5I_INVALID_HID;
 
-    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto error;
+  if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    goto error;
 
-    /* Check for libver bounds */
-    if ((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
-        goto error;
+  /* Check for libver bounds */
+  if ((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
+    goto error;
 
-    return fapl_id;
+  return fapl_id;
 
 error:
-    if (fapl_id != H5I_INVALID_HID)
-        H5Pclose(fapl_id);
-    return H5I_INVALID_HID;
+  if (fapl_id != H5I_INVALID_HID)
+    H5Pclose(fapl_id);
+  return H5I_INVALID_HID;
 } /* end h5_fileaccess_flags() */
 
 /*-------------------------------------------------------------------------
  * Function:    h5_get_libver_fapl
  *
  * Purpose:     Sets the library version bounds for a FAPL according to the
- *              value in the constant or environment variable "HDF5_LIBVER_BOUNDS".
+ *              value in the constant or environment variable
+ *"HDF5_LIBVER_BOUNDS".
  *
  * Return:      Success:    0
  *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_get_libver_fapl(hid_t fapl)
-{
-    const char *env   = NULL; /* HDF5_DRIVER environment variable     */
-    const char *tok   = NULL; /* strtok pointer                       */
-    char       *lasts = NULL; /* Context pointer for strtok_r() call */
-    char        buf[1024];    /* buffer for tokenizing HDF5_DRIVER    */
+herr_t h5_get_libver_fapl(hid_t fapl) {
+  const char *env = NULL; /* HDF5_DRIVER environment variable     */
+  const char *tok = NULL; /* strtok pointer                       */
+  char *lasts = NULL;     /* Context pointer for strtok_r() call */
+  char buf[1024];         /* buffer for tokenizing HDF5_DRIVER    */
 
-    /* Get the environment variable, if it exists */
-    env = HDgetenv("HDF5_LIBVER_BOUNDS");
+  /* Get the environment variable, if it exists */
+  env = HDgetenv("HDF5_LIBVER_BOUNDS");
 #ifdef HDF5_LIBVER_BOUNDS
-    /* Use the environment variable, then the compile-time constant */
-    if (!env)
-        env = HDF5_LIBVER_BOUNDS;
+  /* Use the environment variable, then the compile-time constant */
+  if (!env)
+    env = HDF5_LIBVER_BOUNDS;
 #endif
 
-    /* If the environment variable was not set, just return
-     * without modifying the FAPL.
-     */
-    if (!env || !*env)
-        goto done;
+  /* If the environment variable was not set, just return
+   * without modifying the FAPL.
+   */
+  if (!env || !*env)
+    goto done;
 
-    /* Get the first 'word' of the environment variable.
-     * If it's nothing (environment variable was whitespace)
-     * just return the default fapl.
-     */
-    HDstrncpy(buf, env, sizeof(buf));
-    buf[sizeof(buf) - 1] = '\0';
-    if (NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
-        goto done;
+  /* Get the first 'word' of the environment variable.
+   * If it's nothing (environment variable was whitespace)
+   * just return the default fapl.
+   */
+  HDstrncpy(buf, env, sizeof(buf));
+  buf[sizeof(buf) - 1] = '\0';
+  if (NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
+    goto done;
 
-    if (!HDstrcmp(tok, "latest")) {
-        /* use the latest format */
-        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            goto error;
-    } /* end if */
-    else {
-        /* Unknown setting */
-        goto error;
-    } /* end else */
+  if (!HDstrcmp(tok, "latest")) {
+    /* use the latest format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+      goto error;
+  } /* end if */
+  else {
+    /* Unknown setting */
+    goto error;
+  } /* end else */
 
 done:
-    return 0;
+  return 0;
 
 error:
-    return -1;
+  return -1;
 } /* end h5_get_libver_fapl() */
 
 /*-------------------------------------------------------------------------
@@ -834,10 +800,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_no_hwconv(void)
-{
-    H5Tunregister(H5T_PERS_HARD, NULL, (hid_t)-1, (hid_t)-1, NULL);
+void h5_no_hwconv(void) {
+  H5Tunregister(H5T_PERS_HARD, NULL, (hid_t)-1, (hid_t)-1, NULL);
 }
 
 /*-------------------------------------------------------------------------
@@ -849,64 +813,61 @@ h5_no_hwconv(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_show_hostname(void)
-{
-    char hostname[80];
+void h5_show_hostname(void) {
+  char hostname[80];
 #ifdef H5_HAVE_WIN32_API
-    WSADATA wsaData;
-    int     err;
+  WSADATA wsaData;
+  int err;
 #endif
 
-    /* try show the process or thread id in multiple processes cases*/
+  /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
-    {
-        int mpi_rank, mpi_initialized, mpi_finalized;
+  {
+    int mpi_rank, mpi_initialized, mpi_finalized;
 
-        MPI_Initialized(&mpi_initialized);
-        MPI_Finalized(&mpi_finalized);
+    MPI_Initialized(&mpi_initialized);
+    MPI_Finalized(&mpi_finalized);
 
-        if (mpi_initialized && !mpi_finalized) {
-            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-            printf("MPI-process %d.", mpi_rank);
-        }
-        else
-            printf("thread 0.");
-    }
+    if (mpi_initialized && !mpi_finalized) {
+      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+      printf("MPI-process %d.", mpi_rank);
+    } else
+      printf("thread 0.");
+  }
 #else
-    printf("thread %" PRIu64 ".", H5TS_thread_id());
+  printf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 
-    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (err != 0) {
-        /* could not find a usable WinSock DLL */
-        return;
-    }
+  err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+  if (err != 0) {
+    /* could not find a usable WinSock DLL */
+    return;
+  }
 
-    /* Confirm that the WinSock DLL supports 2.2.*/
-    /* Note that if the DLL supports versions greater    */
-    /* than 2.2 in addition to 2.2, it will still return */
-    /* 2.2 in wVersion since that is the version we      */
-    /* requested.                                        */
+  /* Confirm that the WinSock DLL supports 2.2.*/
+  /* Note that if the DLL supports versions greater    */
+  /* than 2.2 in addition to 2.2, it will still return */
+  /* 2.2 in wVersion since that is the version we      */
+  /* requested.                                        */
 
-    if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2) {
-        /* could not find a usable WinSock DLL */
-        WSACleanup();
-        return;
-    }
+  if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2) {
+    /* could not find a usable WinSock DLL */
+    WSACleanup();
+    return;
+  }
 
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
-    if (gethostname(hostname, (size_t)80) < 0)
-        printf(" gethostname failed\n");
-    else
-        printf(" hostname=%s\n", hostname);
+  if (gethostname(hostname, (size_t)80) < 0)
+    printf(" gethostname failed\n");
+  else
+    printf(" hostname=%s\n", hostname);
 #else
-    printf(" gethostname not supported\n");
+  printf(" gethostname not supported\n");
 #endif
 #ifdef H5_HAVE_WIN32_API
-    WSACleanup();
+  WSACleanup();
 #endif
 }
 
@@ -917,91 +878,89 @@ h5_show_hostname(void)
  *              object.
  * Return:      0 if all is fine; otherwise non-zero.
  */
-int
-h5_set_info_object(void)
-{
-    char *envp; /* environment pointer */
-    int   ret_value = 0;
+int h5_set_info_object(void) {
+  char *envp; /* environment pointer */
+  int ret_value = 0;
 
-    /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
-        char *next, *valp;
+  /* handle any MPI INFO hints via $HDF5_MPI_INFO */
+  if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
+    char *next, *valp;
 
-        valp = envp = next = HDstrdup(envp);
+    valp = envp = next = HDstrdup(envp);
 
-        if (!valp)
-            return 0;
+    if (!valp)
+      return 0;
 
-        /* create an INFO object if not created yet */
-        if (h5_io_info_g == MPI_INFO_NULL)
-            MPI_Info_create(&h5_io_info_g);
+    /* create an INFO object if not created yet */
+    if (h5_io_info_g == MPI_INFO_NULL)
+      MPI_Info_create(&h5_io_info_g);
 
-        do {
-            size_t len;
-            char  *key_val, *endp, *namep;
+    do {
+      size_t len;
+      char *key_val, *endp, *namep;
 
-            if (*valp == ';')
-                valp++;
+      if (*valp == ';')
+        valp++;
 
-            /* copy key/value pair into temporary buffer */
-            len  = HDstrcspn(valp, ";");
-            next = &valp[len];
-            if (NULL == (key_val = (char *)calloc(1, len + 1)))
-                return -1;
+      /* copy key/value pair into temporary buffer */
+      len = HDstrcspn(valp, ";");
+      next = &valp[len];
+      if (NULL == (key_val = (char *)calloc(1, len + 1)))
+        return -1;
 
-            /* increment the next pointer past the terminating semicolon */
-            if (*next == ';')
-                ++next;
+      /* increment the next pointer past the terminating semicolon */
+      if (*next == ';')
+        ++next;
 
-            namep = HDstrncpy(key_val, valp, len);
+      namep = HDstrncpy(key_val, valp, len);
 
-            /* pass up any beginning whitespaces */
-            while (*namep && (*namep == ' ' || *namep == '\t'))
-                namep++;
+      /* pass up any beginning whitespaces */
+      while (*namep && (*namep == ' ' || *namep == '\t'))
+        namep++;
 
-            if (!*namep)
-                continue; /* was all white space, so move to next k/v pair */
+      if (!*namep)
+        continue; /* was all white space, so move to next k/v pair */
 
-            /* eat up any ending white spaces */
-            endp = &namep[HDstrlen(namep) - 1];
+      /* eat up any ending white spaces */
+      endp = &namep[HDstrlen(namep) - 1];
 
-            while (endp && (*endp == ' ' || *endp == '\t'))
-                *endp-- = '\0';
+      while (endp && (*endp == ' ' || *endp == '\t'))
+        *endp-- = '\0';
 
-            /* find the '=' */
-            valp = HDstrchr(namep, '=');
+      /* find the '=' */
+      valp = HDstrchr(namep, '=');
 
-            if (valp != NULL) { /* it's a valid key/value pairing */
-                char *tmp_val = valp + 1;
+      if (valp != NULL) { /* it's a valid key/value pairing */
+        char *tmp_val = valp + 1;
 
-                /* change '=' to \0, move valp down one */
-                *valp-- = '\0';
+        /* change '=' to \0, move valp down one */
+        *valp-- = '\0';
 
-                /* eat up ending whitespace on the "key" part */
-                while (*valp == ' ' || *valp == '\t')
-                    *valp-- = '\0';
+        /* eat up ending whitespace on the "key" part */
+        while (*valp == ' ' || *valp == '\t')
+          *valp-- = '\0';
 
-                valp = tmp_val;
+        valp = tmp_val;
 
-                /* eat up beginning whitespace on the "value" part */
-                while (*valp == ' ' || *valp == '\t')
-                    *valp++ = '\0';
+        /* eat up beginning whitespace on the "value" part */
+        while (*valp == ' ' || *valp == '\t')
+          *valp++ = '\0';
 
-                /* actually set the darned thing */
-                if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    printf("MPI_Info_set failed\n");
-                    ret_value = -1;
-                }
-            }
+        /* actually set the darned thing */
+        if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
+          printf("MPI_Info_set failed\n");
+          ret_value = -1;
+        }
+      }
 
-            valp = next;
-            free(key_val);
-        } while (next && *next);
+      valp = next;
+      free(key_val);
+    } while (next && *next);
 
-        free(envp);
-    }
+    free(envp);
+  }
 
-    return ret_value;
+  return ret_value;
 }
 
 /*
@@ -1009,27 +968,25 @@ h5_set_info_object(void)
  * Purpose:     Display content of an MPI Info object
  * Return:      void
  */
-void
-h5_dump_info_object(MPI_Info info)
-{
-    char key[MPI_MAX_INFO_KEY + 1];
-    char value[MPI_MAX_INFO_VAL + 1];
-    int  flag;
-    int  i, nkeys;
+void h5_dump_info_object(MPI_Info info) {
+  char key[MPI_MAX_INFO_KEY + 1];
+  char value[MPI_MAX_INFO_VAL + 1];
+  int flag;
+  int i, nkeys;
 
-    printf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
-    if (info == MPI_INFO_NULL) {
-        printf("object is MPI_INFO_NULL\n");
+  printf("Dumping MPI Info Object (up to %d bytes per item):\n",
+         MPI_MAX_INFO_VAL);
+  if (info == MPI_INFO_NULL) {
+    printf("object is MPI_INFO_NULL\n");
+  } else {
+    MPI_Info_get_nkeys(info, &nkeys);
+    printf("object has %d items\n", nkeys);
+    for (i = 0; i < nkeys; i++) {
+      MPI_Info_get_nthkey(info, i, key);
+      MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
+      printf("%s=%s\n", key, value);
     }
-    else {
-        MPI_Info_get_nkeys(info, &nkeys);
-        printf("object has %d items\n", nkeys);
-        for (i = 0; i < nkeys; i++) {
-            MPI_Info_get_nthkey(info, i, key);
-            MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-            printf("%s=%s\n", key, value);
-        }
-    }
+  }
 }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1050,155 +1007,153 @@ h5_dump_info_object(MPI_Info info)
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-h5_stat_size_t
-h5_get_file_size(const char *filename, hid_t fapl)
-{
-    char      temp[2048]; /* Temporary buffer for file names */
-    h5_stat_t sb;         /* Structure for querying file info */
-    int       j = 0;
+h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl) {
+  char temp[2048]; /* Temporary buffer for file names */
+  h5_stat_t sb;    /* Structure for querying file info */
+  int j = 0;
 
-    if (fapl == H5P_DEFAULT) {
-        /* Get the file's statistics */
-        if (0 == HDstat(filename, &sb))
-            return ((h5_stat_size_t)sb.st_size);
-    } /* end if */
-    else {
-        hid_t driver; /* VFD used for file */
+  if (fapl == H5P_DEFAULT) {
+    /* Get the file's statistics */
+    if (0 == HDstat(filename, &sb))
+      return ((h5_stat_size_t)sb.st_size);
+  } /* end if */
+  else {
+    hid_t driver; /* VFD used for file */
 
-        /* Get the driver used when creating the file */
-        if ((driver = H5Pget_driver(fapl)) < 0)
-            return (-1);
+    /* Get the driver used when creating the file */
+    if ((driver = H5Pget_driver(fapl)) < 0)
+      return (-1);
 
-        /* Check for simple cases */
-        if (driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
+    /* Check for simple cases */
+    if (driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
 #ifdef H5_HAVE_WINDOWS
-            driver == H5FD_WINDOWS ||
+        driver == H5FD_WINDOWS ||
 #endif /* H5_HAVE_WINDOWS */
 #ifdef H5_HAVE_DIRECT
-            driver == H5FD_DIRECT ||
+        driver == H5FD_DIRECT ||
 #endif /* H5_HAVE_DIRECT */
-            driver == H5FD_LOG || driver == H5FD_SPLITTER) {
+        driver == H5FD_LOG || driver == H5FD_SPLITTER) {
+      /* Get the file's statistics */
+      if (0 == HDstat(filename, &sb))
+        return ((h5_stat_size_t)sb.st_size);
+    } /* end if */
+    else if (driver == H5FD_MULTI) {
+      H5FD_mem_t mt;
+      h5_stat_size_t tot_size = 0;
+      char *driver_env_var = NULL;
+
+      driver_env_var = HDgetenv(HDF5_DRIVER);
+      if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
+        for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
+          if (mt != H5FD_MEM_DRAW && mt != H5FD_MEM_SUPER)
+            continue;
+
+          /* Create the filename to query */
+          if (mt == H5FD_MEM_DRAW) {
+            HDsnprintf(temp, sizeof temp, "%s.raw", filename);
+          } else {
+            HDsnprintf(temp, sizeof temp, "%s.meta", filename);
+          }
+
+          /* Check for existence of file */
+          if (0 == HDaccess(temp, F_OK)) {
             /* Get the file's statistics */
-            if (0 == HDstat(filename, &sb))
-                return ((h5_stat_size_t)sb.st_size);
-        } /* end if */
-        else if (driver == H5FD_MULTI) {
-            H5FD_mem_t     mt;
-            h5_stat_size_t tot_size       = 0;
-            char          *driver_env_var = NULL;
+            if (0 != HDstat(temp, &sb))
+              return (-1);
 
-            driver_env_var = HDgetenv(HDF5_DRIVER);
-            if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
-                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-                    if (mt != H5FD_MEM_DRAW && mt != H5FD_MEM_SUPER)
-                        continue;
+            /* Add to total size */
+            tot_size += (h5_stat_size_t)sb.st_size;
+          } /* end if */
+        }   /* end for */
+      } else {
+        assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+        for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
+          /* Create the filename to query */
+          HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename,
+                     multi_letters[mt]);
 
-                    /* Create the filename to query */
-                    if (mt == H5FD_MEM_DRAW) {
-                        HDsnprintf(temp, sizeof temp, "%s.raw", filename);
-                    }
-                    else {
-                        HDsnprintf(temp, sizeof temp, "%s.meta", filename);
-                    }
+          /* Check for existence of file */
+          if (0 == HDaccess(temp, F_OK)) {
+            /* Get the file's statistics */
+            if (0 != HDstat(temp, &sb))
+              return (-1);
 
-                    /* Check for existence of file */
-                    if (0 == HDaccess(temp, F_OK)) {
-                        /* Get the file's statistics */
-                        if (0 != HDstat(temp, &sb))
-                            return (-1);
+            /* Add to total size */
+            tot_size += (h5_stat_size_t)sb.st_size;
+          } /* end if */
+        }   /* end for */
+      }
 
-                        /* Add to total size */
-                        tot_size += (h5_stat_size_t)sb.st_size;
-                    } /* end if */
-                }     /* end for */
-            }
-            else {
-                assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-                    /* Create the filename to query */
-                    HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
-
-                    /* Check for existence of file */
-                    if (0 == HDaccess(temp, F_OK)) {
-                        /* Get the file's statistics */
-                        if (0 != HDstat(temp, &sb))
-                            return (-1);
-
-                        /* Add to total size */
-                        tot_size += (h5_stat_size_t)sb.st_size;
-                    } /* end if */
-                }     /* end for */
-            }
-
-            /* Return total size */
-            return (tot_size);
-        } /* end if */
+      /* Return total size */
+      return (tot_size);
+    } /* end if */
 #ifdef H5_HAVE_PARALLEL
-        else if (driver == H5FD_MPIO) {
-            MPI_File   fh; /* MPI file handle used to open the file and verify its size */
-            int        mpi_ret;
-            MPI_Offset file_size;
+    else if (driver == H5FD_MPIO) {
+      MPI_File
+          fh; /* MPI file handle used to open the file and verify its size */
+      int mpi_ret;
+      MPI_Offset file_size;
 
-            mpi_ret = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-            if (mpi_ret != MPI_SUCCESS)
-                return -1;
-            mpi_ret = MPI_File_get_size(fh, &file_size);
-            if (mpi_ret != MPI_SUCCESS)
-                return -1;
-            mpi_ret = MPI_File_close(&fh);
-            if (mpi_ret != MPI_SUCCESS)
-                return -1;
+      mpi_ret = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY,
+                              MPI_INFO_NULL, &fh);
+      if (mpi_ret != MPI_SUCCESS)
+        return -1;
+      mpi_ret = MPI_File_get_size(fh, &file_size);
+      if (mpi_ret != MPI_SUCCESS)
+        return -1;
+      mpi_ret = MPI_File_close(&fh);
+      if (mpi_ret != MPI_SUCCESS)
+        return -1;
 
-            return file_size;
-        }
+      return file_size;
+    }
 #endif /* H5_HAVE_PARALLEL */
-        else if (driver == H5FD_FAMILY) {
-            h5_stat_size_t tot_size = 0;
+    else if (driver == H5FD_FAMILY) {
+      h5_stat_size_t tot_size = 0;
 
-            /* Try all filenames possible, until we find one that's missing */
-            for (j = 0; /*void*/; j++) {
-                /* Create the filename to query */
-                HDsnprintf(temp, sizeof temp, filename, j);
+      /* Try all filenames possible, until we find one that's missing */
+      for (j = 0; /*void*/; j++) {
+        /* Create the filename to query */
+        HDsnprintf(temp, sizeof temp, filename, j);
 
-                /* Check for existence of file */
-                if (HDaccess(temp, F_OK) < 0)
-                    break;
+        /* Check for existence of file */
+        if (HDaccess(temp, F_OK) < 0)
+          break;
 
-                /* Get the file's statistics */
-                if (0 != HDstat(temp, &sb))
-                    return (-1);
+        /* Get the file's statistics */
+        if (0 != HDstat(temp, &sb))
+          return (-1);
 
-                /* Add to total size */
-                tot_size += (h5_stat_size_t)sb.st_size;
-            } /* end for */
+        /* Add to total size */
+        tot_size += (h5_stat_size_t)sb.st_size;
+      } /* end for */
 
-            /* Return total size */
-            return (tot_size);
-        } /* end if */
-        else if (driver == H5FD_SUBFILING) {
-            hsize_t size;
-            hid_t   fid = H5I_INVALID_HID;
+      /* Return total size */
+      return (tot_size);
+    } /* end if */
+    else if (driver == H5FD_SUBFILING) {
+      hsize_t size;
+      hid_t fid = H5I_INVALID_HID;
 
-            if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-                return -1;
-            if (H5Fget_filesize(fid, &size) < 0) {
-                H5Fclose(fid);
-                return -1;
-            }
+      if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        return -1;
+      if (H5Fget_filesize(fid, &size) < 0) {
+        H5Fclose(fid);
+        return -1;
+      }
 
-            if (H5Fclose(fid) < 0)
-                return -1;
+      if (H5Fclose(fid) < 0)
+        return -1;
 
-            return (h5_stat_size_t)size;
-        }
-        else {
-            /* Get the file's statistics */
-            if (0 == HDstat(filename, &sb))
-                return ((h5_stat_size_t)sb.st_size);
-        } /* end else */
-    }     /* end else */
+      return (h5_stat_size_t)size;
+    } else {
+      /* Get the file's statistics */
+      if (0 == HDstat(filename, &sb))
+        return ((h5_stat_size_t)sb.st_size);
+    } /* end else */
+  }   /* end else */
 
-    return (-1);
+  return (-1);
 } /* end get_file_size() */
 H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
@@ -1208,16 +1163,14 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  * available. (i.e. Windows & the Mac)
  */
 H5_ATTR_FORMAT(printf, 1, 2)
-int
-print_func(const char *format, ...)
-{
-    va_list arglist;
-    int     ret_value;
+int print_func(const char *format, ...) {
+  va_list arglist;
+  int ret_value;
 
-    va_start(arglist, format);
-    ret_value = HDvprintf(format, arglist);
-    va_end(arglist);
-    return ret_value;
+  va_start(arglist, format);
+  ret_value = HDvprintf(format, arglist);
+  va_end(arglist);
+  return ret_value;
 }
 
 #ifdef H5_HAVE_FILTER_SZIP
@@ -1234,31 +1187,31 @@ print_func(const char *format, ...)
  *
  *-------------------------------------------------------------------------
  */
-int
-h5_szip_can_encode(void)
-{
-    unsigned int filter_config_flags;
+int h5_szip_can_encode(void) {
+  unsigned int filter_config_flags;
 
-    H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config_flags);
-    if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
-        /* filter present but neither encode nor decode is supported (???) */
-        return -1;
-    }
-    else if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
+  H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config_flags);
+  if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED |
+                              H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
+    /* filter present but neither encode nor decode is supported (???) */
+    return -1;
+  } else if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED |
+                                     H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
              H5Z_FILTER_CONFIG_DECODE_ENABLED) {
-        /* decoder only: read but not write */
-        return 0;
-    }
-    else if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
+    /* decoder only: read but not write */
+    return 0;
+  } else if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED |
+                                     H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
              H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
-        /* encoder only: write but not read (???) */
-        return -1;
-    }
-    else if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
-             (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
-        return 1;
-    }
-    return (-1);
+    /* encoder only: write but not read (???) */
+    return -1;
+  } else if ((filter_config_flags & (H5Z_FILTER_CONFIG_ENCODE_ENABLED |
+                                     H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
+             (H5Z_FILTER_CONFIG_ENCODE_ENABLED |
+              H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
+    return 1;
+  }
+  return (-1);
 }
 #endif /* H5_HAVE_FILTER_SZIP */
 
@@ -1281,67 +1234,61 @@ h5_szip_can_encode(void)
  *
  *-------------------------------------------------------------------------
  */
-char *
-getenv_all(MPI_Comm comm, int root, const char *name)
-{
-    int          mpi_size, mpi_rank, mpi_initialized, mpi_finalized;
-    int          len;
-    static char *env = NULL;
+char *getenv_all(MPI_Comm comm, int root, const char *name) {
+  int mpi_size, mpi_rank, mpi_initialized, mpi_finalized;
+  int len;
+  static char *env = NULL;
 
-    assert(name);
+  assert(name);
 
-    MPI_Initialized(&mpi_initialized);
-    MPI_Finalized(&mpi_finalized);
+  MPI_Initialized(&mpi_initialized);
+  MPI_Finalized(&mpi_finalized);
 
-    if (mpi_initialized && !mpi_finalized) {
-        MPI_Comm_rank(comm, &mpi_rank);
-        MPI_Comm_size(comm, &mpi_size);
-        assert(root < mpi_size);
+  if (mpi_initialized && !mpi_finalized) {
+    MPI_Comm_rank(comm, &mpi_rank);
+    MPI_Comm_size(comm, &mpi_size);
+    assert(root < mpi_size);
 
-        /* The root task does the getenv call
-         * and sends the result to the other tasks */
-        if (mpi_rank == root) {
-            env = HDgetenv(name);
-            if (env) {
-                len = (int)HDstrlen(env);
-                MPI_Bcast(&len, 1, MPI_INT, root, comm);
-                MPI_Bcast(env, len, MPI_CHAR, root, comm);
-            }
-            else {
-                /* len -1 indicates that the variable was not in the environment */
-                len = -1;
-                MPI_Bcast(&len, 1, MPI_INT, root, comm);
-            }
-        }
-        else {
-            MPI_Bcast(&len, 1, MPI_INT, root, comm);
-            if (len >= 0) {
-                if (env == NULL)
-                    env = (char *)malloc((size_t)len + 1);
-                else if (HDstrlen(env) < (size_t)len)
-                    env = (char *)realloc(env, (size_t)len + 1);
+    /* The root task does the getenv call
+     * and sends the result to the other tasks */
+    if (mpi_rank == root) {
+      env = HDgetenv(name);
+      if (env) {
+        len = (int)HDstrlen(env);
+        MPI_Bcast(&len, 1, MPI_INT, root, comm);
+        MPI_Bcast(env, len, MPI_CHAR, root, comm);
+      } else {
+        /* len -1 indicates that the variable was not in the environment */
+        len = -1;
+        MPI_Bcast(&len, 1, MPI_INT, root, comm);
+      }
+    } else {
+      MPI_Bcast(&len, 1, MPI_INT, root, comm);
+      if (len >= 0) {
+        if (env == NULL)
+          env = (char *)malloc((size_t)len + 1);
+        else if (HDstrlen(env) < (size_t)len)
+          env = (char *)realloc(env, (size_t)len + 1);
 
-                MPI_Bcast(env, len, MPI_CHAR, root, comm);
-                env[len] = '\0';
-            }
-            else {
-                if (env)
-                    free(env);
-                env = NULL;
-            }
-        }
-#ifndef NDEBUG
-        MPI_Barrier(comm);
-#endif
-    }
-    else {
-        /* use original getenv */
+        MPI_Bcast(env, len, MPI_CHAR, root, comm);
+        env[len] = '\0';
+      } else {
         if (env)
-            free(env);
-        env = HDgetenv(name);
-    } /* end if */
+          free(env);
+        env = NULL;
+      }
+    }
+#ifndef NDEBUG
+    MPI_Barrier(comm);
+#endif
+  } else {
+    /* use original getenv */
+    if (env)
+      free(env);
+    env = HDgetenv(name);
+  } /* end if */
 
-    return env;
+  return env;
 }
 
 #endif
@@ -1361,51 +1308,51 @@ getenv_all(MPI_Comm comm, int root, const char *name)
  *
  *-------------------------------------------------------------------------
  */
-int
-h5_make_local_copy(const char *origfilename, const char *local_copy_name)
-{
-    int         fd_old = (-1), fd_new = (-1);                    /* File descriptors for copying data */
-    ssize_t     nread;                                           /* Number of bytes read in */
-    void       *buf      = NULL;                                 /* Buffer for copying data */
-    const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
+int h5_make_local_copy(const char *origfilename, const char *local_copy_name) {
+  int fd_old = (-1), fd_new = (-1); /* File descriptors for copying data */
+  ssize_t nread;                    /* Number of bytes read in */
+  void *buf = NULL;                 /* Buffer for copying data */
+  const char *filename =
+      H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
 
-    if (!filename)
-        goto error;
+  if (!filename)
+    goto error;
 
-    /* Allocate copy buffer */
-    if (NULL == (buf = calloc((size_t)1, (size_t)READ_BUF_SIZE)))
-        goto error;
+  /* Allocate copy buffer */
+  if (NULL == (buf = calloc((size_t)1, (size_t)READ_BUF_SIZE)))
+    goto error;
 
-    /* Copy old file into temporary file */
-    if ((fd_old = HDopen(filename, O_RDONLY)) < 0)
-        goto error;
-    if ((fd_new = HDopen(local_copy_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
-        goto error;
+  /* Copy old file into temporary file */
+  if ((fd_old = HDopen(filename, O_RDONLY)) < 0)
+    goto error;
+  if ((fd_new = HDopen(local_copy_name, O_RDWR | O_CREAT | O_TRUNC,
+                       H5_POSIX_CREATE_MODE_RW)) < 0)
+    goto error;
 
-    /* Copy data */
-    while ((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
-        if (HDwrite(fd_new, buf, (size_t)nread) < 0)
-            goto error;
+  /* Copy data */
+  while ((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
+    if (HDwrite(fd_new, buf, (size_t)nread) < 0)
+      goto error;
 
-    /* Close files */
-    if (HDclose(fd_old) < 0)
-        goto error;
-    if (HDclose(fd_new) < 0)
-        goto error;
+  /* Close files */
+  if (HDclose(fd_old) < 0)
+    goto error;
+  if (HDclose(fd_new) < 0)
+    goto error;
 
-    /* Release memory */
-    free(buf);
+  /* Release memory */
+  free(buf);
 
-    return 0;
+  return 0;
 
 error:
-    /* ignore return values since we're already noted the problem */
-    if (fd_old > 0)
-        HDclose(fd_old);
-    if (fd_new > 0)
-        HDclose(fd_new);
-    free(buf);
-    return -1;
+  /* ignore return values since we're already noted the problem */
+  if (fd_old > 0)
+    HDclose(fd_old);
+  if (fd_new > 0)
+    HDclose(fd_new);
+  free(buf);
+  return -1;
 } /* end h5_make_local_copy() */
 
 /*-------------------------------------------------------------------------
@@ -1417,14 +1364,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_info2_t *oinfo,
-                          void H5_ATTR_UNUSED *udata)
-{
-    if (oinfo->type == H5O_TYPE_GROUP)
-        return H5G__verify_cached_stabs_test(oid);
-    else
-        return SUCCEED;
+static herr_t h5_verify_cached_stabs_cb(hid_t oid,
+                                        const char H5_ATTR_UNUSED *name,
+                                        const H5O_info2_t *oinfo,
+                                        void H5_ATTR_UNUSED *udata) {
+  if (oinfo->type == H5O_TYPE_GROUP)
+    return H5G__verify_cached_stabs_test(oid);
+  else
+    return SUCCEED;
 } /* end h5_verify_cached_stabs_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1442,48 +1389,40 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
-{
-    hid_t file = -1;
-    char  filename[1024];
-    int   i = 0;
+herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl) {
+  hid_t file = -1;
+  char filename[1024];
+  int i = 0;
 
-    while (base_name[i]) {
-        if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
-            continue;
+  while (base_name[i]) {
+    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
+      continue;
 
-        H5E_BEGIN_TRY
-        {
-            file = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
-        }
-        H5E_END_TRY
-        if (file < 0) {
-            i++;
-            continue;
-        } /* end if */
+    H5E_BEGIN_TRY { file = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+    H5E_END_TRY
+    if (file < 0) {
+      i++;
+      continue;
+    } /* end if */
 
-        if (H5Ovisit3(file, H5_INDEX_NAME, H5_ITER_NATIVE, h5_verify_cached_stabs_cb, NULL, H5O_INFO_BASIC) <
-            0)
-            goto error;
+    if (H5Ovisit3(file, H5_INDEX_NAME, H5_ITER_NATIVE,
+                  h5_verify_cached_stabs_cb, NULL, H5O_INFO_BASIC) < 0)
+      goto error;
 
-        if (H5Fclose(file) < 0)
-            goto error;
-        file = -1;
+    if (H5Fclose(file) < 0)
+      goto error;
+    file = -1;
 
-        i++;
-    } /* end while */
+    i++;
+  } /* end while */
 
-    return 0;
+  return 0;
 
 error:
-    H5E_BEGIN_TRY
-    {
-        H5Fclose(file);
-    }
-    H5E_END_TRY
+  H5E_BEGIN_TRY { H5Fclose(file); }
+  H5E_END_TRY
 
-    return -1;
+  return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -1507,31 +1446,29 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-void
-h5_send_message(const char *send, const char *arg1, const char *arg2)
-{
-    FILE *signalfile = NULL;
+void h5_send_message(const char *send, const char *arg1, const char *arg2) {
+  FILE *signalfile = NULL;
 
-    /* Create signal file (which will send signal to some other process) */
-    signalfile = fopen(TMP_SIGNAL_FILE, "w+");
+  /* Create signal file (which will send signal to some other process) */
+  signalfile = fopen(TMP_SIGNAL_FILE, "w+");
 
-    /* Write messages to signal file, if provided */
-    if (arg2 != NULL) {
-        assert(arg1);
-        fprintf(signalfile, "%s\n%s\n", arg1, arg2);
-    } /* end if */
-    else if (arg1 != NULL) {
-        assert(arg2 == NULL);
-        fprintf(signalfile, "%s\n", arg1);
-    } /* end if */
-    else {
-        assert(arg1 == NULL);
-        assert(arg2 == NULL);
-    } /* end else */
+  /* Write messages to signal file, if provided */
+  if (arg2 != NULL) {
+    assert(arg1);
+    fprintf(signalfile, "%s\n%s\n", arg1, arg2);
+  } /* end if */
+  else if (arg1 != NULL) {
+    assert(arg2 == NULL);
+    fprintf(signalfile, "%s\n", arg1);
+  } /* end if */
+  else {
+    assert(arg1 == NULL);
+    assert(arg2 == NULL);
+  } /* end else */
 
-    fclose(signalfile);
+  fclose(signalfile);
 
-    HDrename(TMP_SIGNAL_FILE, send);
+  HDrename(TMP_SIGNAL_FILE, send);
 } /* h5_send_message() */
 
 /*-------------------------------------------------------------------------
@@ -1558,39 +1495,38 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_wait_message(const char *waitfor)
-{
-    FILE  *returnfile;
-    time_t t0, t1;
+herr_t h5_wait_message(const char *waitfor) {
+  FILE *returnfile;
+  time_t t0, t1;
 
-    /* Start timer. If this function runs for too long (i.e.,
-        expected signal is never received), it will
-        return failure */
-    HDtime(&t0);
+  /* Start timer. If this function runs for too long (i.e.,
+      expected signal is never received), it will
+      return failure */
+  HDtime(&t0);
 
-    /* Wait for return signal from some other process */
-    while ((returnfile = fopen(waitfor, "r")) == NULL) {
+  /* Wait for return signal from some other process */
+  while ((returnfile = fopen(waitfor, "r")) == NULL) {
 
-        /* make note of current time. */
-        HDtime(&t1);
+    /* make note of current time. */
+    HDtime(&t1);
 
-        /* If we've been waiting for a signal for too long, then
-            it was likely never sent and we should fail rather
-            than loop infinitely */
-        if (HDdifftime(t1, t0) > MESSAGE_TIMEOUT) {
-            fprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
-            TEST_ERROR;
-        } /* end if */
-    }     /* end while */
+    /* If we've been waiting for a signal for too long, then
+        it was likely never sent and we should fail rather
+        than loop infinitely */
+    if (HDdifftime(t1, t0) > MESSAGE_TIMEOUT) {
+      fprintf(stdout, "Error communicating between processes. Make sure test "
+                      "script is running.\n");
+      TEST_ERROR;
+    } /* end if */
+  }   /* end while */
 
-    fclose(returnfile);
-    HDunlink(waitfor);
+  fclose(returnfile);
+  HDunlink(waitfor);
 
-    return SUCCEED;
+  return SUCCEED;
 
 error:
-    return FAIL;
+  return FAIL;
 } /* h5_wait_message() */
 
 /* Functions for the dummy VFD class (see below).
@@ -1598,58 +1534,53 @@ error:
  * Useful for testing things like ID handling where we shouldn't mess with the
  * real VFDs.
  */
-static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-static H5FD_t *
-dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id,
-               haddr_t H5_ATTR_UNUSED maxaddr)
-{
-    return NULL;
+static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id,
+                              haddr_t maxaddr);
+static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name,
+                              unsigned H5_ATTR_UNUSED flags,
+                              hid_t H5_ATTR_UNUSED fapl_id,
+                              haddr_t H5_ATTR_UNUSED maxaddr) {
+  return NULL;
 }
 
 static herr_t dummy_vfd_close(H5FD_t *_file);
-static herr_t
-dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file)
-{
-    return FAIL;
-}
+static herr_t dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file) { return FAIL; }
 
 static haddr_t dummy_vfd_get_eoa(const H5FD_t *file, H5FD_mem_t type);
-static haddr_t
-dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type)
-{
-    return HADDR_UNDEF;
+static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file,
+                                 H5FD_mem_t H5_ATTR_UNUSED type) {
+  return HADDR_UNDEF;
 }
 
 static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static herr_t
-dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr)
-{
-    return FAIL;
+static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file,
+                                H5FD_mem_t H5_ATTR_UNUSED type,
+                                haddr_t H5_ATTR_UNUSED addr) {
+  return FAIL;
 }
 
 static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
-static haddr_t
-dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type)
-{
-    return HADDR_UNDEF;
+static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file,
+                                 H5FD_mem_t H5_ATTR_UNUSED type) {
+  return HADDR_UNDEF;
 }
 
-static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
-                             void *buf);
+static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
+                             haddr_t addr, size_t size, void *buf);
 static herr_t
-dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id,
-               haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf)
-{
-    return FAIL;
+dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type,
+               hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr,
+               size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) {
+  return FAIL;
 }
 
-static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
-                              const void *buf);
+static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
+                              haddr_t addr, size_t size, const void *buf);
 static herr_t
-dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id,
-                haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf)
-{
-    return FAIL;
+dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type,
+                hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr,
+                size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) {
+  return FAIL;
 }
 
 /* Dummy VFD with the minimum parameters to make a VFD that can be registered */
@@ -1717,24 +1648,22 @@ static const H5FD_class_t H5FD_dummy_g = {
  *
  *-------------------------------------------------------------------------
  */
-H5FD_class_t *
-h5_get_dummy_vfd_class(void)
-{
-    H5FD_class_t *vfd_class = NULL; /* Dummy VFD that will be returned */
+H5FD_class_t *h5_get_dummy_vfd_class(void) {
+  H5FD_class_t *vfd_class = NULL; /* Dummy VFD that will be returned */
 
-    /* Create the class and initialize everything to zero/NULL */
-    if (NULL == (vfd_class = (H5FD_class_t *)malloc(sizeof(H5FD_class_t))))
-        TEST_ERROR;
+  /* Create the class and initialize everything to zero/NULL */
+  if (NULL == (vfd_class = (H5FD_class_t *)malloc(sizeof(H5FD_class_t))))
+    TEST_ERROR;
 
-    /* Copy the dummy VFD */
-    memcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
+  /* Copy the dummy VFD */
+  memcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
 
-    return vfd_class;
+  return vfd_class;
 
 error:
-    if (vfd_class)
-        free(vfd_class);
-    return NULL;
+  if (vfd_class)
+    free(vfd_class);
+  return NULL;
 } /* h5_get_dummy_vfd_class */
 
 /*-------------------------------------------------------------------------
@@ -1750,34 +1679,34 @@ error:
  *              them (e.g.: for testing VOL connector ID handling).
  *
  *              This API call will return a pointer to a VOL class that
- *              can be used to construct a test VOL using H5VLregister_connector().
+ *              can be used to construct a test VOL using
+ *H5VLregister_connector().
  *
  * Return:      Success:    A pointer to a VOL class struct
  *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
-H5VL_class_t *
-h5_get_dummy_vol_class(void)
-{
-    H5VL_class_t *vol_class = NULL; /* Dummy VOL class that will be returned */
+H5VL_class_t *h5_get_dummy_vol_class(void) {
+  H5VL_class_t *vol_class = NULL; /* Dummy VOL class that will be returned */
 
-    /* Create the class and initialize everything to zero/NULL */
-    if (NULL == (vol_class = (H5VL_class_t *)calloc((size_t)1, sizeof(H5VL_class_t))))
-        TEST_ERROR;
+  /* Create the class and initialize everything to zero/NULL */
+  if (NULL ==
+      (vol_class = (H5VL_class_t *)calloc((size_t)1, sizeof(H5VL_class_t))))
+    TEST_ERROR;
 
-    /* Fill in the minimum parameters to make a VOL connector class that
-     * can be registered.
-     */
-    vol_class->version = H5VL_VERSION;
-    vol_class->name    = "dummy";
+  /* Fill in the minimum parameters to make a VOL connector class that
+   * can be registered.
+   */
+  vol_class->version = H5VL_VERSION;
+  vol_class->name = "dummy";
 
-    return vol_class;
+  return vol_class;
 
 error:
-    if (vol_class)
-        free(vol_class);
-    return NULL;
+  if (vol_class)
+    free(vol_class);
+  return NULL;
 } /* h5_get_dummy_vol_class */
 
 /*-------------------------------------------------------------------------
@@ -1789,10 +1718,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE const char *
-h5_get_version_string(H5F_libver_t libver)
-{
-    return (LIBVER_NAMES[libver]);
+H5_ATTR_PURE const char *h5_get_version_string(H5F_libver_t libver) {
+  return (LIBVER_NAMES[libver]);
 } /* end of h5_get_version_string */
 
 /*-------------------------------------------------------------------------
@@ -1805,103 +1732,102 @@ h5_get_version_string(H5F_libver_t libver)
  *
  *-------------------------------------------------------------------------
  */
-int
-h5_compare_file_bytes(char *f1name, char *f2name)
-{
-    FILE *f1ptr     = NULL; /* two file pointers */
-    FILE *f2ptr     = NULL;
-    off_t f1size    = 0; /* size of the files */
-    off_t f2size    = 0;
-    char  f1char    = 0; /* one char from each file */
-    char  f2char    = 0;
-    off_t ii        = 0;
-    int   ret_value = 0; /* for error handling */
+int h5_compare_file_bytes(char *f1name, char *f2name) {
+  FILE *f1ptr = NULL; /* two file pointers */
+  FILE *f2ptr = NULL;
+  off_t f1size = 0; /* size of the files */
+  off_t f2size = 0;
+  char f1char = 0; /* one char from each file */
+  char f2char = 0;
+  off_t ii = 0;
+  int ret_value = 0; /* for error handling */
 
-    /* Open files for reading */
-    f1ptr = fopen(f1name, "rb");
-    if (f1ptr == NULL) {
-        fprintf(stderr, "Unable to fopen() %s\n", f1name);
-        ret_value = -1;
-        goto done;
+  /* Open files for reading */
+  f1ptr = fopen(f1name, "rb");
+  if (f1ptr == NULL) {
+    fprintf(stderr, "Unable to fopen() %s\n", f1name);
+    ret_value = -1;
+    goto done;
+  }
+  f2ptr = fopen(f2name, "rb");
+  if (f2ptr == NULL) {
+    fprintf(stderr, "Unable to fopen() %s\n", f2name);
+    ret_value = -1;
+    goto done;
+  }
+
+  /* Get the file sizes and verify that they equal */
+  HDfseek(f1ptr, 0, SEEK_END);
+  f1size = HDftell(f1ptr);
+
+  HDfseek(f2ptr, 0, SEEK_END);
+  f2size = HDftell(f2ptr);
+
+  if (f1size != f2size) {
+    fprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n",
+            (hsize_t)f1size, (hsize_t)f2size);
+    ret_value = -1;
+    goto done;
+  }
+
+  /* Compare each byte and fail if a difference is found */
+  HDrewind(f1ptr);
+  HDrewind(f2ptr);
+  for (ii = 0; ii < f1size; ii++) {
+    if (fread(&f1char, 1, 1, f1ptr) != 1) {
+      ret_value = -1;
+      goto done;
     }
-    f2ptr = fopen(f2name, "rb");
-    if (f2ptr == NULL) {
-        fprintf(stderr, "Unable to fopen() %s\n", f2name);
-        ret_value = -1;
-        goto done;
+    if (fread(&f2char, 1, 1, f2ptr) != 1) {
+      ret_value = -1;
+      goto done;
     }
-
-    /* Get the file sizes and verify that they equal */
-    HDfseek(f1ptr, 0, SEEK_END);
-    f1size = HDftell(f1ptr);
-
-    HDfseek(f2ptr, 0, SEEK_END);
-    f2size = HDftell(f2ptr);
-
-    if (f1size != f2size) {
-        fprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
-                (hsize_t)f2size);
-        ret_value = -1;
-        goto done;
+    if (f1char != f2char) {
+      fprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n",
+              (hsize_t)ii, f1char, f2char);
+      ret_value = -1;
+      goto done;
     }
-
-    /* Compare each byte and fail if a difference is found */
-    HDrewind(f1ptr);
-    HDrewind(f2ptr);
-    for (ii = 0; ii < f1size; ii++) {
-        if (fread(&f1char, 1, 1, f1ptr) != 1) {
-            ret_value = -1;
-            goto done;
-        }
-        if (fread(&f2char, 1, 1, f2ptr) != 1) {
-            ret_value = -1;
-            goto done;
-        }
-        if (f1char != f2char) {
-            fprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
-            ret_value = -1;
-            goto done;
-        }
-    }
+  }
 
 done:
-    if (f1ptr)
-        fclose(f1ptr);
-    if (f2ptr)
-        fclose(f2ptr);
-    return ret_value;
+  if (f1ptr)
+    fclose(f1ptr);
+  if (f2ptr)
+    fclose(f2ptr);
+  return ret_value;
 } /* end h5_compare_file_bytes() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5_get_srcdir_filename
  *
- * Purpose:     Append the test file name to the srcdir path and return the whole string
+ * Purpose:     Append the test file name to the srcdir path and return the
+ *whole string
  *
  * Return:      The string or NULL (errors or not enough space)
  *
  *-------------------------------------------------------------------------
  */
-const char *
-H5_get_srcdir_filename(const char *filename)
-{
-    const char *srcdir = H5_get_srcdir();
+const char *H5_get_srcdir_filename(const char *filename) {
+  const char *srcdir = H5_get_srcdir();
 
-    /* Check for error */
-    if (NULL == srcdir)
-        return NULL;
-
-    /* Build path to test file. We're checking the length so suppress
-     * the gcc format-truncation warning.
-     */
-    if ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
-        H5_GCC_DIAG_OFF("format-truncation")
-        HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
-        H5_GCC_DIAG_ON("format-truncation")
-        return srcdir_testpath;
-    }
-
-    /* If not enough space, just return NULL */
+  /* Check for error */
+  if (NULL == srcdir)
     return NULL;
+
+  /* Build path to test file. We're checking the length so suppress
+   * the gcc format-truncation warning.
+   */
+  if ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+    H5_GCC_DIAG_OFF("format-truncation")
+    HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir,
+               filename);
+    H5_GCC_DIAG_ON("format-truncation")
+    return srcdir_testpath;
+  }
+
+  /* If not enough space, just return NULL */
+  return NULL;
 } /* end H5_get_srcdir_filename() */
 
 /*-------------------------------------------------------------------------
@@ -1913,22 +1839,20 @@ H5_get_srcdir_filename(const char *filename)
  *
  *-------------------------------------------------------------------------
  */
-const char *
-H5_get_srcdir(void)
-{
-    const char *srcdir = HDgetenv("srcdir");
+const char *H5_get_srcdir(void) {
+  const char *srcdir = HDgetenv("srcdir");
 
-    /* Check for using the srcdir from configure time */
-    if (NULL == srcdir)
-        srcdir = config_srcdir;
+  /* Check for using the srcdir from configure time */
+  if (NULL == srcdir)
+    srcdir = config_srcdir;
 
-    /* Build path to all test files */
-    if ((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
-        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
-        return (srcdir_path);
-    } /* end if */
-    else
-        return (NULL);
+  /* Build path to all test files */
+  if ((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
+    HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
+    return (srcdir_path);
+  } /* end if */
+  else
+    return (NULL);
 } /* end H5_get_srcdir() */
 
 /*-------------------------------------------------------------------------
@@ -1942,60 +1866,58 @@ H5_get_srcdir(void)
  *
  *-------------------------------------------------------------------------
  */
-int
-h5_duplicate_file_by_bytes(const char *orig, const char *dest)
-{
-    FILE   *orig_ptr  = NULL;
-    FILE   *dest_ptr  = NULL;
-    hsize_t fsize     = 0;
-    hsize_t read_size = 0;
-    hsize_t max_buf   = 0;
-    void   *dup_buf   = NULL;
-    int     ret_value = 0;
+int h5_duplicate_file_by_bytes(const char *orig, const char *dest) {
+  FILE *orig_ptr = NULL;
+  FILE *dest_ptr = NULL;
+  hsize_t fsize = 0;
+  hsize_t read_size = 0;
+  hsize_t max_buf = 0;
+  void *dup_buf = NULL;
+  int ret_value = 0;
 
-    max_buf = 4096 * sizeof(char);
+  max_buf = 4096 * sizeof(char);
 
-    orig_ptr = fopen(orig, "rb");
-    if (NULL == orig_ptr) {
-        ret_value = -1;
-        goto done;
+  orig_ptr = fopen(orig, "rb");
+  if (NULL == orig_ptr) {
+    ret_value = -1;
+    goto done;
+  }
+
+  HDfseek(orig_ptr, 0, SEEK_END);
+  fsize = (hsize_t)HDftell(orig_ptr);
+  HDrewind(orig_ptr);
+
+  dest_ptr = fopen(dest, "wb");
+  if (NULL == dest_ptr) {
+    ret_value = -1;
+    goto done;
+  }
+
+  read_size = MIN(fsize, max_buf);
+  dup_buf = malloc(read_size);
+  if (NULL == dup_buf) {
+    ret_value = -1;
+    goto done;
+  }
+
+  while (read_size > 0) {
+    if (fread(dup_buf, read_size, 1, orig_ptr) != 1) {
+      ret_value = -1;
+      goto done;
     }
-
-    HDfseek(orig_ptr, 0, SEEK_END);
-    fsize = (hsize_t)HDftell(orig_ptr);
-    HDrewind(orig_ptr);
-
-    dest_ptr = fopen(dest, "wb");
-    if (NULL == dest_ptr) {
-        ret_value = -1;
-        goto done;
-    }
-
+    fwrite(dup_buf, read_size, 1, dest_ptr);
+    fsize -= read_size;
     read_size = MIN(fsize, max_buf);
-    dup_buf   = malloc(read_size);
-    if (NULL == dup_buf) {
-        ret_value = -1;
-        goto done;
-    }
-
-    while (read_size > 0) {
-        if (fread(dup_buf, read_size, 1, orig_ptr) != 1) {
-            ret_value = -1;
-            goto done;
-        }
-        fwrite(dup_buf, read_size, 1, dest_ptr);
-        fsize -= read_size;
-        read_size = MIN(fsize, max_buf);
-    }
+  }
 
 done:
-    if (orig_ptr != NULL)
-        fclose(orig_ptr);
-    if (dest_ptr != NULL)
-        fclose(dest_ptr);
-    if (dup_buf != NULL)
-        free(dup_buf);
-    return ret_value;
+  if (orig_ptr != NULL)
+    fclose(orig_ptr);
+  if (dest_ptr != NULL)
+    fclose(dest_ptr);
+  if (dup_buf != NULL)
+    free(dup_buf);
+  return ret_value;
 } /* end h5_duplicate_file_by_bytes() */
 
 /*-------------------------------------------------------------------------
@@ -2009,51 +1931,48 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_check_if_file_locking_enabled(hbool_t *is_enabled)
-{
-    const char *filename = "locking_test_file";
-    int         pmode    = O_RDWR | O_CREAT | O_TRUNC;
-    int         fd       = -1;
+herr_t h5_check_if_file_locking_enabled(hbool_t *is_enabled) {
+  const char *filename = "locking_test_file";
+  int pmode = O_RDWR | O_CREAT | O_TRUNC;
+  int fd = -1;
 
-    *is_enabled = TRUE;
+  *is_enabled = TRUE;
 
-    if ((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
-        goto error;
+  if ((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
+    goto error;
 
-    /* Test HDflock() to see if it works */
-    if (HDflock(fd, LOCK_EX | LOCK_NB) < 0) {
-        if (ENOSYS == errno) {
-            /* When errno is set to ENOSYS, the file system does not support
-             * locking, so ignore it. This is most frequently used on
-             * Lustre. If we also want to check for disabled NFS locks
-             * we'll need to check for ENOLCK, too. That isn't done by
-             * default here since that could also represent an actual
-             * error condition.
-             */
-            errno       = 0;
-            *is_enabled = FALSE;
-        }
-        else
-            goto error;
-    }
-    if (HDflock(fd, LOCK_UN) < 0)
-        goto error;
+  /* Test HDflock() to see if it works */
+  if (HDflock(fd, LOCK_EX | LOCK_NB) < 0) {
+    if (ENOSYS == errno) {
+      /* When errno is set to ENOSYS, the file system does not support
+       * locking, so ignore it. This is most frequently used on
+       * Lustre. If we also want to check for disabled NFS locks
+       * we'll need to check for ENOLCK, too. That isn't done by
+       * default here since that could also represent an actual
+       * error condition.
+       */
+      errno = 0;
+      *is_enabled = FALSE;
+    } else
+      goto error;
+  }
+  if (HDflock(fd, LOCK_UN) < 0)
+    goto error;
 
-    if (HDclose(fd) < 0)
-        goto error;
-    if (HDremove(filename) < 0)
-        goto error;
+  if (HDclose(fd) < 0)
+    goto error;
+  if (HDremove(filename) < 0)
+    goto error;
 
-    return SUCCEED;
+  return SUCCEED;
 
 error:
-    *is_enabled = FALSE;
-    if (fd > -1) {
-        HDclose(fd);
-        HDremove(filename);
-    }
-    return FAIL;
+  *is_enabled = FALSE;
+  if (fd > -1) {
+    HDclose(fd);
+    HDremove(filename);
+  }
+  return FAIL;
 } /* end h5_check_if_file_locking_enabled() */
 
 /*-------------------------------------------------------------------------
@@ -2067,20 +1986,18 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-h5_using_default_driver(const char *drv_name)
-{
-    hbool_t ret_val = TRUE;
+hbool_t h5_using_default_driver(const char *drv_name) {
+  hbool_t ret_val = TRUE;
 
-    assert(H5_DEFAULT_VFD == H5FD_SEC2);
+  assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
-    if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+  if (!drv_name)
+    drv_name = HDgetenv(HDF5_DRIVER);
 
-    if (drv_name)
-        return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
+  if (drv_name)
+    return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
 
-    return ret_val;
+  return ret_val;
 }
 
 /*-------------------------------------------------------------------------
@@ -2097,28 +2014,26 @@ h5_using_default_driver(const char *drv_name)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
-{
-    unsigned long feat_flags = 0;
-    hid_t         driver_id  = H5I_INVALID_HID;
-    herr_t        ret_value  = SUCCEED;
+herr_t h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel) {
+  unsigned long feat_flags = 0;
+  hid_t driver_id = H5I_INVALID_HID;
+  herr_t ret_value = SUCCEED;
 
-    assert(fapl_id >= 0);
-    assert(driver_is_parallel);
+  assert(fapl_id >= 0);
+  assert(driver_is_parallel);
 
-    if (fapl_id == H5P_DEFAULT)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+  if (fapl_id == H5P_DEFAULT)
+    fapl_id = H5P_FILE_ACCESS_DEFAULT;
 
-    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        return FAIL;
+  if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+    return FAIL;
 
-    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
-        return FAIL;
+  if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+    return FAIL;
 
-    *driver_is_parallel = (feat_flags & H5FD_FEAT_HAS_MPI);
+  *driver_is_parallel = (feat_flags & H5FD_FEAT_HAS_MPI);
 
-    return ret_value;
+  return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -2140,28 +2055,27 @@ h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible)
-{
-    unsigned long feat_flags = 0;
-    hid_t         driver_id  = H5I_INVALID_HID;
-    herr_t        ret_value  = SUCCEED;
+herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id,
+                                           hbool_t *default_vfd_compatible) {
+  unsigned long feat_flags = 0;
+  hid_t driver_id = H5I_INVALID_HID;
+  herr_t ret_value = SUCCEED;
 
-    assert(fapl_id >= 0);
-    assert(default_vfd_compatible);
+  assert(fapl_id >= 0);
+  assert(default_vfd_compatible);
 
-    if (fapl_id == H5P_DEFAULT)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+  if (fapl_id == H5P_DEFAULT)
+    fapl_id = H5P_FILE_ACCESS_DEFAULT;
 
-    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        return FAIL;
+  if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+    return FAIL;
 
-    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
-        return FAIL;
+  if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+    return FAIL;
 
-    *default_vfd_compatible = (feat_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE);
+  *default_vfd_compatible = (feat_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE);
 
-    return ret_value;
+  return ret_value;
 } /* end h5_driver_is_default_vfd_compatible() */
 
 /*-------------------------------------------------------------------------
@@ -2190,26 +2104,25 @@ h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatib
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
-{
-    hbool_t ret_val = FALSE;
+hbool_t h5_driver_uses_multiple_files(const char *drv_name, unsigned flags) {
+  hbool_t ret_val = FALSE;
 
-    if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+  if (!drv_name)
+    drv_name = HDgetenv(HDF5_DRIVER);
 
-    if (drv_name) {
-        if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") ||
-                !HDstrcmp(drv_name, "family") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
-                return TRUE;
-        }
-
-        if ((flags & H5_EXCLUDE_NON_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "splitter"))
-                return TRUE;
-        }
+  if (drv_name) {
+    if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
+      if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") ||
+          !HDstrcmp(drv_name, "family") ||
+          !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
+        return TRUE;
     }
 
-    return ret_val;
+    if ((flags & H5_EXCLUDE_NON_MULTIPART_DRIVERS) == 0) {
+      if (!HDstrcmp(drv_name, "splitter"))
+        return TRUE;
+    }
+  }
+
+  return ret_val;
 }

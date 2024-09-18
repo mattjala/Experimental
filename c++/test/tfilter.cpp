@@ -19,12 +19,12 @@
 using std::cerr;
 using std::endl;
 
-#include <string>
 #include "H5Cpp.h" // C++ API header file
+#include <string>
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
+#include "h5test.h"
 
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_DIM1 100
@@ -46,7 +46,8 @@ static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 /* Temporary filter IDs used for testing */
 const int H5Z_FILTER_BOGUS = 305;
 
-static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+                           const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
@@ -70,17 +71,16 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *              Failure: 0
  *-------------------------------------------------------------------------
  */
-static size_t
-filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
-             size_t *buf_size, void **buf)
-{
-    (void)flags;
-    (void)cd_nelmts;
-    (void)cd_values;
-    (void)buf_size;
-    (void)buf;
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+                           const unsigned int *cd_values, size_t nbytes,
+                           size_t *buf_size, void **buf) {
+  (void)flags;
+  (void)cd_nelmts;
+  (void)cd_values;
+  (void)buf_size;
+  (void)buf;
 
-    return nbytes;
+  return nbytes;
 }
 
 /*-------------------------------------------------------------------------
@@ -93,37 +93,35 @@ filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values
  */
 const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
 
-static void
-test_null_filter()
-{
-    // Output message about test being performed
-    SUBTEST("'Null' filter");
-    try {
-        // hsize_t  null_size;          // Size of dataset with null filter
+static void test_null_filter() {
+  // Output message about test being performed
+  SUBTEST("'Null' filter");
+  try {
+    // hsize_t  null_size;          // Size of dataset with null filter
 
-        // Prepare dataset create property list
-        DSetCreatPropList dsplist;
-        dsplist.setChunk(2, chunk_size);
+    // Prepare dataset create property list
+    DSetCreatPropList dsplist;
+    dsplist.setChunk(2, chunk_size);
 
-        if (H5Zregister(H5Z_BOGUS) < 0)
-            throw Exception("test_null_filter", "H5Zregister failed");
+    if (H5Zregister(H5Z_BOGUS) < 0)
+      throw Exception("test_null_filter", "H5Zregister failed");
 
-        // Set some pretent filter
-        dsplist.setFilter(H5Z_FILTER_BOGUS);
+    // Set some pretent filter
+    dsplist.setFilter(H5Z_FILTER_BOGUS);
 
-        // this function is just a stub right now; will work on it later - BMR
-        // if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size)<0)
-        //  throw Exception("test_null_filter", "test_filter_internal failed");
+    // this function is just a stub right now; will work on it later - BMR
+    // if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size)<0)
+    //  throw Exception("test_null_filter", "test_filter_internal failed");
 
-        // Close objects.
-        dsplist.close();
-        PASSED();
-    } // end of try
+    // Close objects.
+    dsplist.close();
+    PASSED();
+  } // end of try
 
-    // catch all other exceptions
-    catch (Exception &E) {
-        issue_fail_msg("test_null_filter()", __LINE__, __FILE__, E.getCDetailMsg());
-    }
+  // catch all other exceptions
+  catch (Exception &E) {
+    issue_fail_msg("test_null_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+  }
 } // test_null_filter
 
 /*-------------------------------------------------------------------------
@@ -136,81 +134,82 @@ test_null_filter()
  */
 const H5std_string DSET_SZIP_NAME("szipped dataset");
 
-static void
-test_szip_filter(H5File &file1)
-{
+static void test_szip_filter(H5File &file1) {
 #ifdef H5_HAVE_FILTER_SZIP
-    int      points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
-    unsigned szip_options_mask     = H5_SZIP_NN_OPTION_MASK;
-    unsigned szip_pixels_per_block = 4;
+  int points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
+  unsigned szip_options_mask = H5_SZIP_NN_OPTION_MASK;
+  unsigned szip_pixels_per_block = 4;
 
-    // Output message about test being performed
-    SUBTEST("szip filter (with encoder)");
+  // Output message about test being performed
+  SUBTEST("szip filter (with encoder)");
 
-    if (h5_szip_can_encode() == 1) {
-        char *tconv_buf = new char[1000];
+  if (h5_szip_can_encode() == 1) {
+    char *tconv_buf = new char[1000];
 
-        try {
-            const hsize_t size[2] = {DSET_DIM1, DSET_DIM2};
+    try {
+      const hsize_t size[2] = {DSET_DIM1, DSET_DIM2};
 
-            // Create the data space
-            DataSpace space1(2, size, NULL);
+      // Create the data space
+      DataSpace space1(2, size, NULL);
 
-            // Create a small conversion buffer to test strip mining (?)
-            DSetMemXferPropList xfer;
-            xfer.setBuffer(1000, tconv_buf, NULL);
+      // Create a small conversion buffer to test strip mining (?)
+      DSetMemXferPropList xfer;
+      xfer.setBuffer(1000, tconv_buf, NULL);
 
-            // Prepare dataset create property list
-            DSetCreatPropList dsplist;
-            dsplist.setChunk(2, chunk_size);
+      // Prepare dataset create property list
+      DSetCreatPropList dsplist;
+      dsplist.setChunk(2, chunk_size);
 
-            // Set up for szip compression
-            dsplist.setSzip(szip_options_mask, szip_pixels_per_block);
+      // Set up for szip compression
+      dsplist.setSzip(szip_options_mask, szip_pixels_per_block);
 
-            // Create a dataset with szip compression
-            DataSpace space2(2, size, NULL);
-            DataSet   dataset(file1.createDataSet(DSET_SZIP_NAME, PredType::NATIVE_INT, space2, dsplist));
+      // Create a dataset with szip compression
+      DataSpace space2(2, size, NULL);
+      DataSet dataset(file1.createDataSet(DSET_SZIP_NAME, PredType::NATIVE_INT,
+                                          space2, dsplist));
 
-            hsize_t i, j, n;
-            for (i = n = 0; i < size[0]; i++) {
-                for (j = 0; j < size[1]; j++) {
-                    points[i][j] = static_cast<int>(n++);
-                }
-            }
-
-            // Write to the dataset then read back the values
-            dataset.write(static_cast<void *>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
-                          xfer);
-            dataset.read(static_cast<void *>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
-                         xfer);
-
-            // Check that the values read are the same as the values written
-            for (i = 0; i < size[0]; i++)
-                for (j = 0; j < size[1]; j++) {
-                    int status = check_values(i, j, points[i][j], check[i][j]);
-                    if (status == -1)
-                        throw Exception("test_szip_filter", "Failed in testing szip method");
-                }
-            dsplist.close();
-            PASSED();
-        } // end of try
-
-        // catch all other exceptions
-        catch (Exception &E) {
-            issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+      hsize_t i, j, n;
+      for (i = n = 0; i < size[0]; i++) {
+        for (j = 0; j < size[1]; j++) {
+          points[i][j] = static_cast<int>(n++);
         }
+      }
 
-        delete[] tconv_buf;
-    } // if szip presents
-    else {
-        SKIPPED();
+      // Write to the dataset then read back the values
+      dataset.write(static_cast<void *>(points), PredType::NATIVE_INT,
+                    DataSpace::ALL, DataSpace::ALL, xfer);
+      dataset.read(static_cast<void *>(check), PredType::NATIVE_INT,
+                   DataSpace::ALL, DataSpace::ALL, xfer);
+
+      // Check that the values read are the same as the values written
+      for (i = 0; i < size[0]; i++)
+        for (j = 0; j < size[1]; j++) {
+          int status = check_values(i, j, points[i][j], check[i][j]);
+          if (status == -1)
+            throw Exception("test_szip_filter",
+                            "Failed in testing szip method");
+        }
+      dsplist.close();
+      PASSED();
+    } // end of try
+
+    // catch all other exceptions
+    catch (Exception &E) {
+      issue_fail_msg("test_szip_filter()", __LINE__, __FILE__,
+                     E.getCDetailMsg());
     }
 
-#else  /* H5_HAVE_FILTER_SZIP */
-    SUBTEST("szip filter");
+    delete[] tconv_buf;
+  } // if szip presents
+  else {
     SKIPPED();
-    H5std_string fname = file1.getFileName();
-    cerr << "    Szip filter not enabled for file '" << fname << "'" << endl;
+  }
+
+#else  /* H5_HAVE_FILTER_SZIP */
+  SUBTEST("szip filter");
+  SKIPPED();
+  H5std_string fname = file1.getFileName();
+  cerr << "    Szip filter not enabled for file '" << fname << "'" << endl;
 #endif /* H5_HAVE_FILTER_SZIP */
 } // test_szip_filter
 
@@ -223,28 +222,25 @@ test_szip_filter(H5File &file1)
  *-------------------------------------------------------------------------
  */
 const H5std_string FILE1("tfilters.h5");
-extern "C" void
-test_filters()
-{
-    // Output message about test being performed
-    MESSAGE(5, ("Testing Various Filters\n"));
+extern "C" void test_filters() {
+  // Output message about test being performed
+  MESSAGE(5, ("Testing Various Filters\n"));
 
-    hid_t fapl_id;
-    fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
+  hid_t fapl_id;
+  fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
-    try {
-        // Use the file access template id to create a file access prop. list
-        FileAccPropList fapl(fapl_id);
+  try {
+    // Use the file access template id to create a file access prop. list
+    FileAccPropList fapl(fapl_id);
 
-        H5File file1(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+    H5File file1(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
-        // Test basic VL string datatype
-        test_null_filter();
-        test_szip_filter(file1);
-    }
-    catch (Exception &E) {
-        issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());
-    }
+    // Test basic VL string datatype
+    test_null_filter();
+    test_szip_filter(file1);
+  } catch (Exception &E) {
+    issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());
+  }
 } // test_filters()
 
 /*-------------------------------------------------------------------------
@@ -255,8 +251,4 @@ test_filters()
  * Return       none
  *-------------------------------------------------------------------------
  */
-extern "C" void
-cleanup_filters()
-{
-    HDremove(FILE1.c_str());
-}
+extern "C" void cleanup_filters() { HDremove(FILE1.c_str()); }

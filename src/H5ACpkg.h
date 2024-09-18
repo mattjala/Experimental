@@ -56,7 +56,7 @@ H5FL_EXTERN(H5AC_aux_t);
  */
 
 #define H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN 0
-#define H5AC_SYNC_POINT_OP__FLUSH_CACHE        1
+#define H5AC_SYNC_POINT_OP__FLUSH_CACHE 1
 
 #endif /* H5_HAVE_PARALLEL */
 
@@ -67,9 +67,9 @@ H5FL_EXTERN(H5AC_aux_t);
  *-------------------------------------------------------------------------
  */
 
-#define H5AC__MIN_DIRTY_BYTES_THRESHOLD     (size_t)(H5C__MIN_MAX_CACHE_SIZE / 2)
+#define H5AC__MIN_DIRTY_BYTES_THRESHOLD (size_t)(H5C__MIN_MAX_CACHE_SIZE / 2)
 #define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD (256 * 1024)
-#define H5AC__MAX_DIRTY_BYTES_THRESHOLD     (size_t)(H5C__MAX_MAX_CACHE_SIZE / 4)
+#define H5AC__MAX_DIRTY_BYTES_THRESHOLD (size_t)(H5C__MAX_MAX_CACHE_SIZE / 4)
 
 /****************************************************************************
  *
@@ -347,37 +347,38 @@ H5FL_EXTERN(H5AC_aux_t);
 #ifdef H5_HAVE_PARALLEL
 
 typedef struct H5AC_aux_t {
-    MPI_Comm mpi_comm;
-    int      mpi_rank;
-    int      mpi_size;
+  MPI_Comm mpi_comm;
+  int mpi_rank;
+  int mpi_size;
 
-    hbool_t write_permitted;
-    size_t  dirty_bytes_threshold;
-    size_t  dirty_bytes;
-    int32_t metadata_write_strategy;
+  hbool_t write_permitted;
+  size_t dirty_bytes_threshold;
+  size_t dirty_bytes;
+  int32_t metadata_write_strategy;
 
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
-    unsigned dirty_bytes_propagations;
-    size_t   unprotect_dirty_bytes;
-    unsigned unprotect_dirty_bytes_updates;
-    size_t   insert_dirty_bytes;
-    unsigned insert_dirty_bytes_updates;
-    size_t   move_dirty_bytes;
-    unsigned move_dirty_bytes_updates;
+  unsigned dirty_bytes_propagations;
+  size_t unprotect_dirty_bytes;
+  unsigned unprotect_dirty_bytes_updates;
+  size_t insert_dirty_bytes;
+  unsigned insert_dirty_bytes_updates;
+  size_t move_dirty_bytes;
+  unsigned move_dirty_bytes_updates;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
-    H5SL_t *d_slist_ptr;
-    H5SL_t *c_slist_ptr;
-    H5SL_t *candidate_slist_ptr;
+  H5SL_t *d_slist_ptr;
+  H5SL_t *c_slist_ptr;
+  H5SL_t *candidate_slist_ptr;
 
-    void (*write_done)(void);
-    void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl);
+  void (*write_done)(void);
+  void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl);
 
-    unsigned p0_image_len;
+  unsigned p0_image_len;
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
 /* Typedefs for debugging function pointers */
-typedef void (*H5AC_sync_point_done_cb_t)(unsigned num_writes, haddr_t *written_entries_tbl);
+typedef void (*H5AC_sync_point_done_cb_t)(unsigned num_writes,
+                                          haddr_t *written_entries_tbl);
 typedef void (*H5AC_write_done_cb_t)(void);
 
 #endif /* H5_HAVE_PARALLEL */
@@ -391,13 +392,17 @@ typedef void (*H5AC_write_done_cb_t)(void);
 H5_DLL herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr);
-H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsigned flags);
+H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
+                                      hbool_t was_dirty, unsigned flags);
 H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
-H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr);
+H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
+                                    haddr_t new_addr);
 H5_DLL herr_t H5AC__flush_entries(H5F_t *f);
 H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, int sync_point_op);
-H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr, H5AC_sync_point_done_cb_t sync_point_done);
-H5_DLL herr_t H5AC__set_write_done_callback(H5C_t *cache_ptr, H5AC_write_done_cb_t write_done);
+H5_DLL herr_t H5AC__set_sync_point_done_callback(
+    H5C_t *cache_ptr, H5AC_sync_point_done_cb_t sync_point_done);
+H5_DLL herr_t H5AC__set_write_done_callback(H5C_t *cache_ptr,
+                                            H5AC_write_done_cb_t write_done);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* H5ACpkg_H */

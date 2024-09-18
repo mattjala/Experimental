@@ -18,8 +18,8 @@
  ******
  */
 
-#include "H5f90.h"
 #include "H5Eprivate.h"
+#include "H5f90.h"
 
 /****if* H5Ff/h5fcreate_c
  * NAME
@@ -38,54 +38,53 @@
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hid_t_f *acc_prp,
-            hid_t_f *file_id)
+int_f h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags,
+                  hid_t_f *crt_prp, hid_t_f *acc_prp, hid_t_f *file_id)
 /******/
 {
-    int      ret_value = -1;
-    char    *c_name;
-    int_f    c_namelen;
-    hid_t    c_file_id;
-    unsigned c_access_flags;
-    hid_t    c_crt_prp;
-    hid_t    c_acc_prp;
+  int ret_value = -1;
+  char *c_name;
+  int_f c_namelen;
+  hid_t c_file_id;
+  unsigned c_access_flags;
+  hid_t c_crt_prp;
+  hid_t c_acc_prp;
 
-    /*
-     * Define access flags
-     */
-    c_access_flags = (unsigned)*access_flags;
+  /*
+   * Define access flags
+   */
+  c_access_flags = (unsigned)*access_flags;
 
-    /*
-     * Define creation property
-     */
-    c_crt_prp = *crt_prp;
+  /*
+   * Define creation property
+   */
+  c_crt_prp = *crt_prp;
 
-    /*
-     * Define access property
-     */
-    c_acc_prp = *acc_prp;
+  /*
+   * Define access property
+   */
+  c_acc_prp = *acc_prp;
 
-    /*
-     * Convert FORTRAN name to C name
-     */
-    c_namelen = *namelen;
-    c_name    = (char *)HD5f2cstring(name, (size_t)c_namelen);
-    if (c_name == NULL)
-        return ret_value;
-
-    /*
-     * Call H5Fcreate function.
-     */
-    c_file_id = H5Fcreate(c_name, c_access_flags, c_crt_prp, c_acc_prp);
-
-    if (c_file_id >= 0) {
-        ret_value = 0;
-        *file_id  = c_file_id;
-    }
-
-    free(c_name);
+  /*
+   * Convert FORTRAN name to C name
+   */
+  c_namelen = *namelen;
+  c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
+  if (c_name == NULL)
     return ret_value;
+
+  /*
+   * Call H5Fcreate function.
+   */
+  c_file_id = H5Fcreate(c_name, c_access_flags, c_crt_prp, c_acc_prp);
+
+  if (c_file_id >= 0) {
+    ret_value = 0;
+    *file_id = c_file_id;
+  }
+
+  free(c_name);
+  return ret_value;
 }
 
 /****if* H5Ff/h5fmount_c
@@ -102,46 +101,46 @@ h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hi
  * RETURNS
  *  0 on success, -1 on failure
  */
-int_f
-h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp)
+int_f h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen,
+                 hid_t_f *file_id, hid_t_f *acc_prp)
 /******/
 {
-    int    ret_value = -1;
-    char  *c_name;
-    int_f  c_namelen;
-    hid_t  c_loc_id;
-    hid_t  c_file_id;
-    hid_t  c_acc_prp;
-    htri_t status;
+  int ret_value = -1;
+  char *c_name;
+  int_f c_namelen;
+  hid_t c_loc_id;
+  hid_t c_file_id;
+  hid_t c_acc_prp;
+  htri_t status;
 
-    /*
-     * Define access property
-     */
-    c_acc_prp = *acc_prp;
-    /*
-         if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
-    */
+  /*
+   * Define access property
+   */
+  c_acc_prp = *acc_prp;
+  /*
+       if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
+  */
 
-    c_loc_id  = *loc_id;
-    c_file_id = *file_id;
-    /*
-     * Convert FORTRAN name to C name
-     */
-    c_namelen = *namelen;
-    c_name    = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
-    if (c_name == NULL)
-        return ret_value;
-
-    /*
-     * Call H5Fmount function.
-     */
-    status = H5Fmount(c_loc_id, c_name, c_file_id, c_acc_prp);
-
-    if (status >= 0)
-        ret_value = 0;
-
-    free(c_name);
+  c_loc_id = *loc_id;
+  c_file_id = *file_id;
+  /*
+   * Convert FORTRAN name to C name
+   */
+  c_namelen = *namelen;
+  c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
+  if (c_name == NULL)
     return ret_value;
+
+  /*
+   * Call H5Fmount function.
+   */
+  status = H5Fmount(c_loc_id, c_name, c_file_id, c_acc_prp);
+
+  if (status >= 0)
+    ret_value = 0;
+
+  free(c_name);
+  return ret_value;
 }
 
 /****if* H5Ff/h5funmount_c
@@ -157,36 +156,35 @@ h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
+int_f h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 /******/
 {
-    int    ret_value = -1;
-    char  *c_name;
-    int_f  c_namelen;
-    hid_t  c_loc_id;
-    htri_t status;
+  int ret_value = -1;
+  char *c_name;
+  int_f c_namelen;
+  hid_t c_loc_id;
+  htri_t status;
 
-    c_loc_id = *loc_id;
+  c_loc_id = *loc_id;
 
-    /*
-     * Convert FORTRAN name to C name
-     */
-    c_namelen = *namelen;
-    c_name    = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
-    if (c_name == NULL)
-        return ret_value;
-
-    /*
-     * Call H5Fmount function.
-     */
-    status = H5Funmount(c_loc_id, c_name);
-
-    if (status >= 0)
-        ret_value = 0;
-
-    free(c_name);
+  /*
+   * Convert FORTRAN name to C name
+   */
+  c_namelen = *namelen;
+  c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
+  if (c_name == NULL)
     return ret_value;
+
+  /*
+   * Call H5Fmount function.
+   */
+  status = H5Funmount(c_loc_id, c_name);
+
+  if (status >= 0)
+    ret_value = 0;
+
+  free(c_name);
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_create_plist_c
@@ -202,22 +200,21 @@ h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fget_create_plist_c(hid_t_f *file_id, hid_t_f *prop_id)
+int_f h5fget_create_plist_c(hid_t_f *file_id, hid_t_f *prop_id)
 /******/
 {
-    int   ret_value = -1;
-    hid_t c_file_id, c_prop_id;
+  int ret_value = -1;
+  hid_t c_file_id, c_prop_id;
 
-    c_file_id = (hid_t)*file_id;
-    c_prop_id = H5Fget_create_plist(c_file_id);
+  c_file_id = (hid_t)*file_id;
+  c_prop_id = H5Fget_create_plist(c_file_id);
 
-    if (c_prop_id < 0)
-        return ret_value;
-    *prop_id = (hid_t_f)c_prop_id;
-
-    ret_value = 0;
+  if (c_prop_id < 0)
     return ret_value;
+  *prop_id = (hid_t_f)c_prop_id;
+
+  ret_value = 0;
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_access_plist_c
@@ -233,22 +230,21 @@ h5fget_create_plist_c(hid_t_f *file_id, hid_t_f *prop_id)
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fget_access_plist_c(hid_t_f *file_id, hid_t_f *access_id)
+int_f h5fget_access_plist_c(hid_t_f *file_id, hid_t_f *access_id)
 /******/
 {
-    int   ret_value = -1;
-    hid_t c_file_id, c_access_id;
+  int ret_value = -1;
+  hid_t c_file_id, c_access_id;
 
-    c_file_id   = (hid_t)*file_id;
-    c_access_id = H5Fget_access_plist(c_file_id);
+  c_file_id = (hid_t)*file_id;
+  c_access_id = H5Fget_access_plist(c_file_id);
 
-    if (c_access_id < 0)
-        return ret_value;
-    *access_id = (hid_t_f)c_access_id;
-
-    ret_value = 0;
+  if (c_access_id < 0)
     return ret_value;
+  *access_id = (hid_t_f)c_access_id;
+
+  ret_value = 0;
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_obj_count_c
@@ -265,21 +261,20 @@ h5fget_access_plist_c(hid_t_f *file_id, hid_t_f *access_id)
  * SOURCE
  */
 
-int_f
-h5fget_obj_count_c(hid_t_f *file_id, int_f *obj_type, size_t_f *obj_count)
+int_f h5fget_obj_count_c(hid_t_f *file_id, int_f *obj_type, size_t_f *obj_count)
 /******/
 {
-    int      ret_value = 0;
-    hid_t    c_file_id;
-    unsigned c_obj_type;
-    ssize_t  c_obj_count;
+  int ret_value = 0;
+  hid_t c_file_id;
+  unsigned c_obj_type;
+  ssize_t c_obj_count;
 
-    c_file_id  = (hid_t)*file_id;
-    c_obj_type = (unsigned)*obj_type;
-    if ((c_obj_count = H5Fget_obj_count(c_file_id, c_obj_type)) < 0)
-        ret_value = -1;
-    *obj_count = (size_t_f)c_obj_count;
-    return ret_value;
+  c_file_id = (hid_t)*file_id;
+  c_obj_type = (unsigned)*obj_type;
+  if ((c_obj_count = H5Fget_obj_count(c_file_id, c_obj_type)) < 0)
+    ret_value = -1;
+  *obj_count = (size_t_f)c_obj_count;
+  return ret_value;
 }
 /****if* H5Ff/h5fget_obj_ids_c
  * NAME
@@ -294,33 +289,33 @@ h5fget_obj_count_c(hid_t_f *file_id, int_f *obj_type, size_t_f *obj_count)
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f *obj_ids, size_t_f *num_objs)
+int_f h5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs,
+                       hid_t_f *obj_ids, size_t_f *num_objs)
 /******/
 {
-    int      ret_value = 0;
-    hid_t    c_file_id;
-    unsigned c_obj_type;
-    size_t   u;
-    size_t   c_max_objs;
-    ssize_t  c_num_objs;
-    hid_t   *c_obj_ids;
+  int ret_value = 0;
+  hid_t c_file_id;
+  unsigned c_obj_type;
+  size_t u;
+  size_t c_max_objs;
+  ssize_t c_num_objs;
+  hid_t *c_obj_ids;
 
-    c_file_id  = (hid_t)*file_id;
-    c_obj_type = (unsigned)*obj_type;
-    c_max_objs = (size_t)*max_objs;
-    c_obj_ids  = (hid_t *)malloc(sizeof(hid_t) * c_max_objs);
+  c_file_id = (hid_t)*file_id;
+  c_obj_type = (unsigned)*obj_type;
+  c_max_objs = (size_t)*max_objs;
+  c_obj_ids = (hid_t *)malloc(sizeof(hid_t) * c_max_objs);
 
-    c_num_objs = H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids);
-    if (c_num_objs < 0)
-        ret_value = -1;
-    for (u = 0; u < c_max_objs; u++)
-        obj_ids[u] = (hid_t_f)c_obj_ids[u];
+  c_num_objs = H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids);
+  if (c_num_objs < 0)
+    ret_value = -1;
+  for (u = 0; u < c_max_objs; u++)
+    obj_ids[u] = (hid_t_f)c_obj_ids[u];
 
-    free(c_obj_ids);
-    *num_objs = (size_t_f)c_num_objs;
+  free(c_obj_ids);
+  *num_objs = (size_t_f)c_num_objs;
 
-    return ret_value;
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_freespace_c
@@ -336,19 +331,18 @@ h5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f 
  * SOURCE
  */
 
-int_f
-h5fget_freespace_c(hid_t_f *file_id, hssize_t_f *free_space)
+int_f h5fget_freespace_c(hid_t_f *file_id, hssize_t_f *free_space)
 /******/
 {
-    int      ret_value = 0;
-    hid_t    c_file_id;
-    hssize_t c_free_space;
+  int ret_value = 0;
+  hid_t c_file_id;
+  hssize_t c_free_space;
 
-    c_file_id = (hid_t)*file_id;
-    if ((c_free_space = H5Fget_freespace(c_file_id)) < 0)
-        ret_value = -1;
-    *free_space = (hssize_t_f)c_free_space;
-    return ret_value;
+  c_file_id = (hid_t)*file_id;
+  if ((c_free_space = H5Fget_freespace(c_file_id)) < 0)
+    ret_value = -1;
+  *free_space = (hssize_t_f)c_free_space;
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_name_c
@@ -366,36 +360,35 @@ h5fget_freespace_c(hid_t_f *file_id, hssize_t_f *free_space)
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
+int_f h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
 /******/
 {
-    char   *c_buf     = NULL; /* Buffer to hold C string */
-    ssize_t size_c    = -1;
-    int_f   ret_value = 0; /* Return value */
+  char *c_buf = NULL; /* Buffer to hold C string */
+  ssize_t size_c = -1;
+  int_f ret_value = 0; /* Return value */
 
-    /*
-     * Allocate buffer to hold name of file
-     */
-    if (NULL == (c_buf = (char *)malloc((size_t)*buflen + 1)))
-        HGOTO_DONE(FAIL);
+  /*
+   * Allocate buffer to hold name of file
+   */
+  if (NULL == (c_buf = (char *)malloc((size_t)*buflen + 1)))
+    HGOTO_DONE(FAIL);
 
-    /*
-     * Call H5Fget_name function
-     */
-    if ((size_c = H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen + 1)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Fget_name function
+   */
+  if ((size_c = H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen + 1)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /*
-     * Convert C name to FORTRAN and place it in the given buffer
-     */
-    HD5packFstring(c_buf, _fcdtocp(buf), (size_t)*buflen);
+  /*
+   * Convert C name to FORTRAN and place it in the given buffer
+   */
+  HD5packFstring(c_buf, _fcdtocp(buf), (size_t)*buflen);
 
 done:
-    *size = (size_t_f)size_c;
-    if (c_buf)
-        free(c_buf);
-    return ret_value;
+  *size = (size_t_f)size_c;
+  if (c_buf)
+    free(c_buf);
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_filesize_c
@@ -411,22 +404,21 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
+int_f h5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
 /******/
 {
-    hsize_t size_c;
-    herr_t  ret_value = 0; /* Return value */
+  hsize_t size_c;
+  herr_t ret_value = 0; /* Return value */
 
-    /*
-     * Call H5Fget_filesize function
-     */
-    if ((ret_value = H5Fget_filesize((hid_t)*file_id, &size_c)) < 0)
-        HGOTO_DONE(FAIL);
-    *size = (hsize_t_f)size_c;
+  /*
+   * Call H5Fget_filesize function
+   */
+  if ((ret_value = H5Fget_filesize((hid_t)*file_id, &size_c)) < 0)
+    HGOTO_DONE(FAIL);
+  *size = (hsize_t_f)size_c;
 
 done:
-    return ret_value;
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_fileno_c
@@ -442,26 +434,25 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5fget_fileno_c(hid_t_f *file_id, int_f *fileno)
+int_f h5fget_fileno_c(hid_t_f *file_id, int_f *fileno)
 /******/
 {
-    unsigned long fileno_c;
-    herr_t        ret_value = 0; /* Return value */
+  unsigned long fileno_c;
+  herr_t ret_value = 0; /* Return value */
 
-    /*
-     * Call H5Fget_fileno function
-     */
-    if ((ret_value = H5Fget_fileno((hid_t)*file_id, &fileno_c)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Fget_fileno function
+   */
+  if ((ret_value = H5Fget_fileno((hid_t)*file_id, &fileno_c)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* XXX: This will have problems if the library fileno value doesn't fit
-     * into an int_f.
-     */
-    *fileno = (int_f)fileno_c;
+  /* XXX: This will have problems if the library fileno value doesn't fit
+   * into an int_f.
+   */
+  *fileno = (int_f)fileno_c;
 
 done:
-    return ret_value;
+  return ret_value;
 }
 
 /****if* H5Ff/h5fget_file_image_c
@@ -471,29 +462,27 @@ done:
  *  Calls h5fget_file_image
  * INPUTS
  *  file_id    - Target file identifier.
- *  buf_ptr    - Pointer to the buffer into which the image of the HDF5 file is to be copied.
- *  buf_len    - Size of the supplied buffer.
- * OUTPUTS
- *  buf_req    - The size in bytes of the buffer required to store the file image.
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
+ *  buf_ptr    - Pointer to the buffer into which the image of the HDF5 file is
+ * to be copied. buf_len    - Size of the supplied buffer. OUTPUTS buf_req    -
+ * The size in bytes of the buffer required to store the file image. RETURNS 0
+ * on success, -1 on failure SOURCE
  */
-int_f
-h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f *buf_req)
+int_f h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len,
+                          size_t_f *buf_req)
 /******/
 {
-    herr_t  ret_value = 0; /* Return value */
-    ssize_t c_buf_req;
-    /*
-     * Call h5fget_file_image function
-     */
+  herr_t ret_value = 0; /* Return value */
+  ssize_t c_buf_req;
+  /*
+   * Call h5fget_file_image function
+   */
 
-    if ((c_buf_req = H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
-        HGOTO_DONE(FAIL);
+  if ((c_buf_req =
+           H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
+    HGOTO_DONE(FAIL);
 
-    *buf_req = (size_t_f)c_buf_req;
+  *buf_req = (size_t_f)c_buf_req;
 
 done:
-    return ret_value;
+  return ret_value;
 }

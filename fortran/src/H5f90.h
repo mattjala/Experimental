@@ -13,10 +13,10 @@
 #ifndef H5f90_H
 #define H5f90_H
 
-#include "hdf5.h"
-#include "H5private.h"
 #include "H5f90i.h"
 #include "H5f90proto.h"
+#include "H5private.h"
+#include "hdf5.h"
 
 /* Constants used in H5Rff.F90 and H5Rf.c files */
 #define REF_REG_BUF_LEN_F 3

@@ -27,10 +27,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5RSprivate.h" /* Reference-counted strings                */
+#include "H5private.h"   /* Generic Functions                        */
 
 /****************/
 /* Local Macros */
@@ -45,12 +45,13 @@
 
 /* Private typedefs & structs */
 struct H5RS_str_t {
-    char    *s;       /* String to be reference counted */
-    char    *end;     /* Pointer to terminating NUL character at the end of the string */
-    size_t   len;     /* Current length of the string */
-    size_t   max;     /* Size of allocated buffer */
-    hbool_t  wrapped; /* Indicates that the string to be ref-counted is not copied */
-    unsigned n;       /* Reference count of number of pointers sharing string */
+  char *s;   /* String to be reference counted */
+  char *end; /* Pointer to terminating NUL character at the end of the string */
+  size_t len; /* Current length of the string */
+  size_t max; /* Size of allocated buffer */
+  hbool_t
+      wrapped; /* Indicates that the string to be ref-counted is not copied */
+  unsigned n;  /* Reference count of number of pointers sharing string */
 };
 
 /********************/
@@ -89,8 +90,8 @@ H5FL_BLK_DEFINE_STATIC(str_buf);
     Duplicate the string being reference counted
  USAGE
     herr_t H5RS__xstrdup(rs, s)
-        H5RS_str_t *rs;         IN/OUT: Ref-counted string to hold duplicated string
-        const char *s;          IN: String to duplicate
+        H5RS_str_t *rs;         IN/OUT: Ref-counted string to hold duplicated
+string const char *s;          IN: String to duplicate
 
  RETURNS
     Non-negative on success/Negative on failure
@@ -102,50 +103,48 @@ H5FL_BLK_DEFINE_STATIC(str_buf);
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
-H5RS__xstrdup(H5RS_str_t *rs, const char *s)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+static herr_t H5RS__xstrdup(H5RS_str_t *rs, const char *s) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    assert(rs);
+  /* Sanity check */
+  assert(rs);
 
-    if (s) {
-        size_t len = HDstrlen(s);
+  if (s) {
+    size_t len = HDstrlen(s);
 
-        /* Determine size of buffer to allocate */
-        rs->max = H5RS_ALLOC_SIZE;
-        while ((len + 1) > rs->max)
-            rs->max *= 2;
+    /* Determine size of buffer to allocate */
+    rs->max = H5RS_ALLOC_SIZE;
+    while ((len + 1) > rs->max)
+      rs->max *= 2;
 
-        /* Allocate the underlying string */
-        if (NULL == (rs->s = (char *)H5FL_BLK_MALLOC(str_buf, rs->max)))
-            HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed");
-        if (len)
-            memcpy(rs->s, s, len);
-        rs->end  = rs->s + len;
-        *rs->end = '\0';
-        rs->len  = len;
+    /* Allocate the underlying string */
+    if (NULL == (rs->s = (char *)H5FL_BLK_MALLOC(str_buf, rs->max)))
+      HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed");
+    if (len)
+      memcpy(rs->s, s, len);
+    rs->end = rs->s + len;
+    *rs->end = '\0';
+    rs->len = len;
+  } /* end if */
+  else {
+    /* Free previous string, if one */
+    if (rs->s) {
+      H5FL_BLK_FREE(str_buf, rs->s);
+      rs->s = rs->end = NULL;
+      rs->max = rs->len = 0;
     } /* end if */
     else {
-        /* Free previous string, if one */
-        if (rs->s) {
-            H5FL_BLK_FREE(str_buf, rs->s);
-            rs->s = rs->end = NULL;
-            rs->max = rs->len = 0;
-        } /* end if */
-        else {
-            /* Sanity checks */
-            assert(NULL == rs->end);
-            assert(0 == rs->max);
-            assert(0 == rs->len);
-        } /* end else */
-    }     /* end else */
+      /* Sanity checks */
+      assert(NULL == rs->end);
+      assert(0 == rs->max);
+      assert(0 == rs->len);
+    } /* end else */
+  }   /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS__xstrdup() */
 
 /*--------------------------------------------------------------------------
@@ -155,48 +154,41 @@ done:
     Prepare a ref-counted string for an append
  USAGE
     herr_t H5RS__prepare_for_append(rs)
-        H5RS_str_t *rs;         IN/OUT: Ref-counted string to hold duplicated string
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Allocate space for a string, or duplicate a wrapped string, in preparation
-    for appending another string.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
+        H5RS_str_t *rs;         IN/OUT: Ref-counted string to hold duplicated
+string RETURNS Non-negative on success/Negative on failure DESCRIPTION Allocate
+space for a string, or duplicate a wrapped string, in preparation for appending
+another string. GLOBAL VARIABLES COMMENTS, BUGS, ASSUMPTIONS EXAMPLES REVISION
+LOG
 --------------------------------------------------------------------------*/
-static herr_t
-H5RS__prepare_for_append(H5RS_str_t *rs)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+static herr_t H5RS__prepare_for_append(H5RS_str_t *rs) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    assert(rs);
+  /* Sanity check */
+  assert(rs);
 
-    if (NULL == rs->s) {
-        rs->max = H5RS_ALLOC_SIZE;
-        if (NULL == (rs->s = (char *)H5FL_BLK_MALLOC(str_buf, rs->max)))
-            HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed");
-        rs->end = rs->s;
-        *rs->s  = '\0';
-        rs->len = 0;
+  if (NULL == rs->s) {
+    rs->max = H5RS_ALLOC_SIZE;
+    if (NULL == (rs->s = (char *)H5FL_BLK_MALLOC(str_buf, rs->max)))
+      HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed");
+    rs->end = rs->s;
+    *rs->s = '\0';
+    rs->len = 0;
+  } /* end if */
+  else {
+    /* If the ref-counted string started life as a wrapper around an
+     * existing string, duplicate the string now, so we can modify it.
+     */
+    if (rs->wrapped) {
+      if (H5RS__xstrdup(rs, rs->s) < 0)
+        HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
+      rs->wrapped = FALSE;
     } /* end if */
-    else {
-        /* If the ref-counted string started life as a wrapper around an
-         * existing string, duplicate the string now, so we can modify it.
-         */
-        if (rs->wrapped) {
-            if (H5RS__xstrdup(rs, rs->s) < 0)
-                HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
-            rs->wrapped = FALSE;
-        } /* end if */
-    }     /* end else */
+  }   /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS__prepare_for_append() */
 
 /*--------------------------------------------------------------------------
@@ -206,9 +198,8 @@ done:
     Resize ref-counted string buffer to accommodate appending another string
  USAGE
     herr_t H5RS__resize_for_append(rs, len)
-        H5RS_str_t *rs;         IN/OUT: Ref-counted string to hold duplicated string
-        size_t len;             IN: Additional length to accommodate
- RETURNS
+        H5RS_str_t *rs;         IN/OUT: Ref-counted string to hold duplicated
+string size_t len;             IN: Additional length to accommodate RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
     Resize a ref-counted string buffer to be large enough to accommodate
@@ -218,28 +209,26 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
-H5RS__resize_for_append(H5RS_str_t *rs, size_t len)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+static herr_t H5RS__resize_for_append(H5RS_str_t *rs, size_t len) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    assert(rs);
+  /* Sanity check */
+  assert(rs);
 
-    /* Check if buffer should be re-allocated */
-    if (len >= (rs->max - rs->len)) {
-        /* Allocate a large enough buffer */
-        while (len >= (rs->max - rs->len))
-            rs->max *= 2;
-        if (NULL == (rs->s = (char *)H5FL_BLK_REALLOC(str_buf, rs->s, rs->max)))
-            HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed");
-        rs->end = rs->s + rs->len;
-    } /* end if */
+  /* Check if buffer should be re-allocated */
+  if (len >= (rs->max - rs->len)) {
+    /* Allocate a large enough buffer */
+    while (len >= (rs->max - rs->len))
+      rs->max *= 2;
+    if (NULL == (rs->s = (char *)H5FL_BLK_REALLOC(str_buf, rs->s, rs->max)))
+      HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed");
+    rs->end = rs->s + rs->len;
+  } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS__resize() */
 
 /*--------------------------------------------------------------------------
@@ -261,25 +250,23 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5RS_str_t *
-H5RS_create(const char *s)
-{
-    H5RS_str_t *ret_value = NULL; /* Return value */
+H5RS_str_t *H5RS_create(const char *s) {
+  H5RS_str_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    /* Allocate ref-counted string structure */
-    if (NULL == (ret_value = H5FL_CALLOC(H5RS_str_t)))
-        HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed");
+  /* Allocate ref-counted string structure */
+  if (NULL == (ret_value = H5FL_CALLOC(H5RS_str_t)))
+    HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed");
 
-    /* Set the internal fields */
-    if (s)
-        if (H5RS__xstrdup(ret_value, s) < 0)
-            HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, NULL, "can't copy string");
-    ret_value->n = 1;
+  /* Set the internal fields */
+  if (s)
+    if (H5RS__xstrdup(ret_value, s) < 0)
+      HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, NULL, "can't copy string");
+  ret_value->n = 1;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_create() */
 
 /*--------------------------------------------------------------------------
@@ -301,36 +288,34 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5RS_str_t *
-H5RS_wrap(const char *s)
-{
-    H5RS_str_t *ret_value = NULL; /* Return value */
+H5RS_str_t *H5RS_wrap(const char *s) {
+  H5RS_str_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL)
 
-    /* Allocate ref-counted string structure */
-    if (NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
-        HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed");
+  /* Allocate ref-counted string structure */
+  if (NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
+    HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed");
 
-    /* Set the internal fields
-     *
-     * We ignore warnings about storing a const char pointer in the struct
-     * since we never modify or free the string when the wrapped struct
-     * field is set to TRUE.
-     */
-    H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    ret_value->s = (char *)s;
-    H5_GCC_CLANG_DIAG_ON("cast-qual")
+  /* Set the internal fields
+   *
+   * We ignore warnings about storing a const char pointer in the struct
+   * since we never modify or free the string when the wrapped struct
+   * field is set to TRUE.
+   */
+  H5_GCC_CLANG_DIAG_OFF("cast-qual")
+  ret_value->s = (char *)s;
+  H5_GCC_CLANG_DIAG_ON("cast-qual")
 
-    ret_value->len = HDstrlen(s);
-    ret_value->end = ret_value->s + ret_value->len;
+  ret_value->len = HDstrlen(s);
+  ret_value->end = ret_value->s + ret_value->len;
 
-    ret_value->wrapped = TRUE;
-    ret_value->max     = 0; /* Wrapped, not allocated */
-    ret_value->n       = 1;
+  ret_value->wrapped = TRUE;
+  ret_value->max = 0; /* Wrapped, not allocated */
+  ret_value->n = 1;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_wrap() */
 
 /*-------------------------------------------------------------------------
@@ -352,92 +337,93 @@ done:
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 H5_ATTR_FORMAT(printf, 2, 3)
-herr_t
-H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...)
-{
-    va_list args1, args2;
-    size_t  out_len;
-    herr_t  ret_value = SUCCEED; /* Return value */
+herr_t H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...) {
+  va_list args1, args2;
+  size_t out_len;
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    assert(rs);
-    assert(fmt);
+  /* Sanity checks */
+  assert(rs);
+  assert(fmt);
 
-    /* Prepare the [possibly wrapped or empty] ref-counted string for an append */
-    if (H5RS__prepare_for_append(rs) < 0)
-        HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL, "can't initialize ref-counted string");
+  /* Prepare the [possibly wrapped or empty] ref-counted string for an append */
+  if (H5RS__prepare_for_append(rs) < 0)
+    HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL,
+                "can't initialize ref-counted string");
 
-    /* Attempt to write formatted output into the managed string */
-    va_start(args1, fmt);
-    va_copy(args2, args1);
-    while ((out_len = (size_t)HDvsnprintf(rs->end, (rs->max - rs->len), fmt, args1)) >= (rs->max - rs->len)) {
-        /* Allocate a large enough buffer */
-        if (H5RS__resize_for_append(rs, out_len) < 0)
-            HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer");
+  /* Attempt to write formatted output into the managed string */
+  va_start(args1, fmt);
+  va_copy(args2, args1);
+  while ((out_len = (size_t)HDvsnprintf(rs->end, (rs->max - rs->len), fmt,
+                                        args1)) >= (rs->max - rs->len)) {
+    /* Allocate a large enough buffer */
+    if (H5RS__resize_for_append(rs, out_len) < 0)
+      HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL,
+                  "can't resize ref-counted string buffer");
 
-        /* Restart the va_list */
-        va_end(args1);
-        va_copy(args1, args2);
-    } /* end while */
-
-    /* Increment the size & end of the string */
-    rs->len += out_len;
-    rs->end += out_len;
-
-    /* Finish access to varargs */
+    /* Restart the va_list */
     va_end(args1);
-    va_end(args2);
+    va_copy(args1, args2);
+  } /* end while */
+
+  /* Increment the size & end of the string */
+  rs->len += out_len;
+  rs->end += out_len;
+
+  /* Finish access to varargs */
+  va_end(args1);
+  va_end(args2);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_asprintf_cat() */
 H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5RS_acat
  *
- * Purpose:     This function appends a character string to a ref-counted string,
- *              allocating the managed string if necessary.
+ * Purpose:     This function appends a character string to a ref-counted
+ *string, allocating the managed string if necessary.
  *
  * Return:      SUCCEED / FAIL
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5RS_acat(H5RS_str_t *rs, const char *s)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5RS_acat(H5RS_str_t *rs, const char *s) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    assert(rs);
-    assert(s);
+  /* Sanity checks */
+  assert(rs);
+  assert(s);
 
-    /* Concatenate the provided string on to the managed string */
-    if (*s) {
-        size_t len = HDstrlen(s);
+  /* Concatenate the provided string on to the managed string */
+  if (*s) {
+    size_t len = HDstrlen(s);
 
-        /* Allocate the underlying string, if necessary */
-        if (H5RS__prepare_for_append(rs) < 0)
-            HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL, "can't initialize ref-counted string");
+    /* Allocate the underlying string, if necessary */
+    if (H5RS__prepare_for_append(rs) < 0)
+      HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL,
+                  "can't initialize ref-counted string");
 
-        /* Increase the managed string's buffer size if necessary */
-        if ((rs->len + len) >= rs->max)
-            if (H5RS__resize_for_append(rs, len) < 0)
-                HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer");
+    /* Increase the managed string's buffer size if necessary */
+    if ((rs->len + len) >= rs->max)
+      if (H5RS__resize_for_append(rs, len) < 0)
+        HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL,
+                    "can't resize ref-counted string buffer");
 
-        /* Append the string */
-        memcpy(rs->end, s, len);
-        rs->end += len;
-        *rs->end = '\0';
-        rs->len += len;
-    } /* end if */
+    /* Append the string */
+    memcpy(rs->end, s, len);
+    rs->end += len;
+    *rs->end = '\0';
+    rs->len += len;
+  } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_acat() */
 
 /*-------------------------------------------------------------------------
@@ -451,42 +437,42 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5RS_ancat(H5RS_str_t *rs, const char *s, size_t n)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5RS_ancat(H5RS_str_t *rs, const char *s, size_t n) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    assert(rs);
-    assert(s);
+  /* Sanity checks */
+  assert(rs);
+  assert(s);
 
-    /* Concatenate the provided string on to the managed string */
-    if (n && *s) {
-        size_t len = HDstrlen(s);
+  /* Concatenate the provided string on to the managed string */
+  if (n && *s) {
+    size_t len = HDstrlen(s);
 
-        /* Limit characters to copy to the minimum of 'n' and 'len' */
-        n = MIN(len, n);
+    /* Limit characters to copy to the minimum of 'n' and 'len' */
+    n = MIN(len, n);
 
-        /* Allocate the underlying string, if necessary */
-        if (H5RS__prepare_for_append(rs) < 0)
-            HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL, "can't initialize ref-counted string");
+    /* Allocate the underlying string, if necessary */
+    if (H5RS__prepare_for_append(rs) < 0)
+      HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL,
+                  "can't initialize ref-counted string");
 
-        /* Increase the managed string's buffer size if necessary */
-        if ((rs->len + n) >= rs->max)
-            if (H5RS__resize_for_append(rs, n) < 0)
-                HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer");
+    /* Increase the managed string's buffer size if necessary */
+    if ((rs->len + n) >= rs->max)
+      if (H5RS__resize_for_append(rs, n) < 0)
+        HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL,
+                    "can't resize ref-counted string buffer");
 
-        /* Append the string */
-        memcpy(rs->end, s, n);
-        rs->end += n;
-        *rs->end = '\0';
-        rs->len += n;
-    } /* end if */
+    /* Append the string */
+    memcpy(rs->end, s, n);
+    rs->end += n;
+    *rs->end = '\0';
+    rs->len += n;
+  } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_ancat() */
 
 /*-------------------------------------------------------------------------
@@ -499,33 +485,33 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5RS_aputc(H5RS_str_t *rs, int c)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5RS_aputc(H5RS_str_t *rs, int c) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    assert(rs);
-    assert(c);
+  /* Sanity checks */
+  assert(rs);
+  assert(c);
 
-    /* Allocate the underlying string, if necessary */
-    if (H5RS__prepare_for_append(rs) < 0)
-        HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL, "can't initialize ref-counted string");
+  /* Allocate the underlying string, if necessary */
+  if (H5RS__prepare_for_append(rs) < 0)
+    HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL,
+                "can't initialize ref-counted string");
 
-    /* Increase the managed string's buffer size if necessary */
-    if ((rs->len + 1) >= rs->max)
-        if (H5RS__resize_for_append(rs, 1) < 0)
-            HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer");
+  /* Increase the managed string's buffer size if necessary */
+  if ((rs->len + 1) >= rs->max)
+    if (H5RS__resize_for_append(rs, 1) < 0)
+      HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL,
+                  "can't resize ref-counted string buffer");
 
-    /* Append the current character */
-    *rs->end++ = (char)c;
-    rs->len++;
-    *rs->end = '\0';
+  /* Append the current character */
+  *rs->end++ = (char)c;
+  rs->len++;
+  *rs->end = '\0';
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_aputc() */
 
 /*--------------------------------------------------------------------------
@@ -547,23 +533,21 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
-H5RS_decr(H5RS_str_t *rs)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+herr_t H5RS_decr(H5RS_str_t *rs) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity check */
-    assert(rs);
-    assert(rs->n > 0);
+  /* Sanity check */
+  assert(rs);
+  assert(rs->n > 0);
 
-    /* Decrement reference count for string */
-    if ((--rs->n) == 0) {
-        if (!rs->wrapped)
-            rs->s = (char *)H5FL_BLK_FREE(str_buf, rs->s);
-        rs = H5FL_FREE(H5RS_str_t, rs);
-    } /* end if */
+  /* Decrement reference count for string */
+  if ((--rs->n) == 0) {
+    if (!rs->wrapped)
+      rs->s = (char *)H5FL_BLK_FREE(str_buf, rs->s);
+    rs = H5FL_FREE(H5RS_str_t, rs);
+  } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5RS_decr() */
 
 /*--------------------------------------------------------------------------
@@ -584,32 +568,30 @@ H5RS_decr(H5RS_str_t *rs)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
-H5RS_incr(H5RS_str_t *rs)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5RS_incr(H5RS_str_t *rs) {
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+  FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity check */
-    assert(rs);
-    assert(rs->n > 0);
+  /* Sanity check */
+  assert(rs);
+  assert(rs->n > 0);
 
-    /* If the ref-counted string started life as a wrapper around an existing
-     * string, duplicate the string now, so that the wrapped string can go out
-     * scope appropriately.
-     */
-    if (rs->wrapped) {
-        if (H5RS__xstrdup(rs, rs->s) < 0)
-            HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
-        rs->wrapped = FALSE;
-    } /* end if */
+  /* If the ref-counted string started life as a wrapper around an existing
+   * string, duplicate the string now, so that the wrapped string can go out
+   * scope appropriately.
+   */
+  if (rs->wrapped) {
+    if (H5RS__xstrdup(rs, rs->s) < 0)
+      HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
+    rs->wrapped = FALSE;
+  } /* end if */
 
-    /* Increment reference count for string */
-    rs->n++;
+  /* Increment reference count for string */
+  rs->n++;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_incr() */
 
 /*--------------------------------------------------------------------------
@@ -631,17 +613,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5RS_str_t *
-H5RS_dup(H5RS_str_t *ret_value)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+H5RS_str_t *H5RS_dup(H5RS_str_t *ret_value) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check for valid reference counted string */
-    if (ret_value != NULL)
-        /* Increment reference count for string */
-        ret_value->n++;
+  /* Check for valid reference counted string */
+  if (ret_value != NULL)
+    /* Increment reference count for string */
+    ret_value->n++;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_dup() */
 
 /*--------------------------------------------------------------------------
@@ -665,19 +645,17 @@ H5RS_dup(H5RS_str_t *ret_value)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-int
-H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
-{
-    /* Can't return invalid value from this function */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+int H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2) {
+  /* Can't return invalid value from this function */
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity check */
-    assert(rs1);
-    assert(rs1->s);
-    assert(rs2);
-    assert(rs2->s);
+  /* Sanity check */
+  assert(rs1);
+  assert(rs1->s);
+  assert(rs2);
+  assert(rs2->s);
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(rs1->s, rs2->s))
+  FUNC_LEAVE_NOAPI(HDstrcmp(rs1->s, rs2->s))
 } /* end H5RS_cmp() */
 
 /*--------------------------------------------------------------------------
@@ -698,16 +676,14 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-size_t
-H5RS_len(const H5RS_str_t *rs)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+size_t H5RS_len(const H5RS_str_t *rs) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity check */
-    assert(rs);
-    assert(rs->s);
+  /* Sanity check */
+  assert(rs);
+  assert(rs->s);
 
-    FUNC_LEAVE_NOAPI(HDstrlen(rs->s))
+  FUNC_LEAVE_NOAPI(HDstrlen(rs->s))
 } /* end H5RS_len() */
 
 /*--------------------------------------------------------------------------
@@ -717,7 +693,8 @@ H5RS_len(const H5RS_str_t *rs)
     Get a pointer to the internal string contained in a ref-counted string
  USAGE
     char *H5RS_get_str(rs)
-        const H5RS_str_t *rs;   IN: Ref-counted string to get internal string from
+        const H5RS_str_t *rs;   IN: Ref-counted string to get internal string
+from
 
  RETURNS
     Returns a pointer to the internal string being ref-counted on success,
@@ -731,16 +708,14 @@ H5RS_len(const H5RS_str_t *rs)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-char *
-H5RS_get_str(const H5RS_str_t *rs)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+char *H5RS_get_str(const H5RS_str_t *rs) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity check */
-    assert(rs);
-    assert(rs->s);
+  /* Sanity check */
+  assert(rs);
+  assert(rs->s);
 
-    FUNC_LEAVE_NOAPI(rs->s)
+  FUNC_LEAVE_NOAPI(rs->s)
 } /* end H5RS_get_str() */
 
 /*--------------------------------------------------------------------------
@@ -750,26 +725,21 @@ H5RS_get_str(const H5RS_str_t *rs)
     Get the reference count for a ref-counted string
  USAGE
     unsigned H5RS_get_count(rs)
-        const H5RS_str_t *rs;   IN: Ref-counted string to get internal count from
+        const H5RS_str_t *rs;   IN: Ref-counted string to get internal count
+from
 
  RETURNS
-    Returns the number of references to the internal string being ref-counted on success,
-        0 on failure.
- DESCRIPTION
-    Gets the count of references to the reference counted string.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
+    Returns the number of references to the internal string being ref-counted on
+success, 0 on failure. DESCRIPTION Gets the count of references to the reference
+counted string. GLOBAL VARIABLES COMMENTS, BUGS, ASSUMPTIONS EXAMPLES REVISION
+LOG
 --------------------------------------------------------------------------*/
-unsigned
-H5RS_get_count(const H5RS_str_t *rs)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+unsigned H5RS_get_count(const H5RS_str_t *rs) {
+  FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity check */
-    assert(rs);
-    assert(rs->n > 0);
+  /* Sanity check */
+  assert(rs);
+  assert(rs->n > 0);
 
-    FUNC_LEAVE_NOAPI(rs->n)
+  FUNC_LEAVE_NOAPI(rs->n)
 } /* end H5RS_get_count() */

@@ -19,12 +19,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dpkg.h"      /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
+#include "H5private.h"   /* Generic Functions                        */
 
 /****************/
 /* Local Macros */
@@ -60,25 +60,24 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Ddebug(hid_t dset_id)
-{
-    H5D_t *dset;                /* Dataset to debug */
-    herr_t ret_value = SUCCEED; /* Return value */
+herr_t H5Ddebug(hid_t dset_id) {
+  H5D_t *dset;                /* Dataset to debug */
+  herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", dset_id);
+  FUNC_ENTER_API(FAIL)
+  H5TRACE1("e", "i", dset_id);
 
-    /* Check args */
-    if (NULL == (dset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+  /* Check args */
+  if (NULL == (dset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
-    /* Print B-tree information */
-    if (H5D_CHUNKED == dset->shared->layout.type)
-        (void)H5D__chunk_dump_index(dset, stdout);
-    else if (H5D_CONTIGUOUS == dset->shared->layout.type)
-        fprintf(stdout, "    %-10s %" PRIuHADDR "\n", "Address:", dset->shared->layout.storage.u.contig.addr);
+  /* Print B-tree information */
+  if (H5D_CHUNKED == dset->shared->layout.type)
+    (void)H5D__chunk_dump_index(dset, stdout);
+  else if (H5D_CONTIGUOUS == dset->shared->layout.type)
+    fprintf(stdout, "    %-10s %" PRIuHADDR "\n",
+            "Address:", dset->shared->layout.storage.u.contig.addr);
 
 done:
-    FUNC_LEAVE_API(ret_value)
+  FUNC_LEAVE_API(ret_value)
 } /* end H5Ddebug() */

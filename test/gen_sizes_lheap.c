@@ -32,39 +32,38 @@
  *
  *-------------------------------------------------------------------------
  */
-int
-main(void)
-{
-    hid_t file, space, dset, fcpl;
+int main(void) {
+  hid_t file, space, dset, fcpl;
 
-    /* Create the FCPL */
-    fcpl = H5Pcreate(H5P_FILE_CREATE);
-    if (fcpl < 0)
-        printf("fcpl < 0!\n");
+  /* Create the FCPL */
+  fcpl = H5Pcreate(H5P_FILE_CREATE);
+  if (fcpl < 0)
+    printf("fcpl < 0!\n");
 
-    /* Set sizeof_addr and sizeof_size to be 4 */
-    if (H5Pset_sizes(fcpl, 4, 4) < 0)
-        printf("H5Pset_sizes < 0!\n");
+  /* Set sizeof_addr and sizeof_size to be 4 */
+  if (H5Pset_sizes(fcpl, 4, 4) < 0)
+    printf("H5Pset_sizes < 0!\n");
 
-    /* Create the file */
-    file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
-    if (file < 0)
-        printf("file < 0!\n");
+  /* Create the file */
+  file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+  if (file < 0)
+    printf("file < 0!\n");
 
-    /* Create the dataspace (for dataset) */
-    space = H5Screate(H5S_SCALAR);
-    if (space < 0)
-        printf("space < 0!\n");
+  /* Create the dataspace (for dataset) */
+  space = H5Screate(H5S_SCALAR);
+  if (space < 0)
+    printf("space < 0!\n");
 
-    /* Create the dataset with compound array fields */
-    dset = H5Dcreate2(file, "Dataset1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (dset < 0)
-        printf("dset < 0!\n");
+  /* Create the dataset with compound array fields */
+  dset = H5Dcreate2(file, "Dataset1", H5T_NATIVE_INT, space, H5P_DEFAULT,
+                    H5P_DEFAULT, H5P_DEFAULT);
+  if (dset < 0)
+    printf("dset < 0!\n");
 
-    H5Dclose(dset);
-    H5Sclose(space);
-    H5Fclose(file);
-    H5Pclose(fcpl);
+  H5Dclose(dset);
+  H5Sclose(space);
+  H5Fclose(file);
+  H5Pclose(fcpl);
 
-    return 0;
+  return 0;
 }

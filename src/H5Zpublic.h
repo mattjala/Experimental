@@ -195,9 +195,9 @@ typedef int H5Z_filter_t;
 /**
  * \ingroup SCALEOFFSET */
 typedef enum H5Z_SO_scale_type_t {
-    H5Z_SO_FLOAT_DSCALE = 0,
-    H5Z_SO_FLOAT_ESCALE = 1,
-    H5Z_SO_INT          = 2
+  H5Z_SO_FLOAT_DSCALE = 0,
+  H5Z_SO_FLOAT_ESCALE = 1,
+  H5Z_SO_INT = 2
 } H5Z_SO_scale_type_t;
 
 /**
@@ -205,10 +205,10 @@ typedef enum H5Z_SO_scale_type_t {
  * Values to decide if EDC is enabled for reading data
  */
 typedef enum H5Z_EDC_t {
-    H5Z_ERROR_EDC   = -1, /**< error value */
-    H5Z_DISABLE_EDC = 0,
-    H5Z_ENABLE_EDC  = 1,
-    H5Z_NO_EDC      = 2 /**< sentinel */
+  H5Z_ERROR_EDC = -1, /**< error value */
+  H5Z_DISABLE_EDC = 0,
+  H5Z_ENABLE_EDC = 1,
+  H5Z_NO_EDC = 2 /**< sentinel */
 } H5Z_EDC_t;
 
 /* Bit flags for H5Zget_filter_info */
@@ -219,17 +219,18 @@ typedef enum H5Z_EDC_t {
  * Return values for filter callback function
  */
 typedef enum H5Z_cb_return_t {
-    H5Z_CB_ERROR = -1, /**< error value */
-    H5Z_CB_FAIL  = 0,  /**< I/O should fail if filter fails. */
-    H5Z_CB_CONT  = 1,  /**< I/O continues if filter fails.   */
-    H5Z_CB_NO    = 2   /**< sentinel */
+  H5Z_CB_ERROR = -1, /**< error value */
+  H5Z_CB_FAIL = 0,   /**< I/O should fail if filter fails. */
+  H5Z_CB_CONT = 1,   /**< I/O continues if filter fails.   */
+  H5Z_CB_NO = 2      /**< sentinel */
 } H5Z_cb_return_t;
 
 //! <!-- [H5Z_filter_func_t_snip] -->
 /**
  *  Filter callback function definition
  */
-typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
+typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf,
+                                             size_t buf_size, void *op_data);
 //! <!-- [H5Z_filter_func_t_snip] -->
 
 #ifdef __cplusplus
@@ -286,8 +287,8 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  *          H5Z_FILTER_CONFIG_ENCODE_ENABLED & filter_config_flags
  *          \endcode
  *          is true, i.e., greater than 0 (zero), the queried filter
- *          is configured to encode data; if the value is \c FALSE, i.e., equal to
- *          0 (zero), the filter is not so configured.
+ *          is configured to encode data; if the value is \c FALSE, i.e., equal
+ * to 0 (zero), the filter is not so configured.
  *
  *          If a filter is not encode-enabled, the corresponding \c H5Pset_*
  *          function will return an error if the filter is added to a dataset
@@ -300,13 +301,14 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  *          to read an existing file encoded with that filter.
  *
  *          This function should be called, and the returned \p
- *          filter_config_flags should be analyzed, before calling any other function,
- *          such as H5Pset_szip(), that might require a particular filter
+ *          filter_config_flags should be analyzed, before calling any other
+ * function, such as H5Pset_szip(), that might require a particular filter
  *          configuration.
  *
  * \since 1.6.3
  */
-H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter,
+                                 unsigned int *filter_config_flags);
 
 #ifdef __cplusplus
 }

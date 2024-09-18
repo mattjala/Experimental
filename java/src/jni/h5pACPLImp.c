@@ -20,10 +20,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdlib.h>
-#include "hdf5.h"
-#include "h5jni.h"
 #include "h5pACPLImp.h"
+#include "h5jni.h"
+#include "hdf5.h"
+#include <stdlib.h>
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.

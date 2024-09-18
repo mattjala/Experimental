@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "H5Include.h"
+#include "H5DxferProp.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
+#include "H5Include.h"
 #include "H5PropList.h"
-#include "H5DxferProp.h"
 
 namespace H5 {
 
@@ -39,25 +39,23 @@ DSetMemXferPropList *DSetMemXferPropList::DEFAULT_ = 0;
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
 //--------------------------------------------------------------------------
-DSetMemXferPropList *
-DSetMemXferPropList::getConstant()
-{
-    // Tell the C library not to clean up, H5Library::termH5cpp will call
-    // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called) {
-        (void)H5dont_atexit();
-        IdComponent::H5dontAtexit_called = true;
-    }
+DSetMemXferPropList *DSetMemXferPropList::getConstant() {
+  // Tell the C library not to clean up, H5Library::termH5cpp will call
+  // H5close - more dependency if use H5Library::dontAtExit()
+  if (!IdComponent::H5dontAtexit_called) {
+    (void)H5dont_atexit();
+    IdComponent::H5dontAtexit_called = true;
+  }
 
-    // If the constant pointer is not allocated, allocate it. Otherwise,
-    // throw because it shouldn't be.
-    if (DEFAULT_ == 0)
-        DEFAULT_ = new DSetMemXferPropList(H5P_DATASET_XFER);
-    else
-        throw PropListIException(
-            "DSetMemXferPropList::getConstant",
-            "DSetMemXferPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return (DEFAULT_);
+  // If the constant pointer is not allocated, allocate it. Otherwise,
+  // throw because it shouldn't be.
+  if (DEFAULT_ == 0)
+    DEFAULT_ = new DSetMemXferPropList(H5P_DATASET_XFER);
+  else
+    throw PropListIException("DSetMemXferPropList::getConstant",
+                             "DSetMemXferPropList::getConstant is being "
+                             "invoked on an allocated DEFAULT_");
+  return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -65,11 +63,7 @@ DSetMemXferPropList::getConstant()
 // Purpose:     Deletes the constant object that DSetMemXferPropList::DEFAULT_
 //              points to.
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::deleteConstants()
-{
-    delete DEFAULT_;
-}
+void DSetMemXferPropList::deleteConstants() { delete DEFAULT_; }
 
 //--------------------------------------------------------------------------
 // Purpose      Constant for default dataset memory and transfer property list.
@@ -83,18 +77,16 @@ const DSetMemXferPropList &DSetMemXferPropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub dataset memory and
 ///             transfer property list object.
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER)
-{
-}
+DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList constructor
 ///\brief       Creates a dataset transfer property list with transform
 ///             expression.
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const char *exp) : PropList(H5P_DATASET_XFER)
-{
-    setDataTransform(exp);
+DSetMemXferPropList::DSetMemXferPropList(const char *exp)
+    : PropList(H5P_DATASET_XFER) {
+  setDataTransform(exp);
 }
 
 //--------------------------------------------------------------------------
@@ -104,9 +96,8 @@ DSetMemXferPropList::DSetMemXferPropList(const char *exp) : PropList(H5P_DATASET
 ///\param       original - IN: Original dataset memory and transfer property
 ///                            list object to copy
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : PropList(original)
-{
-}
+DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original)
+    : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList overloaded constructor
@@ -115,44 +106,40 @@ DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : 
 ///\param       plist_id - IN: Id of an existing dataset memory and transfer
 ///                            property list
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id)
-{
-}
+DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id)
+    : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::setBuffer
 ///\brief       Sets type conversion and background buffers.
-///\param       size  - IN: Size, in bytes, of the type conversion and background buffers
-///\param       tconv - IN: Pointer to application-allocated type conversion buffer
-///\param       bkg   - IN: Pointer to application-allocated background buffer
-///\exception   H5::PropListIException
+///\param       size  - IN: Size, in bytes, of the type conversion and
+///background buffers \param       tconv - IN: Pointer to application-allocated
+///type conversion buffer \param       bkg   - IN: Pointer to
+///application-allocated background buffer \exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setBuffer(size_t size, void *tconv, void *bkg) const
-{
-    herr_t ret_value = H5Pset_buffer(id, size, tconv, bkg);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setBuffer", "H5Pset_buffer failed");
-    }
+void DSetMemXferPropList::setBuffer(size_t size, void *tconv, void *bkg) const {
+  herr_t ret_value = H5Pset_buffer(id, size, tconv, bkg);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setBuffer",
+                             "H5Pset_buffer failed");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::getBuffer
 ///\brief       Reads buffer settings.
-///\param       tconv - OUT: Pointer to application-allocated type conversion buf
-///\param       bkg   - OUT: Pointer to application-allocated background buffer
-///\return      Buffer size, in bytes
-///\exception   H5::PropListIException
+///\param       tconv - OUT: Pointer to application-allocated type conversion
+///buf \param       bkg   - OUT: Pointer to application-allocated background
+///buffer \return      Buffer size, in bytes \exception   H5::PropListIException
 //--------------------------------------------------------------------------
-size_t
-DSetMemXferPropList::getBuffer(void **tconv, void **bkg) const
-{
-    size_t buffer_size = H5Pget_buffer(id, tconv, bkg);
-    if (buffer_size == 0) {
-        throw PropListIException("DSetMemXferPropList::getBuffer",
-                                 "H5Pget_buffer returned 0 for buffer size - failure");
-    }
-    return (buffer_size);
+size_t DSetMemXferPropList::getBuffer(void **tconv, void **bkg) const {
+  size_t buffer_size = H5Pget_buffer(id, tconv, bkg);
+  if (buffer_size == 0) {
+    throw PropListIException(
+        "DSetMemXferPropList::getBuffer",
+        "H5Pget_buffer returned 0 for buffer size - failure");
+  }
+  return (buffer_size);
 }
 
 //--------------------------------------------------------------------------
@@ -161,13 +148,12 @@ DSetMemXferPropList::getBuffer(void **tconv, void **bkg) const
 ///\param       status - IN: Status to set, true or false
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setPreserve(bool status) const
-{
-    herr_t ret_value = H5Pset_preserve(id, static_cast<hbool_t>(status));
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setPreserve", "H5Pset_preserve failed");
-    }
+void DSetMemXferPropList::setPreserve(bool status) const {
+  herr_t ret_value = H5Pset_preserve(id, static_cast<hbool_t>(status));
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setPreserve",
+                             "H5Pset_preserve failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -176,67 +162,65 @@ DSetMemXferPropList::setPreserve(bool status) const
 ///\return      Status of the dataset transfer property list
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-bool
-DSetMemXferPropList::getPreserve() const
-{
-    int ret_value = H5Pget_preserve(id);
-    if (ret_value > 0)
-        return true;
-    else if (ret_value == 0)
-        return false;
-    else {
-        throw PropListIException("DSetMemXferPropList::getPreserve",
-                                 "H5Pget_preserve returned negative value for status");
-    }
+bool DSetMemXferPropList::getPreserve() const {
+  int ret_value = H5Pget_preserve(id);
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else {
+    throw PropListIException(
+        "DSetMemXferPropList::getPreserve",
+        "H5Pget_preserve returned negative value for status");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::setBtreeRatios
 ///\brief       Sets B-tree split ratios for a dataset transfer property list.
 ///\param       left   - IN: B-tree split ratio for left-most nodes
-///\param       middle - IN: B-tree split ratio for right-most nodes and lone nodes
-///\param       right  - IN: B-tree split ratio for all other nodes
+///\param       middle - IN: B-tree split ratio for right-most nodes and lone
+///nodes \param       right  - IN: B-tree split ratio for all other nodes
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setBtreeRatios(double left, double middle, double right) const
-{
-    herr_t ret_value = H5Pset_btree_ratios(id, left, middle, right);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setBtreeRatios", "H5Pset_btree_ratios failed");
-    }
+void DSetMemXferPropList::setBtreeRatios(double left, double middle,
+                                         double right) const {
+  herr_t ret_value = H5Pset_btree_ratios(id, left, middle, right);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setBtreeRatios",
+                             "H5Pset_btree_ratios failed");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::getBtreeRatios
 ///\brief       Gets B-tree split ratios for a dataset transfer property list.
 ///\param       left   - OUT: B-tree split ratio for left-most nodes
-///\param       middle - OUT: B-tree split ratio for right-most nodes and lone nodes
-///\param       right  - OUT: B-tree split ratio for all other nodes
+///\param       middle - OUT: B-tree split ratio for right-most nodes and lone
+///nodes \param       right  - OUT: B-tree split ratio for all other nodes
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::getBtreeRatios(double &left, double &middle, double &right) const
-{
-    herr_t ret_value = H5Pget_btree_ratios(id, &left, &middle, &right);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::getBtreeRatios", "H5Pget_btree_ratios failed");
-    }
+void DSetMemXferPropList::getBtreeRatios(double &left, double &middle,
+                                         double &right) const {
+  herr_t ret_value = H5Pget_btree_ratios(id, &left, &middle, &right);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::getBtreeRatios",
+                             "H5Pget_btree_ratios failed");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::setDataTransform
 ///\brief       Sets data transform expression.
-///\param       expression - IN: null-terminated data transform expression (char*)
-///\exception   H5::PropListIException
+///\param       expression - IN: null-terminated data transform expression
+///(char*) \exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setDataTransform(const char *expression) const
-{
-    herr_t ret_value = H5Pset_data_transform(id, expression);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setDataTransform", "H5Pset_data_transform failed");
-    }
+void DSetMemXferPropList::setDataTransform(const char *expression) const {
+  herr_t ret_value = H5Pset_data_transform(id, expression);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setDataTransform",
+                             "H5Pset_data_transform failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -246,10 +230,9 @@ DSetMemXferPropList::setDataTransform(const char *expression) const
 ///\param       expression - IN: H5std_string data transform expression
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setDataTransform(const H5std_string &expression) const
-{
-    setDataTransform(expression.c_str());
+void DSetMemXferPropList::setDataTransform(
+    const H5std_string &expression) const {
+  setDataTransform(expression.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -260,70 +243,70 @@ DSetMemXferPropList::setDataTransform(const H5std_string &expression) const
 ///                              null terminator
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-ssize_t
-DSetMemXferPropList::getDataTransform(char *exp, size_t buf_size) const
-{
-    // H5Pget_data_transform will get buf_size characters of the expression
-    // including the null terminator
-    ssize_t exp_len;
-    exp_len = H5Pget_data_transform(id, exp, buf_size);
+ssize_t DSetMemXferPropList::getDataTransform(char *exp,
+                                              size_t buf_size) const {
+  // H5Pget_data_transform will get buf_size characters of the expression
+  // including the null terminator
+  ssize_t exp_len;
+  exp_len = H5Pget_data_transform(id, exp, buf_size);
 
-    // H5Pget_data_transform returns a negative value, raise an exception
-    if (exp_len < 0) {
-        throw PropListIException("DSetMemXferPropList::getDataTransform", "H5Pget_data_transform failed");
-    }
+  // H5Pget_data_transform returns a negative value, raise an exception
+  if (exp_len < 0) {
+    throw PropListIException("DSetMemXferPropList::getDataTransform",
+                             "H5Pget_data_transform failed");
+  }
 
-    // H5Pget_data_transform will put a null terminator at the end of the
-    // expression or at [buf_size-1] if the expression is at least the size
-    // of the buffer.
+  // H5Pget_data_transform will put a null terminator at the end of the
+  // expression or at [buf_size-1] if the expression is at least the size
+  // of the buffer.
 
-    // Return the expression length, which might be different from buf_size
-    return (exp_len);
+  // Return the expression length, which might be different from buf_size
+  return (exp_len);
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::getDataTransform
 ///\brief       This is an overloaded member function, provided for convenience.
-///             It takes no parameter and returns a \c H5std_string for the expression.
+///             It takes no parameter and returns a \c H5std_string for the
+///             expression.
 ///
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-H5std_string
-DSetMemXferPropList::getDataTransform() const
-{
-    // Initialize string to "", so that if there is no expression, the returned
-    // string will be empty
-    H5std_string expression;
+H5std_string DSetMemXferPropList::getDataTransform() const {
+  // Initialize string to "", so that if there is no expression, the returned
+  // string will be empty
+  H5std_string expression;
 
-    // Preliminary call to get the expression's length
-    ssize_t exp_len = H5Pget_data_transform(id, NULL, 0);
+  // Preliminary call to get the expression's length
+  ssize_t exp_len = H5Pget_data_transform(id, NULL, 0);
 
-    // If H5Pget_data_transform returns a negative value, raise an exception
-    if (exp_len < 0) {
-        throw PropListIException("DSetMemXferPropList::getDataTransform", "H5Pget_data_transform failed");
-    }
+  // If H5Pget_data_transform returns a negative value, raise an exception
+  if (exp_len < 0) {
+    throw PropListIException("DSetMemXferPropList::getDataTransform",
+                             "H5Pget_data_transform failed");
+  }
 
-    // If expression exists, calls C routine again to get it
-    else if (exp_len > 0) {
+  // If expression exists, calls C routine again to get it
+  else if (exp_len > 0) {
 
-        // The actual size is the cast value + 1 for the terminal ASCII NUL
-        // (unfortunate in/out type sign mismatch)
-        size_t actual_exp_len = static_cast<size_t>(exp_len) + 1;
+    // The actual size is the cast value + 1 for the terminal ASCII NUL
+    // (unfortunate in/out type sign mismatch)
+    size_t actual_exp_len = static_cast<size_t>(exp_len) + 1;
 
-        // Temporary buffer for char* expression
-        char *exp_C = new char[actual_exp_len]();
+    // Temporary buffer for char* expression
+    char *exp_C = new char[actual_exp_len]();
 
-        // Used overloaded function
-        exp_len = getDataTransform(exp_C, actual_exp_len);
+    // Used overloaded function
+    exp_len = getDataTransform(exp_C, actual_exp_len);
 
-        // Convert the C expression to return
-        expression = exp_C;
+    // Convert the C expression to return
+    expression = exp_C;
 
-        // Clean up resource
-        delete[] exp_C;
-    }
-    // Return the string expression
-    return (expression);
+    // Clean up resource
+    delete[] exp_C;
+  }
+  // Return the string expression
+  return (expression);
 }
 
 //--------------------------------------------------------------------------
@@ -334,13 +317,13 @@ DSetMemXferPropList::getDataTransform() const
 ///\param       user_data - IN: User's data
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setTypeConvCB(H5T_conv_except_func_t op, void *user_data) const
-{
-    herr_t ret_value = H5Pset_type_conv_cb(id, op, user_data);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setTypeConvCB", "H5Pset_type_conv_cb failed");
-    }
+void DSetMemXferPropList::setTypeConvCB(H5T_conv_except_func_t op,
+                                        void *user_data) const {
+  herr_t ret_value = H5Pset_type_conv_cb(id, op, user_data);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setTypeConvCB",
+                             "H5Pset_type_conv_cb failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -350,13 +333,13 @@ DSetMemXferPropList::setTypeConvCB(H5T_conv_except_func_t op, void *user_data) c
 ///\param       user_data - IN: Retrieved user data
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::getTypeConvCB(H5T_conv_except_func_t *op, void **user_data) const
-{
-    herr_t ret_value = H5Pget_type_conv_cb(id, op, user_data);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::getTypeConvCB", "H5Pget_type_conv_cb failed");
-    }
+void DSetMemXferPropList::getTypeConvCB(H5T_conv_except_func_t *op,
+                                        void **user_data) const {
+  herr_t ret_value = H5Pget_type_conv_cb(id, op, user_data);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::getTypeConvCB",
+                             "H5Pget_type_conv_cb failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -368,14 +351,16 @@ DSetMemXferPropList::getTypeConvCB(H5T_conv_except_func_t *op, void **user_data)
 ///\param       free_info  - IN: User's free parameters
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setVlenMemManager(H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
-                                       void *free_info) const
-{
-    herr_t ret_value = H5Pset_vlen_mem_manager(id, alloc_func, alloc_info, free_func, free_info);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setVlenMemManager", "H5Pset_vlen_mem_manager failed");
-    }
+void DSetMemXferPropList::setVlenMemManager(H5MM_allocate_t alloc_func,
+                                            void *alloc_info,
+                                            H5MM_free_t free_func,
+                                            void *free_info) const {
+  herr_t ret_value =
+      H5Pset_vlen_mem_manager(id, alloc_func, alloc_info, free_func, free_info);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setVlenMemManager",
+                             "H5Pset_vlen_mem_manager failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -385,10 +370,8 @@ DSetMemXferPropList::setVlenMemManager(H5MM_allocate_t alloc_func, void *alloc_i
 ///
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setVlenMemManager() const
-{
-    setVlenMemManager(NULL, NULL, NULL, NULL);
+void DSetMemXferPropList::setVlenMemManager() const {
+  setVlenMemManager(NULL, NULL, NULL, NULL);
 }
 
 //--------------------------------------------------------------------------
@@ -400,14 +383,16 @@ DSetMemXferPropList::setVlenMemManager() const
 ///\param       free_info  - OUT: User's free parameters
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::getVlenMemManager(H5MM_allocate_t &alloc_func, void **alloc_info, H5MM_free_t &free_func,
-                                       void **free_info) const
-{
-    herr_t ret_value = H5Pget_vlen_mem_manager(id, &alloc_func, alloc_info, &free_func, free_info);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::getVlenMemManager", "H5Pget_vlen_mem_manager failed");
-    }
+void DSetMemXferPropList::getVlenMemManager(H5MM_allocate_t &alloc_func,
+                                            void **alloc_info,
+                                            H5MM_free_t &free_func,
+                                            void **free_info) const {
+  herr_t ret_value = H5Pget_vlen_mem_manager(id, &alloc_func, alloc_info,
+                                             &free_func, free_info);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::getVlenMemManager",
+                             "H5Pget_vlen_mem_manager failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -419,14 +404,12 @@ DSetMemXferPropList::getVlenMemManager(H5MM_allocate_t &alloc_func, void **alloc
 ///             For detail, please refer to the H5Pset_small_data_block_size
 ///             API in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setSmallDataBlockSize(hsize_t size) const
-{
-    herr_t ret_value = H5Pset_small_data_block_size(id, size);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setSmallDataBlockSize",
-                                 "H5Pset_small_data_block_size failed");
-    }
+void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size) const {
+  herr_t ret_value = H5Pset_small_data_block_size(id, size);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setSmallDataBlockSize",
+                             "H5Pset_small_data_block_size failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -435,16 +418,14 @@ DSetMemXferPropList::setSmallDataBlockSize(hsize_t size) const
 ///\return      Size of the small data block, in bytes
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-hsize_t
-DSetMemXferPropList::getSmallDataBlockSize() const
-{
-    hsize_t size;
-    herr_t  ret_value = H5Pget_small_data_block_size(id, &size);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::getSmallDataBlockSize",
-                                 "H5Pget_small_data_block_size failed");
-    }
-    return (size);
+hsize_t DSetMemXferPropList::getSmallDataBlockSize() const {
+  hsize_t size;
+  herr_t ret_value = H5Pget_small_data_block_size(id, &size);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::getSmallDataBlockSize",
+                             "H5Pget_small_data_block_size failed");
+  }
+  return (size);
 }
 
 //--------------------------------------------------------------------------
@@ -456,14 +437,12 @@ DSetMemXferPropList::getSmallDataBlockSize() const
 ///             For detail, please refer to the H5Pset_hyper_vector_size
 ///             API in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setHyperVectorSize(size_t vector_size) const
-{
-    herr_t ret_value = H5Pset_hyper_vector_size(id, vector_size);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setHyperVectorSize",
-                                 "H5Pset_hyper_vector_size failed");
-    }
+void DSetMemXferPropList::setHyperVectorSize(size_t vector_size) const {
+  herr_t ret_value = H5Pset_hyper_vector_size(id, vector_size);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setHyperVectorSize",
+                             "H5Pset_hyper_vector_size failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -473,16 +452,14 @@ DSetMemXferPropList::setHyperVectorSize(size_t vector_size) const
 ///\return      Number of I/O vectors
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-size_t
-DSetMemXferPropList::getHyperVectorSize() const
-{
-    size_t vector_size;
-    herr_t ret_value = H5Pget_hyper_vector_size(id, &vector_size);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::getHyperVectorSize",
-                                 "H5Pget_hyper_vector_size failed");
-    }
-    return (vector_size);
+size_t DSetMemXferPropList::getHyperVectorSize() const {
+  size_t vector_size;
+  herr_t ret_value = H5Pget_hyper_vector_size(id, &vector_size);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::getHyperVectorSize",
+                             "H5Pget_hyper_vector_size failed");
+  }
+  return (vector_size);
 }
 
 //--------------------------------------------------------------------------
@@ -502,13 +479,12 @@ DSetMemXferPropList::getHyperVectorSize() const
 ///             \li \c H5Z_ENABLE_EDC   (default)
 ///             \li \c H5Z_DISABLE_EDC
 //--------------------------------------------------------------------------
-void
-DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check) const
-{
-    herr_t ret_value = H5Pset_edc_check(id, check);
-    if (ret_value < 0) {
-        throw PropListIException("DSetMemXferPropList::setEDCCheck", "H5Pset_edc_check failed");
-    }
+void DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check) const {
+  herr_t ret_value = H5Pset_edc_check(id, check);
+  if (ret_value < 0) {
+    throw PropListIException("DSetMemXferPropList::setEDCCheck",
+                             "H5Pset_edc_check failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -517,22 +493,19 @@ DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check) const
 ///\return      \c H5Z_ENABLE_EDC or \c H5Z_DISABLE_EDC
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
-H5Z_EDC_t
-DSetMemXferPropList::getEDCCheck() const
-{
-    H5Z_EDC_t check = H5Pget_edc_check(id);
-    if (check < 0) {
-        throw PropListIException("DSetMemXferPropList::getEDCCheck", "H5Pget_edc_check failed");
-    }
-    return (check);
+H5Z_EDC_t DSetMemXferPropList::getEDCCheck() const {
+  H5Z_EDC_t check = H5Pget_edc_check(id);
+  if (check < 0) {
+    throw PropListIException("DSetMemXferPropList::getEDCCheck",
+                             "H5Pget_edc_check failed");
+  }
+  return (check);
 }
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
-DSetMemXferPropList::~DSetMemXferPropList()
-{
-}
+DSetMemXferPropList::~DSetMemXferPropList() {}
 
 } // namespace H5

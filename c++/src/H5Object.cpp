@@ -12,28 +12,28 @@
 
 #include <string>
 
-#include "H5Include.h"
-#include "H5Exception.h"
-#include "H5IdComponent.h"
-#include "H5PropList.h"
-#include "H5FaccProp.h"
-#include "H5FcreatProp.h"
-#include "H5OcreatProp.h"
+#include "H5AbstractDs.h"
+#include "H5Attribute.h"
+#include "H5CommonFG.h"
+#include "H5DaccProp.h"
+#include "H5DataSet.h"
+#include "H5DataSpace.h"
+#include "H5DataType.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
-#include "H5LcreatProp.h"
+#include "H5Exception.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
+#include "H5File.h"
+#include "H5Group.h"
+#include "H5IdComponent.h"
+#include "H5Include.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
-#include "H5DataType.h"
-#include "H5DataSpace.h"
-#include "H5AbstractDs.h"
-#include "H5CommonFG.h"
-#include "H5Group.h"
-#include "H5File.h"
-#include "H5DataSet.h"
-#include "H5Attribute.h"
+#include "H5OcreatProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 
@@ -42,31 +42,29 @@ namespace H5 {
 // C library function H5Aiterate2
 extern "C" {
 
-static herr_t
-userAttrOpWrpr(hid_t loc_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
-{
-    // Unused
-    (void)loc_id;
-    (void)ainfo;
+static herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
+                             const H5A_info_t *ainfo, void *op_data) {
+  // Unused
+  (void)loc_id;
+  (void)ainfo;
 
-    H5std_string       s_attr_name = H5std_string(attr_name);
-    UserData4Aiterate *myData      = reinterpret_cast<UserData4Aiterate *>(op_data);
-    myData->op(*myData->location, s_attr_name, myData->opData);
-    return 0;
+  H5std_string s_attr_name = H5std_string(attr_name);
+  UserData4Aiterate *myData = reinterpret_cast<UserData4Aiterate *>(op_data);
+  myData->op(*myData->location, s_attr_name, myData->opData);
+  return 0;
 }
 
 // userVisitOpWrpr interfaces between the user's function and the
 // C library function H5Ovisit3
-static herr_t
-userVisitOpWrpr(hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info, void *op_data)
-{
-    // Unused
-    (void)obj_id;
+static herr_t userVisitOpWrpr(hid_t obj_id, const char *attr_name,
+                              const H5O_info2_t *obj_info, void *op_data) {
+  // Unused
+  (void)obj_id;
 
-    H5std_string    s_attr_name = H5std_string(attr_name);
-    UserData4Visit *myData      = reinterpret_cast<UserData4Visit *>(op_data);
-    int             status      = myData->op(*myData->obj, s_attr_name, obj_info, myData->opData);
-    return status;
+  H5std_string s_attr_name = H5std_string(attr_name);
+  UserData4Visit *myData = reinterpret_cast<UserData4Visit *>(op_data);
+  int status = myData->op(*myData->obj, s_attr_name, obj_info, myData->opData);
+  return status;
 }
 
 } // extern "C"
@@ -74,9 +72,7 @@ userVisitOpWrpr(hid_t obj_id, const char *attr_name, const H5O_info2_t *obj_info
 //--------------------------------------------------------------------------
 // Function:    H5Object default constructor (protected)
 //--------------------------------------------------------------------------
-H5Object::H5Object() : H5Location()
-{
-}
+H5Object::H5Object() : H5Location() {}
 
 //--------------------------------------------------------------------------
 // Function:    f_Attribute_setId - friend
@@ -87,11 +83,7 @@ H5Object::H5Object() : H5Location()
 // param        attr   - IN/OUT: Attribute object to be changed
 // param        new_id - IN: New id to set
 //--------------------------------------------------------------------------
-void
-f_Attribute_setId(Attribute *attr, hid_t new_id)
-{
-    attr->p_setId(new_id);
-}
+void f_Attribute_setId(Attribute *attr, hid_t new_id) { attr->p_setId(new_id); }
 #endif
 
 //--------------------------------------------------------------------------
@@ -114,23 +106,23 @@ f_Attribute_setId(Attribute *attr, hid_t new_id)
 ///             delete the existing one with \c H5Object::removeAttr, then
 ///             recreate it with this function.
 //--------------------------------------------------------------------------
-Attribute
-H5Object::createAttribute(const char *name, const DataType &data_type, const DataSpace &data_space,
-                          const PropList &create_plist) const
-{
-    hid_t type_id  = data_type.getId();
-    hid_t space_id = data_space.getId();
-    hid_t plist_id = create_plist.getId();
-    hid_t attr_id  = H5Acreate2(getId(), name, type_id, space_id, plist_id, H5P_DEFAULT);
+Attribute H5Object::createAttribute(const char *name, const DataType &data_type,
+                                    const DataSpace &data_space,
+                                    const PropList &create_plist) const {
+  hid_t type_id = data_type.getId();
+  hid_t space_id = data_space.getId();
+  hid_t plist_id = create_plist.getId();
+  hid_t attr_id =
+      H5Acreate2(getId(), name, type_id, space_id, plist_id, H5P_DEFAULT);
 
-    // If the attribute id is valid, create and return the Attribute object
-    if (attr_id > 0) {
-        Attribute attr;
-        f_Attribute_setId(&attr, attr_id);
-        return (attr);
-    }
-    else
-        throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
+  // If the attribute id is valid, create and return the Attribute object
+  if (attr_id > 0) {
+    Attribute attr;
+    f_Attribute_setId(&attr, attr_id);
+    return (attr);
+  } else
+    throw AttributeIException(inMemFunc("createAttribute"),
+                              "H5Acreate2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -139,11 +131,11 @@ H5Object::createAttribute(const char *name, const DataType &data_type, const Dat
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 //--------------------------------------------------------------------------
-Attribute
-H5Object::createAttribute(const H5std_string &name, const DataType &data_type, const DataSpace &data_space,
-                          const PropList &create_plist) const
-{
-    return (createAttribute(name.c_str(), data_type, data_space, create_plist));
+Attribute H5Object::createAttribute(const H5std_string &name,
+                                    const DataType &data_type,
+                                    const DataSpace &data_space,
+                                    const PropList &create_plist) const {
+  return (createAttribute(name.c_str(), data_type, data_space, create_plist));
 }
 
 //--------------------------------------------------------------------------
@@ -153,18 +145,15 @@ H5Object::createAttribute(const H5std_string &name, const DataType &data_type, c
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
 //--------------------------------------------------------------------------
-Attribute
-H5Object::openAttribute(const char *name) const
-{
-    hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
-    if (attr_id > 0) {
-        Attribute attr;
-        f_Attribute_setId(&attr, attr_id);
-        return (attr);
-    }
-    else {
-        throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
-    }
+Attribute H5Object::openAttribute(const char *name) const {
+  hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
+  if (attr_id > 0) {
+    Attribute attr;
+    f_Attribute_setId(&attr, attr_id);
+    return (attr);
+  } else {
+    throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -173,32 +162,28 @@ H5Object::openAttribute(const char *name) const
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 //--------------------------------------------------------------------------
-Attribute
-H5Object::openAttribute(const H5std_string &name) const
-{
-    return (openAttribute(name.c_str()));
+Attribute H5Object::openAttribute(const H5std_string &name) const {
+  return (openAttribute(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
 // Function:    H5Object::openAttribute
 ///\brief       Opens an attribute given its index.
-///\param       idx - IN: Index of the attribute, a 0-based, non-negative integer
-///\return      Attribute instance
-///\exception   H5::AttributeIException
+///\param       idx - IN: Index of the attribute, a 0-based, non-negative
+///integer \return      Attribute instance \exception   H5::AttributeIException
 //--------------------------------------------------------------------------
-Attribute
-H5Object::openAttribute(const unsigned int idx) const
-{
-    hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, static_cast<hsize_t>(idx),
-                                   H5P_DEFAULT, H5P_DEFAULT);
-    if (attr_id > 0) {
-        Attribute attr;
-        f_Attribute_setId(&attr, attr_id);
-        return (attr);
-    }
-    else {
-        throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
-    }
+Attribute H5Object::openAttribute(const unsigned int idx) const {
+  hid_t attr_id =
+      H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER, H5_ITER_INC,
+                     static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
+  if (attr_id > 0) {
+    Attribute attr;
+    f_Attribute_setId(&attr, attr_id);
+    return (attr);
+  } else {
+    throw AttributeIException(inMemFunc("openAttribute"),
+                              "H5Aopen_by_idx failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -215,31 +200,29 @@ H5Object::openAttribute(const unsigned int idx) const
 ///             The signature of user_op is
 ///             void (*)(H5::H5Location&, H5std_string, void*).
 //--------------------------------------------------------------------------
-int
-H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
-{
-    // store the user's function and data
-    UserData4Aiterate *userData = new UserData4Aiterate;
-    userData->opData            = op_data;
-    userData->op                = user_op;
-    userData->location          = this;
+int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx,
+                           void *op_data) {
+  // store the user's function and data
+  UserData4Aiterate *userData = new UserData4Aiterate;
+  userData->opData = op_data;
+  userData->op = user_op;
+  userData->location = this;
 
-    // call the C library routine H5Aiterate2 to iterate the attributes
-    hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
-    int     ret_value =
-        H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx, userAttrOpWrpr, static_cast<void *>(userData));
+  // call the C library routine H5Aiterate2 to iterate the attributes
+  hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
+  int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
+                              userAttrOpWrpr, static_cast<void *>(userData));
 
-    // release memory
-    delete userData;
+  // release memory
+  delete userData;
 
-    if (ret_value >= 0) {
-        /* Pass back update index value to calling code */
-        if (_idx)
-            *_idx = static_cast<unsigned>(idx);
-        return (ret_value);
-    }
-    else // raise exception when H5Aiterate returns a negative value
-        throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
+  if (ret_value >= 0) {
+    /* Pass back update index value to calling code */
+    if (_idx)
+      *_idx = static_cast<unsigned>(idx);
+    return (ret_value);
+  } else // raise exception when H5Aiterate returns a negative value
+    throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -248,7 +231,8 @@ H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 ///\param       idx_type - IN: Type of index; valid values include:
 ///             \li \c H5_INDEX_NAME
 ///             \li \c H5_INDEX_CRT_ORDER
-///\param       order - IN: Order in which index is traversed; valid values include:
+///\param       order - IN: Order in which index is traversed; valid values
+///include:
 ///             \li \c H5_ITER_DEC
 ///             \li \c H5_ITER_INC
 ///             \li \c H5_ITER_NATIVE
@@ -261,11 +245,13 @@ H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 ///             \li \c H5O_INFO_BASIC      fileno, addr, type, and rc fields
 ///             \li \c H5O_INFO_TIME       atime, mtime, ctime, and btime fields
 ///             \li \c H5O_INFO_NUM_ATTRS  num_attrs field
-///             \li \c H5O_INFO_ALL        H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS
+///             \li \c H5O_INFO_ALL        H5O_INFO_BASIC | H5O_INFO_TIME |
+///             H5O_INFO_NUM_ATTRS
 ///\return
 ///             \li On success:
-///                 \li the return value of the first operator that returns a positive value
-///                 \li zero if all members were processed with no operator returning non-zero
+///                 \li the return value of the first operator that returns a
+///                 positive value \li zero if all members were processed with
+///                 no operator returning non-zero
 ///             \li On failure:
 ///                 \li an exception Exception will be thrown if something went
 ///                     wrong within the library or the operator failed
@@ -274,27 +260,26 @@ H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 ///             For information, please refer to the H5Ovisit3 API in the HDF5
 ///             C Reference Manual.
 //--------------------------------------------------------------------------
-void
-H5Object::visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_t user_op, void *op_data,
-                unsigned int fields)
-{
-    // Store the user's function and data
-    UserData4Visit *userData = new UserData4Visit;
-    userData->opData         = op_data;
-    userData->op             = user_op;
-    userData->obj            = this;
+void H5Object::visit(H5_index_t idx_type, H5_iter_order_t order,
+                     visit_operator_t user_op, void *op_data,
+                     unsigned int fields) {
+  // Store the user's function and data
+  UserData4Visit *userData = new UserData4Visit;
+  userData->opData = op_data;
+  userData->op = user_op;
+  userData->obj = this;
 
-    // Call the C API passing in op wrapper and info
-    herr_t ret_value =
-        H5Ovisit3(getId(), idx_type, order, userVisitOpWrpr, static_cast<void *>(userData), fields);
+  // Call the C API passing in op wrapper and info
+  herr_t ret_value = H5Ovisit3(getId(), idx_type, order, userVisitOpWrpr,
+                               static_cast<void *>(userData), fields);
 
-    // Release memory
-    delete userData;
+  // Release memory
+  delete userData;
 
-    // Throw exception if H5Ovisit3 failed, which could be a failure in
-    // the library or in the call back operator
-    if (ret_value < 0)
-        throw Exception(inMemFunc("visit"), "H5Ovisit3 failed");
+  // Throw exception if H5Ovisit3 failed, which could be a failure in
+  // the library or in the call back operator
+  if (ret_value < 0)
+    throw Exception(inMemFunc("visit"), "H5Ovisit3 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -308,25 +293,23 @@ H5Object::visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_t use
 ///             - an error returned by the C API
 ///             - version number is not one of the valid values above
 //--------------------------------------------------------------------------
-unsigned
-H5Object::objVersion() const
-{
-    H5O_native_info_t objinfo;
-    unsigned          version = 0;
+unsigned H5Object::objVersion() const {
+  H5O_native_info_t objinfo;
+  unsigned version = 0;
 
-    // Use C API to get information of the object
-    herr_t ret_value = H5Oget_native_info(getId(), &objinfo, H5O_NATIVE_INFO_HDR);
+  // Use C API to get information of the object
+  herr_t ret_value = H5Oget_native_info(getId(), &objinfo, H5O_NATIVE_INFO_HDR);
 
-    // Throw exception if C API returns failure
-    if (ret_value < 0)
-        throw Exception(inMemFunc("objVersion"), "H5Oget_native_info failed");
-    // Return a valid version or throw an exception for invalid value
-    else {
-        version = objinfo.hdr.version;
-        if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
-            throw ObjHeaderIException("objVersion", "Invalid version for object");
-    }
-    return (version);
+  // Throw exception if C API returns failure
+  if (ret_value < 0)
+    throw Exception(inMemFunc("objVersion"), "H5Oget_native_info failed");
+  // Return a valid version or throw an exception for invalid value
+  else {
+    version = objinfo.hdr.version;
+    if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
+      throw ObjHeaderIException("objVersion", "Invalid version for object");
+  }
+  return (version);
 }
 
 //--------------------------------------------------------------------------
@@ -335,15 +318,13 @@ H5Object::objVersion() const
 ///\return      Number of attributes
 ///\exception   H5::AttributeIException
 //--------------------------------------------------------------------------
-int
-H5Object::getNumAttrs() const
-{
-    H5O_info2_t oinfo; /* Object info */
+int H5Object::getNumAttrs() const {
+  H5O_info2_t oinfo; /* Object info */
 
-    if (H5Oget_info3(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
-        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
-    else
-        return (static_cast<int>(oinfo.num_attrs));
+  if (H5Oget_info3(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
+    throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+  else
+    return (static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
@@ -352,19 +333,17 @@ H5Object::getNumAttrs() const
 ///\param       name - IN: Name of the attribute to be queried
 ///\exception   H5::AttributeIException
 //--------------------------------------------------------------------------
-bool
-H5Object::attrExists(const char *name) const
-{
-    // Call C routine H5Aexists to determine whether an attribute exists
-    // at this location, which could be specified by a file, group, dataset,
-    // or named datatype.
-    herr_t ret_value = H5Aexists(getId(), name);
-    if (ret_value > 0)
-        return true;
-    else if (ret_value == 0)
-        return false;
-    else // Raise exception when H5Aexists returns a negative value
-        throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
+bool H5Object::attrExists(const char *name) const {
+  // Call C routine H5Aexists to determine whether an attribute exists
+  // at this location, which could be specified by a file, group, dataset,
+  // or named datatype.
+  herr_t ret_value = H5Aexists(getId(), name);
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else // Raise exception when H5Aexists returns a negative value
+    throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
 }
 
 //--------------------------------------------------------------------------
@@ -373,10 +352,8 @@ H5Object::attrExists(const char *name) const
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 //--------------------------------------------------------------------------
-bool
-H5Object::attrExists(const H5std_string &name) const
-{
-    return (attrExists(name.c_str()));
+bool H5Object::attrExists(const H5std_string &name) const {
+  return (attrExists(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -385,12 +362,10 @@ H5Object::attrExists(const H5std_string &name) const
 ///\param       name - IN: Name of the attribute to be removed
 ///\exception   H5::AttributeIException
 //--------------------------------------------------------------------------
-void
-H5Object::removeAttr(const char *name) const
-{
-    herr_t ret_value = H5Adelete(getId(), name);
-    if (ret_value < 0)
-        throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
+void H5Object::removeAttr(const char *name) const {
+  herr_t ret_value = H5Adelete(getId(), name);
+  if (ret_value < 0)
+    throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
 }
 
 //--------------------------------------------------------------------------
@@ -399,10 +374,8 @@ H5Object::removeAttr(const char *name) const
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 //--------------------------------------------------------------------------
-void
-H5Object::removeAttr(const H5std_string &name) const
-{
-    removeAttr(name.c_str());
+void H5Object::removeAttr(const H5std_string &name) const {
+  removeAttr(name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -412,12 +385,10 @@ H5Object::removeAttr(const H5std_string &name) const
 ///\param       newname - IN: New name ame of the attribute
 ///\exception   H5::AttributeIException
 //--------------------------------------------------------------------------
-void
-H5Object::renameAttr(const char *oldname, const char *newname) const
-{
-    herr_t ret_value = H5Arename(getId(), oldname, newname);
-    if (ret_value < 0)
-        throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
+void H5Object::renameAttr(const char *oldname, const char *newname) const {
+  herr_t ret_value = H5Arename(getId(), oldname, newname);
+  if (ret_value < 0)
+    throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
 }
 
 //--------------------------------------------------------------------------
@@ -426,10 +397,9 @@ H5Object::renameAttr(const char *oldname, const char *newname) const
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for the names.
 //--------------------------------------------------------------------------
-void
-H5Object::renameAttr(const H5std_string &oldname, const H5std_string &newname) const
-{
-    renameAttr(oldname.c_str(), newname.c_str());
+void H5Object::renameAttr(const H5std_string &oldname,
+                          const H5std_string &newname) const {
+  renameAttr(oldname.c_str(), newname.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -437,21 +407,19 @@ H5Object::renameAttr(const H5std_string &oldname, const H5std_string &newname) c
 ///\brief       Given an id, returns the type of the object.
 ///\return      The name of the object
 //--------------------------------------------------------------------------
-ssize_t
-H5Object::getObjName(char *obj_name, size_t buf_size) const
-{
-    // H5Iget_name will get buf_size-1 chars of the name to null terminate it
-    ssize_t name_size = H5Iget_name(getId(), obj_name, buf_size);
+ssize_t H5Object::getObjName(char *obj_name, size_t buf_size) const {
+  // H5Iget_name will get buf_size-1 chars of the name to null terminate it
+  ssize_t name_size = H5Iget_name(getId(), obj_name, buf_size);
 
-    // If H5Iget_name returns a negative value, raise an exception
-    if (name_size < 0) {
-        throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
-    }
-    else if (name_size == 0) {
-        throw Exception(inMemFunc("getObjName"), "Object must have a name, but name length is 0");
-    }
-    // Return length of the name
-    return (name_size);
+  // If H5Iget_name returns a negative value, raise an exception
+  if (name_size < 0) {
+    throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
+  } else if (name_size == 0) {
+    throw Exception(inMemFunc("getObjName"),
+                    "Object must have a name, but name length is 0");
+  }
+  // Return length of the name
+  return (name_size);
 }
 
 //--------------------------------------------------------------------------
@@ -460,43 +428,41 @@ H5Object::getObjName(char *obj_name, size_t buf_size) const
 ///\return      Name of the object
 ///\exception   H5::Exception
 //--------------------------------------------------------------------------
-H5std_string
-H5Object::getObjName() const
-{
-    H5std_string obj_name; // object name to return
+H5std_string H5Object::getObjName() const {
+  H5std_string obj_name; // object name to return
 
-    // Preliminary call to get the size of the object name
-    ssize_t name_size = H5Iget_name(getId(), NULL, 0);
+  // Preliminary call to get the size of the object name
+  ssize_t name_size = H5Iget_name(getId(), NULL, 0);
 
-    // If H5Iget_name failed, throw exception
-    if (name_size < 0) {
-        throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
-    }
-    else if (name_size == 0) {
-        throw Exception(inMemFunc("getObjName"), "Object must have a name, but name length is 0");
-    }
-    // Object's name exists, retrieve it
-    else if (name_size > 0) {
+  // If H5Iget_name failed, throw exception
+  if (name_size < 0) {
+    throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
+  } else if (name_size == 0) {
+    throw Exception(inMemFunc("getObjName"),
+                    "Object must have a name, but name length is 0");
+  }
+  // Object's name exists, retrieve it
+  else if (name_size > 0) {
 
-        // The actual size is the cast value + 1 for the terminal ASCII NUL
-        // (unfortunate in/out type sign mismatch)
-        size_t actual_name_size = static_cast<size_t>(name_size) + 1;
+    // The actual size is the cast value + 1 for the terminal ASCII NUL
+    // (unfortunate in/out type sign mismatch)
+    size_t actual_name_size = static_cast<size_t>(name_size) + 1;
 
-        // Create buffer for C string
-        char *name_C = new char[actual_name_size]();
+    // Create buffer for C string
+    char *name_C = new char[actual_name_size]();
 
-        // Use overloaded function
-        name_size = getObjName(name_C, actual_name_size);
+    // Use overloaded function
+    name_size = getObjName(name_C, actual_name_size);
 
-        // Convert the C object name to return
-        obj_name = name_C;
+    // Convert the C object name to return
+    obj_name = name_C;
 
-        // Clean up resource
-        delete[] name_C;
-    }
+    // Clean up resource
+    delete[] name_C;
+  }
 
-    // Return object's name
-    return obj_name;
+  // Return object's name
+  return obj_name;
 }
 
 //--------------------------------------------------------------------------
@@ -511,34 +477,32 @@ H5Object::getObjName() const
 ///             buf_size can specify a specific length or default to 0, in
 ///             which case the entire name will be retrieved.
 //--------------------------------------------------------------------------
-ssize_t
-H5Object::getObjName(H5std_string &obj_name, size_t len) const
-{
-    ssize_t name_size = 0;
+ssize_t H5Object::getObjName(H5std_string &obj_name, size_t len) const {
+  ssize_t name_size = 0;
 
-    // If no length is provided, get the entire object name
-    if (len == 0) {
-        obj_name  = getObjName();
-        name_size = static_cast<ssize_t>(obj_name.length());
-    }
-    // If length is provided, get that number of characters in name
-    else {
-        // Create buffer for C string
-        char *name_C = new char[len + 1]();
+  // If no length is provided, get the entire object name
+  if (len == 0) {
+    obj_name = getObjName();
+    name_size = static_cast<ssize_t>(obj_name.length());
+  }
+  // If length is provided, get that number of characters in name
+  else {
+    // Create buffer for C string
+    char *name_C = new char[len + 1]();
 
-        // Use overloaded function
-        name_size = getObjName(name_C, len + 1);
+    // Use overloaded function
+    name_size = getObjName(name_C, len + 1);
 
-        // Convert the C object name to return
-        obj_name = name_C;
+    // Convert the C object name to return
+    obj_name = name_C;
 
-        // Clean up resource
-        delete[] name_C;
-    }
-    // Otherwise, keep obj_name intact
+    // Clean up resource
+    delete[] name_C;
+  }
+  // Otherwise, keep obj_name intact
 
-    // Return name size
-    return name_size;
+  // Return name size
+  return name_size;
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -546,9 +510,7 @@ H5Object::getObjName(H5std_string &obj_name, size_t len) const
 // Function:    H5Object destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
-H5Object::~H5Object()
-{
-}
+H5Object::~H5Object() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

@@ -14,29 +14,29 @@
 #define PH5DIFF_H
 
 /* Send from manager to workers */
-#define MPI_TAG_ARGS      1
+#define MPI_TAG_ARGS 1
 #define MPI_TAG_PRINT_TOK 2
 
 /*Sent from workers to manager */
 #define MPI_TAG_TOK_REQUEST 3
-#define MPI_TAG_DONE        4
-#define MPI_TAG_TOK_RETURN  5
-#define MPI_TAG_PRINT_DATA  6
+#define MPI_TAG_DONE 4
+#define MPI_TAG_TOK_RETURN 5
+#define MPI_TAG_PRINT_DATA 6
 
 /* Operational tags used to init and complete diff */
-#define MPI_TAG_END      7
+#define MPI_TAG_END 7
 #define MPI_TAG_PARALLEL 8
 
 struct diff_mpi_args {
-    char        name1[256];
-    char        name2[256];
-    diff_opt_t  opts;
-    diff_args_t argdata; /* rest args */
+  char name1[256];
+  char name2[256];
+  diff_opt_t opts;
+  diff_args_t argdata; /* rest args */
 };
 
 struct diffs_found {
-    hsize_t nfound;
-    int     not_cmp;
+  hsize_t nfound;
+  int not_cmp;
 };
 
 #endif /* PH5DIFF_H */

@@ -27,7 +27,6 @@
 /* H5 Headers */
 /**************/
 
-#include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
@@ -35,6 +34,7 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
+#include "H5private.h"   /* Generic Functions                        */
 
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
@@ -206,21 +206,21 @@ do {                                                                            
 
 typedef struct ioc_io_queue_entry {
 
-    uint32_t                   magic;
-    struct ioc_io_queue_entry *next;
-    struct ioc_io_queue_entry *prev;
-    hbool_t                    in_progress;
-    uint32_t                   counter;
+  uint32_t magic;
+  struct ioc_io_queue_entry *next;
+  struct ioc_io_queue_entry *prev;
+  hbool_t in_progress;
+  uint32_t counter;
 
-    sf_work_request_t     wk_req;
-    struct hg_thread_work thread_wk;
-    int                   wk_ret;
+  sf_work_request_t wk_req;
+  struct hg_thread_work thread_wk;
+  int wk_ret;
 
-    /* statistics */
+  /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
 
-    uint64_t q_time;
-    uint64_t dispatch_time;
+  uint64_t q_time;
+  uint64_t dispatch_time;
 
 #endif
 
@@ -362,28 +362,28 @@ typedef struct ioc_io_queue_entry {
 
 typedef struct ioc_io_queue {
 
-    uint32_t              magic;
-    ioc_io_queue_entry_t *q_head;
-    ioc_io_queue_entry_t *q_tail;
-    int32_t               num_pending;
-    int32_t               num_in_progress;
-    int32_t               num_failed;
-    int32_t               q_len;
-    uint32_t              req_counter;
-    hg_thread_mutex_t     q_mutex;
+  uint32_t magic;
+  ioc_io_queue_entry_t *q_head;
+  ioc_io_queue_entry_t *q_tail;
+  int32_t num_pending;
+  int32_t num_in_progress;
+  int32_t num_failed;
+  int32_t q_len;
+  uint32_t req_counter;
+  hg_thread_mutex_t q_mutex;
 
-    /* statistics */
+  /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
-    int32_t max_q_len;
-    int32_t max_num_pending;
-    int32_t max_num_in_progress;
-    int64_t ind_read_requests;
-    int64_t ind_write_requests;
-    int64_t truncate_requests;
-    int64_t get_eof_requests;
-    int64_t requests_queued;
-    int64_t requests_dispatched;
-    int64_t requests_completed;
+  int32_t max_q_len;
+  int32_t max_num_pending;
+  int32_t max_num_in_progress;
+  int64_t ind_read_requests;
+  int64_t ind_write_requests;
+  int64_t truncate_requests;
+  int64_t get_eof_requests;
+  int64_t requests_queued;
+  int64_t requests_dispatched;
+  int64_t requests_completed;
 #endif
 
 } ioc_io_queue_t;
@@ -395,14 +395,15 @@ typedef struct ioc_io_queue {
  * invoked.  See below.
  */
 typedef struct _io_req {
-    int         ioc;             /* ID of the IO Concentrator handling this IO.   */
-    int64_t     context_id;      /* The context id provided for the read or write */
-    int64_t     offset;          /* The file offset for the IO operation          */
-    int64_t     elements;        /* How many bytes                                */
-    void       *data;            /* A pointer to the (contiguous) data segment    */
-    MPI_Request io_transfer_req; /* MPI request for Isend/Irecv of I/O data */
-    MPI_Request io_comp_req;     /* MPI request signifying when actual I/O is finished */
-    int         io_comp_tag;     /* MPI tag value used for completed I/O request */
+  int ioc;            /* ID of the IO Concentrator handling this IO.   */
+  int64_t context_id; /* The context id provided for the read or write */
+  int64_t offset;     /* The file offset for the IO operation          */
+  int64_t elements;   /* How many bytes                                */
+  void *data;         /* A pointer to the (contiguous) data segment    */
+  MPI_Request io_transfer_req; /* MPI request for Isend/Irecv of I/O data */
+  MPI_Request
+      io_comp_req; /* MPI request signifying when actual I/O is finished */
+  int io_comp_tag; /* MPI tag value used for completed I/O request */
 } io_req_t;
 
 extern int *H5FD_IOC_tag_ub_val_ptr;
@@ -414,9 +415,11 @@ extern "C" {
 H5_DLL int initialize_ioc_threads(void *_sf_context);
 H5_DLL int finalize_ioc_threads(void *_sf_context);
 
-H5_DLL herr_t ioc__write_independent_async(int64_t context_id, int64_t offset, int64_t elements,
-                                           const void *data, io_req_t **io_req);
-H5_DLL herr_t ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements, void *data,
+H5_DLL herr_t ioc__write_independent_async(int64_t context_id, int64_t offset,
+                                           int64_t elements, const void *data,
+                                           io_req_t **io_req);
+H5_DLL herr_t ioc__read_independent_async(int64_t context_id, int64_t offset,
+                                          int64_t elements, void *data,
                                           io_req_t **io_req);
 
 H5_DLL herr_t ioc__async_completion(MPI_Request *mpi_reqs, size_t num_reqs);

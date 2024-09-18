@@ -42,86 +42,85 @@ import java.io.Serializable;
  */
 
 public class H5FD_ros3_fapl_t implements Serializable {
-    private static final long serialVersionUID = 8985533001471224030L;
+  private static final long serialVersionUID = 8985533001471224030L;
 
-    /** Version number of the H5FD_ros3_fapl_t structure */
-    private int version;
-    /** Flag TRUE or FALSE whether or not requests are to be authenticated with the AWS4 algorithm. */
-    private boolean authenticate;
-    /** region "aws region" for authenticating request */
-    private String aws_region;
-    /** id "secret id" or "access id" for authenticating request */
-    private String secret_id;
-    /** key "secret key" or "access key" for authenticating request */
-    private String secret_key;
+  /** Version number of the H5FD_ros3_fapl_t structure */
+  private int version;
+  /**
+   * Flag TRUE or FALSE whether or not requests are to be authenticated with
+   * the AWS4 algorithm.
+   */
+  private boolean authenticate;
+  /** region "aws region" for authenticating request */
+  private String aws_region;
+  /** id "secret id" or "access id" for authenticating request */
+  private String secret_id;
+  /** key "secret key" or "access key" for authenticating request */
+  private String secret_key;
 
-    /**
-     * Create a "default" fapl_t structure, for anonymous access.
-     */
-    public H5FD_ros3_fapl_t()
-    {
-        /* H5FD_ros3_fapl_t("", "", ""); */ /* defer */
-        this.version    = 1;
-        this.aws_region = "";
-        this.secret_id  = "";
-        this.secret_key = "";
-    }
+  /**
+   * Create a "default" fapl_t structure, for anonymous access.
+   */
+  public H5FD_ros3_fapl_t() {
+    /* H5FD_ros3_fapl_t("", "", ""); */ /* defer */
+    this.version = 1;
+    this.aws_region = "";
+    this.secret_id = "";
+    this.secret_key = "";
+  }
 
-    /**
-     * Create a fapl_t structure with the specified components.
-     * If all are the empty string, is anonymous (non-authenticating).
-     * Region and ID must both be supplied for authentication.
-     *
-     * @param region "aws region" for authenticating request
-     * @param id "secret id" or "access id" for authenticating request
-     * @param key "secret key" or "access key" for authenticating request
-     */
-    public H5FD_ros3_fapl_t(String region, String id, String key)
-    {
-        this.version = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
-                          /* as found in H5FDros3.h                    */
-        this.aws_region = region;
-        this.secret_id  = id;
-        this.secret_key = key;
-    }
+  /**
+   * Create a fapl_t structure with the specified components.
+   * If all are the empty string, is anonymous (non-authenticating).
+   * Region and ID must both be supplied for authentication.
+   *
+   * @param region "aws region" for authenticating request
+   * @param id "secret id" or "access id" for authenticating request
+   * @param key "secret key" or "access key" for authenticating request
+   */
+  public H5FD_ros3_fapl_t(String region, String id, String key) {
+    this.version = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
+                      /* as found in H5FDros3.h                    */
+    this.aws_region = region;
+    this.secret_id = id;
+    this.secret_key = key;
+  }
 
-    @Override
-    public boolean equals(Object o)
-    {
-        if (o == null)
-            return false;
-        if (!(o instanceof H5FD_ros3_fapl_t))
-            return false;
+  @Override
+  public boolean equals(Object o) {
+    if (o == null)
+      return false;
+    if (!(o instanceof H5FD_ros3_fapl_t))
+      return false;
 
-        H5FD_ros3_fapl_t other = (H5FD_ros3_fapl_t)o;
-        if (this.version != other.version)
-            return false;
-        if (!this.aws_region.equals(other.aws_region))
-            return false;
-        if (!this.secret_key.equals(other.secret_key))
-            return false;
-        if (!this.secret_id.equals(other.secret_id))
-            return false;
-        return true;
-    }
+    H5FD_ros3_fapl_t other = (H5FD_ros3_fapl_t)o;
+    if (this.version != other.version)
+      return false;
+    if (!this.aws_region.equals(other.aws_region))
+      return false;
+    if (!this.secret_key.equals(other.secret_key))
+      return false;
+    if (!this.secret_id.equals(other.secret_id))
+      return false;
+    return true;
+  }
 
-    @Override
-    public int hashCode()
-    {
-        /* this is a _very bad_ hash algorithm for purposes of hashing! */
-        /* implemented to satisfy the "contract" regarding equality     */
-        int k = (int)this.version;
-        k += this.aws_region.length();
-        k += this.secret_id.length();
-        k += this.secret_key.length();
-        return k;
-    }
+  @Override
+  public int hashCode() {
+    /* this is a _very bad_ hash algorithm for purposes of hashing! */
+    /* implemented to satisfy the "contract" regarding equality     */
+    int k = (int)this.version;
+    k += this.aws_region.length();
+    k += this.secret_id.length();
+    k += this.secret_key.length();
+    return k;
+  }
 
-    @Override
-    public String toString()
-    {
-        return "H5FD_ros3_fapl_t (Version:" + this.version + ") {"
-            + "\n    aws_region : " + this.aws_region + "\n    secret_id  : " + this.secret_id +
-            "\n    secret_key : " + this.secret_key + "\n}\n";
-    }
+  @Override
+  public String toString() {
+    return "H5FD_ros3_fapl_t (Version:" + this.version + ") {"
+        + "\n    aws_region : " + this.aws_region +
+        "\n    secret_id  : " + this.secret_id +
+        "\n    secret_key : " + this.secret_key + "\n}\n";
+  }
 }

@@ -12,19 +12,19 @@
 
 #include <string>
 
-#include "H5Include.h"
+#include "H5AtomType.h"
+#include "H5DaccProp.h"
+#include "H5DataType.h"
+#include "H5DcreatProp.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5PropList.h"
-#include "H5OcreatProp.h"
-#include "H5DcreatProp.h"
-#include "H5LcreatProp.h"
+#include "H5Include.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
-#include "H5DataType.h"
-#include "H5AtomType.h"
+#include "H5OcreatProp.h"
+#include "H5PropList.h"
 
 namespace H5 {
 
@@ -33,9 +33,7 @@ namespace H5 {
 // Function:    AtomType default constructor [protected]
 // Purpose      Default constructor: creates a stub atomic datatype.
 //--------------------------------------------------------------------------
-AtomType::AtomType() : DataType()
-{
-}
+AtomType::AtomType() : DataType() {}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType overloaded constructor [protected]
@@ -43,17 +41,13 @@ AtomType::AtomType() : DataType()
 // Parameter    existing_id - IN: Id of an existing datatype
 // Exception    H5::DataTypeIException
 //--------------------------------------------------------------------------
-AtomType::AtomType(const hid_t existing_id) : DataType(existing_id)
-{
-}
+AtomType::AtomType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 //--------------------------------------------------------------------------
-AtomType::AtomType(const AtomType &original) : DataType(original)
-{
-}
+AtomType::AtomType(const AtomType &original) : DataType(original) {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -62,14 +56,12 @@ AtomType::AtomType(const AtomType &original) : DataType(original)
 ///\param       size - IN: Size to set
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-void
-AtomType::setSize(size_t size) const
-{
-    // Call C routine H5Tset_size to set the total size
-    herr_t ret_value = H5Tset_size(id, size);
-    if (ret_value < 0) {
-        throw DataTypeIException(inMemFunc("setSize"), "H5Tset_size failed");
-    }
+void AtomType::setSize(size_t size) const {
+  // Call C routine H5Tset_size to set the total size
+  herr_t ret_value = H5Tset_size(id, size);
+  if (ret_value < 0) {
+    throw DataTypeIException(inMemFunc("setSize"), "H5Tset_size failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -81,17 +73,16 @@ AtomType::setSize(size_t size) const
 ///             \li \c H5T_ORDER_VAX
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-H5T_order_t
-AtomType::getOrder() const
-{
-    // Call C routine to get the byte ordering
-    H5T_order_t type_order = H5Tget_order(id);
+H5T_order_t AtomType::getOrder() const {
+  // Call C routine to get the byte ordering
+  H5T_order_t type_order = H5Tget_order(id);
 
-    // return a byte order constant if successful
-    if (type_order == H5T_ORDER_ERROR) {
-        throw DataTypeIException(inMemFunc("getOrder"), "H5Tget_order returns H5T_ORDER_ERROR");
-    }
-    return (type_order);
+  // return a byte order constant if successful
+  if (type_order == H5T_ORDER_ERROR) {
+    throw DataTypeIException(inMemFunc("getOrder"),
+                             "H5Tget_order returns H5T_ORDER_ERROR");
+  }
+  return (type_order);
 }
 
 //--------------------------------------------------------------------------
@@ -110,20 +101,18 @@ AtomType::getOrder() const
 ///             \li \c H5T_ORDER_VAX
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-H5T_order_t
-AtomType::getOrder(H5std_string &order_string) const
-{
-    // Call the overloaded to get the type order without text
-    H5T_order_t type_order = getOrder();
+H5T_order_t AtomType::getOrder(H5std_string &order_string) const {
+  // Call the overloaded to get the type order without text
+  H5T_order_t type_order = getOrder();
 
-    // Then provide the text and return the type order
-    if (type_order == H5T_ORDER_LE)
-        order_string = "Little endian byte ordering (0)";
-    else if (type_order == H5T_ORDER_BE)
-        order_string = "Big endian byte ordering (1)";
-    else if (type_order == H5T_ORDER_VAX)
-        order_string = "VAX mixed byte ordering (2)";
-    return (type_order);
+  // Then provide the text and return the type order
+  if (type_order == H5T_ORDER_LE)
+    order_string = "Little endian byte ordering (0)";
+  else if (type_order == H5T_ORDER_BE)
+    order_string = "Big endian byte ordering (1)";
+  else if (type_order == H5T_ORDER_VAX)
+    order_string = "VAX mixed byte ordering (2)";
+  return (type_order);
 }
 
 //--------------------------------------------------------------------------
@@ -135,14 +124,12 @@ AtomType::getOrder(H5std_string &order_string) const
 ///             \li \c H5T_ORDER_VAX
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
-void
-AtomType::setOrder(H5T_order_t order) const
-{
-    // Call C routine to set the byte ordering
-    herr_t ret_value = H5Tset_order(id, order);
-    if (ret_value < 0) {
-        throw DataTypeIException(inMemFunc("setOrder"), "H5Tset_order failed");
-    }
+void AtomType::setOrder(H5T_order_t order) const {
+  // Call C routine to set the byte ordering
+  herr_t ret_value = H5Tset_order(id, order);
+  if (ret_value < 0) {
+    throw DataTypeIException(inMemFunc("setOrder"), "H5Tset_order failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -155,17 +142,16 @@ AtomType::setOrder(H5T_order_t order) const
 ///             unless padding is present, is 8 times larger than the
 ///             value returned by \c DataType::getSize().
 //--------------------------------------------------------------------------
-size_t
-AtomType::getPrecision() const
-{
-    size_t num_signi_bits = H5Tget_precision(id); // C routine
+size_t AtomType::getPrecision() const {
+  size_t num_signi_bits = H5Tget_precision(id); // C routine
 
-    // returns number of significant bits if successful
-    if (num_signi_bits == 0) {
-        throw DataTypeIException(inMemFunc("getPrecision"),
-                                 "H5Tget_precision returns invalid number of significant bits");
-    }
-    return (num_signi_bits);
+  // returns number of significant bits if successful
+  if (num_signi_bits == 0) {
+    throw DataTypeIException(
+        inMemFunc("getPrecision"),
+        "H5Tget_precision returns invalid number of significant bits");
+  }
+  return (num_signi_bits);
 }
 
 //--------------------------------------------------------------------------
@@ -177,14 +163,13 @@ AtomType::getPrecision() const
 ///             For information, please refer to the H5Tset_precision API in
 ///             the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-AtomType::setPrecision(size_t precision) const
-{
-    // Call C routine to set the datatype precision
-    herr_t ret_value = H5Tset_precision(id, precision);
-    if (ret_value < 0) {
-        throw DataTypeIException(inMemFunc("setPrecision"), "H5Tset_precision failed");
-    }
+void AtomType::setPrecision(size_t precision) const {
+  // Call C routine to set the datatype precision
+  herr_t ret_value = H5Tset_precision(id, precision);
+  if (ret_value < 0) {
+    throw DataTypeIException(inMemFunc("setPrecision"),
+                             "H5Tset_precision failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -200,16 +185,15 @@ AtomType::setPrecision(size_t precision) const
 //                  - return type changed from size_t to int
 //                  - offset = -1 when failure occurs vs. 0
 //--------------------------------------------------------------------------
-int
-AtomType::getOffset() const
-{
-    int offset = H5Tget_offset(id); // C routine
+int AtomType::getOffset() const {
+  int offset = H5Tget_offset(id); // C routine
 
-    // returns a non-negative offset value if successful
-    if (offset == -1) {
-        throw DataTypeIException(inMemFunc("getOffset"), "H5Tget_offset returns a negative offset value");
-    }
-    return (offset);
+  // returns a non-negative offset value if successful
+  if (offset == -1) {
+    throw DataTypeIException(inMemFunc("getOffset"),
+                             "H5Tget_offset returns a negative offset value");
+  }
+  return (offset);
 }
 
 //--------------------------------------------------------------------------
@@ -221,14 +205,12 @@ AtomType::getOffset() const
 ///             For information, please refer to the H5Tset_offset API in
 ///             the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
-void
-AtomType::setOffset(size_t offset) const
-{
-    // Call C routine to set the bit offset
-    herr_t ret_value = H5Tset_offset(id, offset);
-    if (ret_value < 0) {
-        throw DataTypeIException(inMemFunc("setOffset"), "H5Tset_offset failed");
-    }
+void AtomType::setOffset(size_t offset) const {
+  // Call C routine to set the bit offset
+  herr_t ret_value = H5Tset_offset(id, offset);
+  if (ret_value < 0) {
+    throw DataTypeIException(inMemFunc("setOffset"), "H5Tset_offset failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -244,14 +226,12 @@ AtomType::setOffset(size_t offset) const
 ///             \li \c H5T_PAD_ONE (1) - Set background to ones.
 ///             \li \c H5T_PAD_BACKGROUND (2) - Leave background alone.
 //--------------------------------------------------------------------------
-void
-AtomType::getPad(H5T_pad_t &lsb, H5T_pad_t &msb) const
-{
-    // Call C routine to get the padding type
-    herr_t ret_value = H5Tget_pad(id, &lsb, &msb);
-    if (ret_value < 0) {
-        throw DataTypeIException(inMemFunc("getPad"), "H5Tget_pad failed");
-    }
+void AtomType::getPad(H5T_pad_t &lsb, H5T_pad_t &msb) const {
+  // Call C routine to get the padding type
+  herr_t ret_value = H5Tget_pad(id, &lsb, &msb);
+  if (ret_value < 0) {
+    throw DataTypeIException(inMemFunc("getPad"), "H5Tget_pad failed");
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -266,14 +246,12 @@ AtomType::getPad(H5T_pad_t &lsb, H5T_pad_t &msb) const
 ///             \li \c H5T_PAD_ONE (1) - Set background to ones.
 ///             \li \c H5T_PAD_BACKGROUND (2) - Leave background alone.
 //--------------------------------------------------------------------------
-void
-AtomType::setPad(H5T_pad_t lsb, H5T_pad_t msb) const
-{
-    // Call C routine to set the padding type
-    herr_t ret_value = H5Tset_pad(id, lsb, msb);
-    if (ret_value < 0) {
-        throw DataTypeIException(inMemFunc("setPad"), "H5Tset_pad failed");
-    }
+void AtomType::setPad(H5T_pad_t lsb, H5T_pad_t msb) const {
+  // Call C routine to set the padding type
+  herr_t ret_value = H5Tset_pad(id, lsb, msb);
+  if (ret_value < 0) {
+    throw DataTypeIException(inMemFunc("setPad"), "H5Tset_pad failed");
+  }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -281,9 +259,7 @@ AtomType::setPad(H5T_pad_t lsb, H5T_pad_t msb) const
 // Function:    AtomType destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
-AtomType::~AtomType()
-{
-}
+AtomType::~AtomType() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

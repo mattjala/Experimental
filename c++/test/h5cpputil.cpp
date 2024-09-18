@@ -22,12 +22,12 @@
 using std::cerr;
 using std::endl;
 
-#include <string>
 #include "H5Cpp.h" // C++ API header file
+#include <string>
 using namespace H5;
 
-#include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
+#include "h5test.h"
 
 /*-------------------------------------------------------------------------
  * Function:    test_report
@@ -41,21 +41,18 @@ using namespace H5;
  *              if no failure occurs: 0
  *-------------------------------------------------------------------------
  */
-int
-test_report(int nerrors, const H5std_string &testname)
-{
-    if (nerrors) {
-        nerrors = MAX(1, nerrors);
-        if (1 == nerrors)
-            cerr << "***** " << nerrors << testname << " TEST FAILED! *****" << endl;
-        else
-            cerr << "***** " << nerrors << testname << " TESTS FAILED! *****" << endl;
-        return 1;
-    }
-    else {
-        cerr << "All" << testname << " tests passed." << endl;
-        return 0;
-    }
+int test_report(int nerrors, const H5std_string &testname) {
+  if (nerrors) {
+    nerrors = MAX(1, nerrors);
+    if (1 == nerrors)
+      cerr << "***** " << nerrors << testname << " TEST FAILED! *****" << endl;
+    else
+      cerr << "***** " << nerrors << testname << " TESTS FAILED! *****" << endl;
+    return 1;
+  } else {
+    cerr << "All" << testname << " tests passed." << endl;
+    return 0;
+  }
 }
 
 /*-------------------------------------------------------------------------
@@ -66,15 +63,14 @@ test_report(int nerrors, const H5std_string &testname)
  * Return       None
  *-------------------------------------------------------------------------
  */
-void
-issue_fail_msg(const char *where, int line, const char *file_name, const char *message)
-{
-    if (GetTestVerbosity() >= VERBO_HI) {
-        cerr << endl;
-        cerr << ">>> FAILED in " << where << " at line " << line << " in " << file_name << " - " << message
-             << endl
-             << endl;
-    }
+void issue_fail_msg(const char *where, int line, const char *file_name,
+                    const char *message) {
+  if (GetTestVerbosity() >= VERBO_HI) {
+    cerr << endl;
+    cerr << ">>> FAILED in " << where << " at line " << line << " in "
+         << file_name << " - " << message << endl
+         << endl;
+  }
 }
 
 /*-------------------------------------------------------------------------
@@ -85,16 +81,15 @@ issue_fail_msg(const char *where, int line, const char *file_name, const char *m
  * Return       None
  *-------------------------------------------------------------------------
  */
-void
-issue_fail_msg(const char *where, int line, const char *file_name, const char *func_name, const char *message)
-{
-    if (GetTestVerbosity() >= VERBO_HI) {
-        cerr << endl;
-        cerr << ">>> FAILED in " << where << ": " << func_name << endl
-             << "    at line " << line << " in " << file_name << endl
-             << "    C library detail: " << message << endl
-             << endl;
-    }
+void issue_fail_msg(const char *where, int line, const char *file_name,
+                    const char *func_name, const char *message) {
+  if (GetTestVerbosity() >= VERBO_HI) {
+    cerr << endl;
+    cerr << ">>> FAILED in " << where << ": " << func_name << endl
+         << "    at line " << line << " in " << file_name << endl
+         << "    C library detail: " << message << endl
+         << endl;
+  }
 }
 
 /*-------------------------------------------------------------------------
@@ -112,16 +107,14 @@ issue_fail_msg(const char *where, int line, const char *file_name, const char *f
  *              Failure: -1
  *-------------------------------------------------------------------------
  */
-int
-check_values(hsize_t i, hsize_t j, int apoint, int acheck)
-{
-    if (apoint != acheck) {
-        cerr << "    Read different values than written.\n" << endl;
-        cerr << "    At index " << static_cast<unsigned long>(i) << "," << static_cast<unsigned long>(j)
-             << endl;
-        return -1;
-    }
-    return 0;
+int check_values(hsize_t i, hsize_t j, int apoint, int acheck) {
+  if (apoint != acheck) {
+    cerr << "    Read different values than written.\n" << endl;
+    cerr << "    At index " << static_cast<unsigned long>(i) << ","
+         << static_cast<unsigned long>(j) << endl;
+    return -1;
+  }
+  return 0;
 } // check_values
 
 /*-------------------------------------------------------------------------
@@ -135,15 +128,14 @@ check_values(hsize_t i, hsize_t j, int apoint, int acheck)
  *              Failure: -1
  *-------------------------------------------------------------------------
  */
-void
-check_values(const char *value, const char *msg, int line, const char *file_name)
-{
-    if (value == NULL) {
-        cerr << endl;
-        cerr << "*** ERROR: " << msg << ", at line " << line << endl;
-        IncTestNumErrs();
-        throw TestFailedException(file_name, msg);
-    }
+void check_values(const char *value, const char *msg, int line,
+                  const char *file_name) {
+  if (value == NULL) {
+    cerr << endl;
+    cerr << "*** ERROR: " << msg << ", at line " << line << endl;
+    IncTestNumErrs();
+    throw TestFailedException(file_name, msg);
+  }
 }
 
 /*-------------------------------------------------------------------------
@@ -158,29 +150,27 @@ check_values(const char *value, const char *msg, int line, const char *file_name
  *              Failure: -1
  *-------------------------------------------------------------------------
  */
-void
-verify_val(const char *x, const char *value, const char *where, int line, const char *file_name)
-{
-    if (GetTestVerbosity() >= VERBO_HI) {
-        cerr << endl;
-        cerr << "   Call to routine: " << where << " at line " << line << " in " << file_name << " had value "
-             << x << endl;
-    }
-    if (strcmp(x, value) != 0) {
-        cerr << endl;
-        cerr << "*** UNEXPECTED VALUE from " << where << " should be " << value << ", but is " << x
-             << " at line " << line << " in " << file_name << endl;
-        // IncTestNumErrs();
-        throw TestFailedException(where, "");
-    }
+void verify_val(const char *x, const char *value, const char *where, int line,
+                const char *file_name) {
+  if (GetTestVerbosity() >= VERBO_HI) {
+    cerr << endl;
+    cerr << "   Call to routine: " << where << " at line " << line << " in "
+         << file_name << " had value " << x << endl;
+  }
+  if (strcmp(x, value) != 0) {
+    cerr << endl;
+    cerr << "*** UNEXPECTED VALUE from " << where << " should be " << value
+         << ", but is " << x << " at line " << line << " in " << file_name
+         << endl;
+    // IncTestNumErrs();
+    throw TestFailedException(where, "");
+  }
 }
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException default constructor
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException() : Exception()
-{
-}
+InvalidActionException::InvalidActionException() : Exception() {}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException overloaded constructor
@@ -192,24 +182,19 @@ InvalidActionException::InvalidActionException() : Exception()
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException(const H5std_string &func, const H5std_string &message)
-    : Exception(func, message)
-{
-}
+InvalidActionException::InvalidActionException(const H5std_string &func,
+                                               const H5std_string &message)
+    : Exception(func, message) {}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException destructor
 //--------------------------------------------------------------------------
-InvalidActionException::~InvalidActionException() throw()
-{
-}
+InvalidActionException::~InvalidActionException() throw() {}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException default constructor
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException() : Exception()
-{
-}
+TestFailedException::TestFailedException() : Exception() {}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException overloaded constructor
@@ -221,14 +206,11 @@ TestFailedException::TestFailedException() : Exception()
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException(const H5std_string &func, const H5std_string &message)
-    : Exception(func, message)
-{
-}
+TestFailedException::TestFailedException(const H5std_string &func,
+                                         const H5std_string &message)
+    : Exception(func, message) {}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException destructor
 //--------------------------------------------------------------------------
-TestFailedException::~TestFailedException() throw()
-{
-}
+TestFailedException::~TestFailedException() throw() {}

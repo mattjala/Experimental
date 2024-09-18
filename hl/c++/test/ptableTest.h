@@ -20,9 +20,9 @@
 #ifndef PTABLETEST
 #define PTABLETEST
 
-#include "h5hltest.h"
-#include "H5PacketTable.h"
 #include "H5Cpp.h"
+#include "H5PacketTable.h"
+#include "h5hltest.h"
 
 static hid_t fileID;
 

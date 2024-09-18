@@ -19,22 +19,22 @@ package hdf.hdf5lib.exceptions;
  */
 
 public class HDF5ObjectHeaderException extends HDF5LibraryException {
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5ObjectHeaderException</code> with no specified
-     * detail message.
-     */
-    public HDF5ObjectHeaderException() { super(); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5ObjectHeaderException</code> with no specified
+   * detail message.
+   */
+  public HDF5ObjectHeaderException() { super(); }
 
-    /**
-     * @ingroup JERRLIB
-     *
-     * Constructs an <code>HDF5ObjectHeaderException</code> with the specified
-     * detail message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5ObjectHeaderException(String s) { super(s); }
+  /**
+   * @ingroup JERRLIB
+   *
+   * Constructs an <code>HDF5ObjectHeaderException</code> with the specified
+   * detail message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5ObjectHeaderException(String s) { super(s); }
 }

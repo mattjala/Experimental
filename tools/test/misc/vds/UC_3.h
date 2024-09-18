@@ -31,10 +31,10 @@
  * mapped source datasets with gaps.
  */
 #define UC_31_VDS_HEIGHT 25 /* full height + 7 (gaps of 1)  */
-#define UC_31_VDS_WIDTH  8  /* full width + 0 (no gaps)     */
+#define UC_31_VDS_WIDTH 8   /* full width + 0 (no gaps)     */
 #define UC_32_VDS_HEIGHT 13 /* full height + 5              */
-#define UC_32_VDS_WIDTH  19 /* full width + 5               */
-#define UC_31_GAP        1
+#define UC_32_VDS_WIDTH 19  /* full width + 5               */
+#define UC_31_GAP 1
 
 /* VDS datatypes */
 #define UC_31_VDS_DATATYPE H5T_STD_I32LE
@@ -45,8 +45,10 @@ static hsize_t UC_31_VDS_DIMS[RANK] = {0, UC_31_VDS_HEIGHT, UC_31_VDS_WIDTH};
 static hsize_t UC_32_VDS_DIMS[RANK] = {0, UC_32_VDS_HEIGHT, UC_32_VDS_WIDTH};
 
 /* Maximum size of virtual datasets */
-static hsize_t UC_31_VDS_MAX_DIMS[RANK] = {UC_1_N_MAX_PLANES, UC_31_VDS_HEIGHT, UC_31_VDS_WIDTH};
-static hsize_t UC_32_VDS_MAX_DIMS[RANK] = {UC_2_N_MAX_PLANES, UC_32_VDS_HEIGHT, UC_32_VDS_WIDTH};
+static hsize_t UC_31_VDS_MAX_DIMS[RANK] = {UC_1_N_MAX_PLANES, UC_31_VDS_HEIGHT,
+                                           UC_31_VDS_WIDTH};
+static hsize_t UC_32_VDS_MAX_DIMS[RANK] = {UC_2_N_MAX_PLANES, UC_32_VDS_HEIGHT,
+                                           UC_32_VDS_WIDTH};
 
 /* Positions of mapped source datasets */
 static hsize_t UC_32_POSITIONS[UC_2_N_SOURCES][RANK] = {

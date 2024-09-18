@@ -23,7 +23,7 @@ int H5_api_async_test(void);
  *                                              *
  ************************************************/
 
-#define ASYNC_API_TEST_FILE        "H5_api_async_test.h5"
+#define ASYNC_API_TEST_FILE "H5_api_async_test.h5"
 #define ASYNC_API_TEST_FILE_PRINTF "H5_api_async_test_%d.h5"
 
 #endif

@@ -24,14 +24,14 @@
 #define H5VL_PASSTHRU (H5VL_pass_through_register())
 
 /* Characteristics of the pass-through VOL connector */
-#define H5VL_PASSTHRU_NAME    "pass_through"
-#define H5VL_PASSTHRU_VALUE   1 /* VOL connector ID */
+#define H5VL_PASSTHRU_NAME "pass_through"
+#define H5VL_PASSTHRU_VALUE 1 /* VOL connector ID */
 #define H5VL_PASSTHRU_VERSION 0
 
 /* Pass-through VOL connector info */
 typedef struct H5VL_pass_through_info_t {
-    hid_t under_vol_id;   /* VOL ID for under VOL */
-    void *under_vol_info; /* VOL info for under VOL */
+  hid_t under_vol_id;   /* VOL ID for under VOL */
+  void *under_vol_info; /* VOL info for under VOL */
 } H5VL_pass_through_info_t;
 
 #ifdef __cplusplus

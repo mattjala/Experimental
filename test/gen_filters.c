@@ -14,13 +14,14 @@
 
 #define TESTFILE1 "test_filters.h5"
 #define TESTFILE2 "filter_error.h5"
-#define DSETNAME  "dataset_with_filter"
+#define DSETNAME "dataset_with_filter"
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS 305
 
 /* Local prototypes for filter functions */
-static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+                           const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
 
 /*-------------------------------------------------------------------------
@@ -28,9 +29,9 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  *
  * Purpose:	Create a dataset with the fletcher filter.
  *	        This function is used to create the test file `test_filters.h5'
- *              which has a dataset with the "fletcher" I/O filter.  This dataset
- *              will be used to verify the correct behavior of the library in
- *              the test "dsets"
+ *              which has a dataset with the "fletcher" I/O filter.  This
+ *dataset will be used to verify the correct behavior of the library in the test
+ *"dsets"
  *
  * Return:	Success:	0
  *
@@ -38,68 +39,66 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_filters_endianess(void)
-{
-    hid_t   fid           = -1;   /* file ID */
-    hid_t   dsid          = -1;   /* dataset ID */
-    hid_t   sid           = -1;   /* dataspace ID */
-    hid_t   dcpl          = -1;   /* dataset creation property list ID */
-    hsize_t dims[1]       = {20}; /* dataspace dimensions */
-    hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
-    int     buf[20];
-    int     rank = 1;
-    int     i;
+static herr_t test_filters_endianess(void) {
+  hid_t fid = -1;               /* file ID */
+  hid_t dsid = -1;              /* dataset ID */
+  hid_t sid = -1;               /* dataspace ID */
+  hid_t dcpl = -1;              /* dataset creation property list ID */
+  hsize_t dims[1] = {20};       /* dataspace dimensions */
+  hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
+  int buf[20];
+  int rank = 1;
+  int i;
 
-    for (i = 0; i < 20; i++)
-        buf[i] = 1;
+  for (i = 0; i < 20; i++)
+    buf[i] = 1;
 
-    /* create a file using default properties */
-    if ((fid = H5Fcreate(TESTFILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+  /* create a file using default properties */
+  if ((fid = H5Fcreate(TESTFILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    goto error;
 
-    /* create a data space */
-    if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-        goto error;
+  /* create a data space */
+  if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+    goto error;
 
-    /* create dcpl  */
-    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
-    if (H5Pset_chunk(dcpl, rank, chunk_dims) < 0)
-        goto error;
+  /* create dcpl  */
+  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    goto error;
+  if (H5Pset_chunk(dcpl, rank, chunk_dims) < 0)
+    goto error;
 
-    if (H5Pset_fletcher32(dcpl) < 0)
-        goto error;
+  if (H5Pset_fletcher32(dcpl) < 0)
+    goto error;
 
-    /* create a dataset */
-    if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto error;
+  /* create a dataset */
+  if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                         H5P_DEFAULT)) < 0)
+    goto error;
 
-    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto error;
+  if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    goto error;
 
-    /* close */
-    if (H5Pclose(dcpl) < 0)
-        goto error;
-    if (H5Dclose(dsid) < 0)
-        goto error;
-    if (H5Sclose(sid) < 0)
-        goto error;
-    if (H5Fclose(fid) < 0)
-        goto error;
+  /* close */
+  if (H5Pclose(dcpl) < 0)
+    goto error;
+  if (H5Dclose(dsid) < 0)
+    goto error;
+  if (H5Sclose(sid) < 0)
+    goto error;
+  if (H5Fclose(fid) < 0)
+    goto error;
 
-    return 0;
+  return 0;
 
 error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(dcpl);
-        H5Dclose(dsid);
-        H5Sclose(sid);
-        H5Fclose(fid);
-    }
-    H5E_END_TRY
-    return -1;
+  H5E_BEGIN_TRY {
+    H5Pclose(dcpl);
+    H5Dclose(dsid);
+    H5Sclose(sid);
+    H5Fclose(fid);
+  }
+  H5E_END_TRY
+  return -1;
 } /* end test_filters_endianess() */
 
 /* This message derives from H5Z */
@@ -124,12 +123,12 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-             const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
-             void H5_ATTR_UNUSED **buf)
-{
-    return nbytes;
+static size_t filter_bogus(unsigned int H5_ATTR_UNUSED flags,
+                           size_t H5_ATTR_UNUSED cd_nelmts,
+                           const unsigned int H5_ATTR_UNUSED *cd_values,
+                           size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                           void H5_ATTR_UNUSED **buf) {
+  return nbytes;
 }
 
 /*-------------------------------------------------------------------------
@@ -143,73 +142,71 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-create_file_with_bogus_filter(void)
-{
-    hid_t   fid           = -1;   /* file ID */
-    hid_t   dsid          = -1;   /* dataset ID */
-    hid_t   sid           = -1;   /* dataspace ID */
-    hid_t   dcpl          = -1;   /* dataset creation property list ID */
-    hsize_t dims[1]       = {20}; /* dataspace dimensions */
-    hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
-    int     buf[20];
-    int     rank = 1;
-    int     i;
+static herr_t create_file_with_bogus_filter(void) {
+  hid_t fid = -1;               /* file ID */
+  hid_t dsid = -1;              /* dataset ID */
+  hid_t sid = -1;               /* dataspace ID */
+  hid_t dcpl = -1;              /* dataset creation property list ID */
+  hsize_t dims[1] = {20};       /* dataspace dimensions */
+  hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
+  int buf[20];
+  int rank = 1;
+  int i;
 
-    for (i = 0; i < 20; i++)
-        buf[i] = 1;
+  for (i = 0; i < 20; i++)
+    buf[i] = 1;
 
-    /* create a file using default properties */
-    if ((fid = H5Fcreate(TESTFILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+  /* create a file using default properties */
+  if ((fid = H5Fcreate(TESTFILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    goto error;
 
-    /* create a data space */
-    if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-        goto error;
+  /* create a data space */
+  if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+    goto error;
 
-    /* create dcpl  */
-    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
+  /* create dcpl  */
+  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    goto error;
 
-    /* create chunking */
-    if (H5Pset_chunk(dcpl, rank, chunk_dims) < 0)
-        goto error;
+  /* create chunking */
+  if (H5Pset_chunk(dcpl, rank, chunk_dims) < 0)
+    goto error;
 
-    /* register bogus filter */
-    if (H5Zregister(H5Z_BOGUS) < 0)
-        goto error;
-    if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
-        goto error;
+  /* register bogus filter */
+  if (H5Zregister(H5Z_BOGUS) < 0)
+    goto error;
+  if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
+    goto error;
 
-    /* create a dataset */
-    if ((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto error;
+  /* create a dataset */
+  if ((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                         H5P_DEFAULT)) < 0)
+    goto error;
 
-    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto error;
+  if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    goto error;
 
-    /* close */
-    if (H5Pclose(dcpl) < 0)
-        goto error;
-    if (H5Dclose(dsid) < 0)
-        goto error;
-    if (H5Sclose(sid) < 0)
-        goto error;
-    if (H5Fclose(fid) < 0)
-        goto error;
+  /* close */
+  if (H5Pclose(dcpl) < 0)
+    goto error;
+  if (H5Dclose(dsid) < 0)
+    goto error;
+  if (H5Sclose(sid) < 0)
+    goto error;
+  if (H5Fclose(fid) < 0)
+    goto error;
 
-    return 0;
+  return 0;
 
 error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(dcpl);
-        H5Dclose(dsid);
-        H5Sclose(sid);
-        H5Fclose(fid);
-    }
-    H5E_END_TRY
-    return -1;
+  H5E_BEGIN_TRY {
+    H5Pclose(dcpl);
+    H5Dclose(dsid);
+    H5Sclose(sid);
+    H5Fclose(fid);
+  }
+  H5E_END_TRY
+  return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -221,22 +218,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int
-main(void)
-{
-    int nerrors = 0;
+int main(void) {
+  int nerrors = 0;
 
-    nerrors += test_filters_endianess() < 0 ? 1 : 0;
-    nerrors += create_file_with_bogus_filter() < 0 ? 1 : 0;
+  nerrors += test_filters_endianess() < 0 ? 1 : 0;
+  nerrors += create_file_with_bogus_filter() < 0 ? 1 : 0;
 
-    if (nerrors)
-        goto error;
-    printf("All tests passed.\n");
+  if (nerrors)
+    goto error;
+  printf("All tests passed.\n");
 
-    return 0;
+  return 0;
 
 error:
-    nerrors = MAX(1, nerrors);
-    printf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
-    return 1;
+  nerrors = MAX(1, nerrors);
+  printf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
+  return 1;
 }

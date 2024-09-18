@@ -13,8 +13,8 @@
 #ifndef H5_API_TEST_H
 #define H5_API_TEST_H
 
-#include <hdf5.h>
 #include <H5private.h>
+#include <hdf5.h>
 
 #include "h5test.h"
 
@@ -50,12 +50,12 @@ extern const char *test_path_prefix;
 /* The names of a set of container groups which hold objects
  * created by each of the different types of tests.
  */
-#define GROUP_TEST_GROUP_NAME         "group_tests"
-#define ATTRIBUTE_TEST_GROUP_NAME     "attribute_tests"
-#define DATASET_TEST_GROUP_NAME       "dataset_tests"
-#define DATATYPE_TEST_GROUP_NAME      "datatype_tests"
-#define LINK_TEST_GROUP_NAME          "link_tests"
-#define OBJECT_TEST_GROUP_NAME        "object_tests"
+#define GROUP_TEST_GROUP_NAME "group_tests"
+#define ATTRIBUTE_TEST_GROUP_NAME "attribute_tests"
+#define DATASET_TEST_GROUP_NAME "dataset_tests"
+#define DATATYPE_TEST_GROUP_NAME "datatype_tests"
+#define LINK_TEST_GROUP_NAME "link_tests"
+#define OBJECT_TEST_GROUP_NAME "object_tests"
 #define MISCELLANEOUS_TEST_GROUP_NAME "miscellaneous_tests"
 
 #define ARRAY_LENGTH(array) sizeof(array) / sizeof(array[0])
