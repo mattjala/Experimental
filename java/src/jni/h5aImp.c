@@ -20,13 +20,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "h5aImp.h"
+#include "h5jni.h"
+#include "h5util.h"
+#include "hdf5.h"
 #include <jni.h>
 #include <stdlib.h>
 #include <string.h>
-#include "hdf5.h"
-#include "h5util.h"
-#include "h5jni.h"
-#include "h5aImp.h"
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.
@@ -34,20 +34,25 @@ extern "C" {
 extern JavaVM *jvm;
 
 typedef struct _cb_wrapper {
-    jobject visit_callback;
-    jobject op_data;
+  jobject visit_callback;
+  jobject op_data;
 } cb_wrapper;
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-static herr_t H5AwriteVL_asstr(JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
-static herr_t H5AwriteVL_str(JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
-static herr_t H5AreadVL_asstr(JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
-static herr_t H5AreadVL_str(JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
+static herr_t H5AwriteVL_asstr(JNIEnv *env, hid_t attr_id, hid_t mem_id,
+                               jobjectArray buf);
+static herr_t H5AwriteVL_str(JNIEnv *env, hid_t attr_id, hid_t mem_id,
+                             jobjectArray buf);
+static herr_t H5AreadVL_asstr(JNIEnv *env, hid_t attr_id, hid_t mem_id,
+                              jobjectArray buf);
+static herr_t H5AreadVL_str(JNIEnv *env, hid_t attr_id, hid_t mem_id,
+                            jobjectArray buf);
 
-static herr_t H5A_iterate_cb(hid_t g_id, const char *name, const H5A_info_t *info, void *cb_data);
+static herr_t H5A_iterate_cb(hid_t g_id, const char *name,
+                             const H5A_info_t *info, void *cb_data);
 
 /********************/
 /* Local Macros     */
@@ -58,29 +63,30 @@ static herr_t H5A_iterate_cb(hid_t g_id, const char *name, const H5A_info_t *inf
  * Method:    _H5Acreate
  * Signature: (JLjava/lang/String;JJJ)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Acreate(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
-                                jlong space_id, jlong create_plist)
-{
-    const char *attrName = NULL;
-    hid_t       attr_id  = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Acreate(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
+    jlong space_id, jlong create_plist) {
+  const char *attrName = NULL;
+  hid_t attr_id = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate: attribute name is NULL");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Acreate: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, attrName, NULL,
+                  "H5Acreate: attribute name not pinned");
 
-    if ((attr_id = H5Acreate2((hid_t)loc_id, attrName, (hid_t)type_id, (hid_t)space_id, (hid_t)create_plist,
-                              (hid_t)H5P_DEFAULT)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((attr_id =
+           H5Acreate2((hid_t)loc_id, attrName, (hid_t)type_id, (hid_t)space_id,
+                      (hid_t)create_plist, (hid_t)H5P_DEFAULT)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, name, attrName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, name, attrName);
 
-    return (jlong)attr_id;
+  return (jlong)attr_id;
 } /* end Java_hdf_hdf5lib_H5__1H5Acreate */
 
 /*
@@ -88,37 +94,39 @@ done:
  * Method:    _H5Aopen_name
  * Signature: (JLjava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aopen_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring name)
-{
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1name(JNIEnv *env,
+                                                            jclass clss,
+                                                            jlong loc_id,
+                                                            jstring name) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    const char *attrName = NULL;
+  const char *attrName = NULL;
 #endif
-    hid_t attr_id = H5I_INVALID_HID;
+  hid_t attr_id = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
-    UNUSED(loc_id);
-    UNUSED(name);
-    H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_name: not implemented");
+  UNUSED(loc_id);
+  UNUSED(name);
+  H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_name: not implemented");
 #else
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_name: attribute name is null");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_name: attribute name is null");
 
-    PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Aopen_name: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, attrName, NULL,
+                  "H5Aopen_name: attribute name not pinned");
 
-    if ((attr_id = H5Aopen_name((hid_t)loc_id, attrName)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((attr_id = H5Aopen_name((hid_t)loc_id, attrName)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 #endif
 
 done:
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, name, attrName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, name, attrName);
 #endif
 
-    return (jlong)attr_id;
+  return (jlong)attr_id;
 } /* end Java_hdf_hdf5lib_H5__1H5Aopen_1name */
 
 /*
@@ -126,24 +134,25 @@ done:
  * Method:    _H5Aopen_idx
  * Signature: (JI)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aopen_1idx(JNIEnv *env, jclass clss, jlong loc_id, jint idx)
-{
-    hid_t attr_id = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1idx(JNIEnv *env,
+                                                           jclass clss,
+                                                           jlong loc_id,
+                                                           jint idx) {
+  hid_t attr_id = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
-    UNUSED(loc_id);
-    UNUSED(idx);
-    H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_idx: not implemented");
+  UNUSED(loc_id);
+  UNUSED(idx);
+  H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_idx: not implemented");
 #else
-    if ((attr_id = H5Aopen_idx((hid_t)loc_id, (unsigned int)idx)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((attr_id = H5Aopen_idx((hid_t)loc_id, (unsigned int)idx)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 #endif
 
 done:
-    return (jlong)attr_id;
+  return (jlong)attr_id;
 } /* end Java_hdf_hdf5lib_H5__1H5Aopen_1idx */
 
 /*
@@ -151,86 +160,87 @@ done:
  * Method:    H5Aread
  * Signature: (JJ[BZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jbyteArray buf,
-                            jboolean isCriticalPinning)
-{
-    jboolean    readBufIsCopy;
-    jbyte      *readBuf = NULL;
-    hsize_t     dims[H5S_MAX_RANK];
-    hid_t       sid = H5I_INVALID_HID;
-    size_t      typeSize;
-    H5T_class_t type_class;
-    jsize       vl_array_len = 0; // Only used by vl_data_class types
-    htri_t      vl_data_class;
-    herr_t      status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss,
+                                                   jlong attr_id,
+                                                   jlong mem_type_id,
+                                                   jbyteArray buf,
+                                                   jboolean isCriticalPinning) {
+  jboolean readBufIsCopy;
+  jbyte *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  size_t typeSize;
+  H5T_class_t type_class;
+  jsize vl_array_len = 0; // Only used by vl_data_class types
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
 
-        if (!(typeSize = H5Tget_size(mem_type_id)))
-            H5_LIBRARY_ERROR(ENVONLY);
+    if (!(typeSize = H5Tget_size(mem_type_id)))
+      H5_LIBRARY_ERROR(ENVONLY);
 
-        if (NULL == (readBuf = calloc((size_t)vl_array_len, typeSize)))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread: failed to allocate raw VL read buffer");
+    if (NULL == (readBuf = calloc((size_t)vl_array_len, typeSize)))
+      H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                             "H5Aread: failed to allocate raw VL read buffer");
+  } else {
+    if (isCriticalPinning) {
+      PIN_BYTE_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
+                              "H5Aread: read buffer not critically pinned");
+    } else {
+      PIN_BYTE_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy,
+                     "H5Aread: read buffer not pinned");
     }
-    else {
-        if (isCriticalPinning) {
-            PIN_BYTE_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
-                                    "H5Aread: read buffer not critically pinned");
-        }
-        else {
-            PIN_BYTE_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy, "H5Aread: read buffer not pinned");
-        }
-    }
+  }
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, (void *)readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, (void *)readBuf)) <
+      0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+  if (vl_data_class) {
+    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
 
-        translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
-    }
+    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+  }
 
 done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            dims[0] = (hsize_t)vl_array_len;
-            if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      dims[0] = (hsize_t)vl_array_len;
+      if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
 
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-
-        if (vl_data_class) {
-            free(readBuf);
-        }
-        else {
-            if (isCriticalPinning) {
-                UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-            }
-            else {
-                UNPIN_BYTE_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-            }
-        }
+      if (sid >= 0)
+        H5Sclose(sid);
     }
 
-    return (jint)status;
+    if (vl_data_class) {
+      free(readBuf);
+    } else {
+      if (isCriticalPinning) {
+        UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf,
+                             (status < 0) ? JNI_ABORT : 0);
+      } else {
+        UNPIN_BYTE_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
+      }
+    }
+  }
+
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread */
 
 /*
@@ -238,85 +248,84 @@ done:
  * Method:    H5Awrite
  * Signature: (JJ[BZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jbyteArray buf,
-                             jboolean isCriticalPinning)
-{
-    jboolean    writeBufIsCopy;
-    jbyte      *writeBuf = NULL;
-    hsize_t     dims[H5S_MAX_RANK];
-    hid_t       sid = H5I_INVALID_HID;
-    size_t      typeSize;
-    H5T_class_t type_class;
-    jsize       vl_array_len = 0; // Only used by vl_data_class types
-    htri_t      vl_data_class;
-    herr_t      status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jbyteArray buf,
+    jboolean isCriticalPinning) {
+  jboolean writeBufIsCopy;
+  jbyte *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  size_t typeSize;
+  H5T_class_t type_class;
+  jsize vl_array_len = 0; // Only used by vl_data_class types
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer length < 0");
-        }
-
-        if (!(typeSize = H5Tget_size(mem_type_id)))
-            H5_LIBRARY_ERROR(ENVONLY);
-
-        if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Awrite: failed to allocate raw VL write buffer");
-    }
-    else {
-        if (isCriticalPinning) {
-            PIN_BYTE_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
-                                    "H5Awrite: write buffer not critically pinned");
-        }
-        else {
-            PIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5Awrite: write buffer not pinned");
-        }
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer length < 0");
     }
 
-    if (vl_data_class) {
-        if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+    if (!(typeSize = H5Tget_size(mem_type_id)))
+      H5_LIBRARY_ERROR(ENVONLY);
 
-        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+    if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
+      H5_OUT_OF_MEMORY_ERROR(
+          ENVONLY, "H5Awrite: failed to allocate raw VL write buffer");
+  } else {
+    if (isCriticalPinning) {
+      PIN_BYTE_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                              "H5Awrite: write buffer not critically pinned");
+    } else {
+      PIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                     "H5Awrite: write buffer not pinned");
     }
+  }
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (vl_data_class) {
+    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+
+    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len,
+                   writeBuf);
+  }
+
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class) {
-            dims[0] = (hsize_t)vl_array_len;
-            if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class) {
+      dims[0] = (hsize_t)vl_array_len;
+      if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
-        }
-
-        if (vl_data_class) {
-            free(writeBuf);
-        }
-        else {
-            if (isCriticalPinning) {
-                UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-            }
-            else {
-                UNPIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-            }
-        }
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
     }
 
-    return (jint)status;
+    if (vl_data_class) {
+      free(writeBuf);
+    } else {
+      if (isCriticalPinning) {
+        UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf,
+                             (status < 0) ? JNI_ABORT : 0);
+      } else {
+        UNPIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
+      }
+    }
+  }
+
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite */
 
 /*
@@ -324,66 +333,65 @@ done:
  * Method:    H5Aread_short
  * Signature: (JJ[SZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1short(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                   jshortArray buf, jboolean isCriticalPinning)
-{
-    jboolean readBufIsCopy;
-    jshort  *readBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1short(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jshortArray buf,
+    jboolean isCriticalPinning) {
+  jboolean readBufIsCopy;
+  jshort *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_short: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_short: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-        }
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+    }
 
-        dims[0] = (hsize_t)n;
-        if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+    dims[0] = (hsize_t)n;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+  }
+
+  if (isCriticalPinning) {
+    PIN_SHORT_ARRAY_CRITICAL(
+        ENVONLY, buf, readBuf, &readBufIsCopy,
+        "H5Aread_short: read buffer not critically pinned");
+  } else {
+    PIN_SHORT_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy,
+                    "H5Aread_short: read buffer not pinned");
+  }
+
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      if (sid >= 0)
+        H5Sclose(sid);
     }
 
     if (isCriticalPinning) {
-        PIN_SHORT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
-                                 "H5Aread_short: read buffer not critically pinned");
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_SHORT_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
     }
-    else {
-        PIN_SHORT_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy, "H5Aread_short: read buffer not pinned");
-    }
+  }
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_SHORT_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-    }
-
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1short */
 
 /*
@@ -391,61 +399,61 @@ done:
  * Method:    H5Awrite_short
  * Signature: (JJ[SZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1short(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                    jshortArray buf, jboolean isCriticalPinning)
-{
-    jboolean writeBufIsCopy;
-    jshort  *writeBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite_1short(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jshortArray buf,
+    jboolean isCriticalPinning) {
+  jboolean writeBufIsCopy;
+  jshort *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_short: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_short: write buffer is NULL");
 
-    /* Get size of data array */
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+  /* Get size of data array */
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+  }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (isCriticalPinning) {
-        PIN_SHORT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
-                                 "H5Awrite_short: write buffer not critically pinned");
-    }
-    else {
-        PIN_SHORT_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5Awrite_short: write buffer not pinned");
-    }
+  if (isCriticalPinning) {
+    PIN_SHORT_ARRAY_CRITICAL(
+        ENVONLY, buf, writeBuf, &writeBufIsCopy,
+        "H5Awrite_short: write buffer not critically pinned");
+  } else {
+    PIN_SHORT_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                    "H5Awrite_short: write buffer not pinned");
+  }
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class)
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class)
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
 
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_SHORT_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
+    if (isCriticalPinning) {
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf,
+                           (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_SHORT_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
     }
+  }
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1short */
 
 /*
@@ -453,66 +461,64 @@ done:
  * Method:    H5Aread_int
  * Signature: (JJ[IZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jintArray buf,
-                                 jboolean isCriticalPinning)
-{
-    jboolean readBufIsCopy;
-    jint    *readBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1int(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jintArray buf,
+    jboolean isCriticalPinning) {
+  jboolean readBufIsCopy;
+  jint *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (buf == NULL)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_int: read buffer is NULL");
+  if (buf == NULL)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_int: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-        }
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+    }
 
-        dims[0] = (hsize_t)n;
-        if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+    dims[0] = (hsize_t)n;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+  }
+
+  if (isCriticalPinning) {
+    PIN_INT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
+                           "H5Aread_int: read buffer not critically pinned");
+  } else {
+    PIN_INT_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy,
+                  "H5Aread_int: read buffer not pinned");
+  }
+
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      if (sid >= 0)
+        H5Sclose(sid);
     }
 
     if (isCriticalPinning) {
-        PIN_INT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
-                               "H5Aread_int: read buffer not critically pinned");
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_INT_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
     }
-    else {
-        PIN_INT_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy, "H5Aread_int: read buffer not pinned");
-    }
+  }
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_INT_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-    }
-
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1int */
 
 /*
@@ -520,61 +526,60 @@ done:
  * Method:    H5Awrite_int
  * Signature: (JJ[IZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jintArray buf,
-                                  jboolean isCriticalPinning)
-{
-    jboolean writeBufIsCopy;
-    jint    *writeBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite_1int(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jintArray buf,
+    jboolean isCriticalPinning) {
+  jboolean writeBufIsCopy;
+  jint *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (buf == NULL)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_int: write buffer is NULL");
+  if (buf == NULL)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_int: write buffer is NULL");
 
-    /* Get size of data array */
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+  /* Get size of data array */
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+  }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (isCriticalPinning) {
-        PIN_INT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
-                               "H5Awrite_int: write buffer not critically pinned");
-    }
-    else {
-        PIN_INT_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5Awrite_int: write buffer not pinned");
-    }
+  if (isCriticalPinning) {
+    PIN_INT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                           "H5Awrite_int: write buffer not critically pinned");
+  } else {
+    PIN_INT_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                  "H5Awrite_int: write buffer not pinned");
+  }
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class)
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class)
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
 
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_INT_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
+    if (isCriticalPinning) {
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf,
+                           (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_INT_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
     }
+  }
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1int */
 
 /*
@@ -582,66 +587,64 @@ done:
  * Method:    H5Aread_long
  * Signature: (JJ[JZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1long(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jlongArray buf,
-                                  jboolean isCriticalPinning)
-{
-    jboolean readBufIsCopy;
-    jlong   *readBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1long(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jlongArray buf,
+    jboolean isCriticalPinning) {
+  jboolean readBufIsCopy;
+  jlong *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_long: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_long: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-        }
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+    }
 
-        dims[0] = (hsize_t)n;
-        if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+    dims[0] = (hsize_t)n;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+  }
+
+  if (isCriticalPinning) {
+    PIN_LONG_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
+                            "H5Aread_long: read buffer not critically pinned");
+  } else {
+    PIN_LONG_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy,
+                   "H5Aread_long: read buffer not pinned");
+  }
+
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      if (sid >= 0)
+        H5Sclose(sid);
     }
 
     if (isCriticalPinning) {
-        PIN_LONG_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
-                                "H5Aread_long: read buffer not critically pinned");
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_LONG_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
     }
-    else {
-        PIN_LONG_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy, "H5Aread_long: read buffer not pinned");
-    }
+  }
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_LONG_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-    }
-
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1long */
 
 /*
@@ -649,61 +652,61 @@ done:
  * Method:    H5Awrite_long
  * Signature: (JJ[JZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1long(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jlongArray buf,
-                                   jboolean isCriticalPinning)
-{
-    jboolean writeBufIsCopy;
-    jlong   *writeBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite_1long(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jlongArray buf,
+    jboolean isCriticalPinning) {
+  jboolean writeBufIsCopy;
+  jlong *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_long: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_long: write buffer is NULL");
 
-    /* Get size of data array */
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+  /* Get size of data array */
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+  }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (isCriticalPinning) {
-        PIN_LONG_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
-                                "H5Awrite_long: write buffer not critically pinned");
-    }
-    else {
-        PIN_LONG_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5Awrite_long: write buffer not pinned");
-    }
+  if (isCriticalPinning) {
+    PIN_LONG_ARRAY_CRITICAL(
+        ENVONLY, buf, writeBuf, &writeBufIsCopy,
+        "H5Awrite_long: write buffer not critically pinned");
+  } else {
+    PIN_LONG_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                   "H5Awrite_long: write buffer not pinned");
+  }
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class)
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class)
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
 
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_LONG_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
+    if (isCriticalPinning) {
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf,
+                           (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_LONG_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
     }
+  }
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1long */
 
 /*
@@ -711,66 +714,65 @@ done:
  * Method:    H5Aread_float
  * Signature: (JJ[FZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1float(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                   jfloatArray buf, jboolean isCriticalPinning)
-{
-    jboolean readBufIsCopy;
-    jfloat  *readBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1float(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jfloatArray buf,
+    jboolean isCriticalPinning) {
+  jboolean readBufIsCopy;
+  jfloat *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_float: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_float: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-        }
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+    }
 
-        dims[0] = (hsize_t)n;
-        if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+    dims[0] = (hsize_t)n;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+  }
+
+  if (isCriticalPinning) {
+    PIN_FLOAT_ARRAY_CRITICAL(
+        ENVONLY, buf, readBuf, &readBufIsCopy,
+        "H5Aread_float: read buffer not critically pinned");
+  } else {
+    PIN_FLOAT_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy,
+                    "H5Aread_float: read buffer not pinned");
+  }
+
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      if (sid >= 0)
+        H5Sclose(sid);
     }
 
     if (isCriticalPinning) {
-        PIN_FLOAT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
-                                 "H5Aread_float: read buffer not critically pinned");
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_FLOAT_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
     }
-    else {
-        PIN_FLOAT_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy, "H5Aread_float: read buffer not pinned");
-    }
+  }
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_FLOAT_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-    }
-
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1float */
 
 /*
@@ -778,61 +780,61 @@ done:
  * Method:    H5Awrite_float
  * Signature: (JJ[FZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1float(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                    jfloatArray buf, jboolean isCriticalPinning)
-{
-    jboolean writeBufIsCopy;
-    jfloat  *writeBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite_1float(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jfloatArray buf,
+    jboolean isCriticalPinning) {
+  jboolean writeBufIsCopy;
+  jfloat *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_float: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_float: write buffer is NULL");
 
-    /* Get size of data array */
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+  /* Get size of data array */
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+  }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (isCriticalPinning) {
-        PIN_FLOAT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
-                                 "H5Awrite_float: write buffer not critically pinned");
-    }
-    else {
-        PIN_FLOAT_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5Awrite_float: write buffer not pinned");
-    }
+  if (isCriticalPinning) {
+    PIN_FLOAT_ARRAY_CRITICAL(
+        ENVONLY, buf, writeBuf, &writeBufIsCopy,
+        "H5Awrite_float: write buffer not critically pinned");
+  } else {
+    PIN_FLOAT_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                    "H5Awrite_float: write buffer not pinned");
+  }
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class)
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class)
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
 
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_FLOAT_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
+    if (isCriticalPinning) {
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf,
+                           (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_FLOAT_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
     }
+  }
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1float */
 
 /*
@@ -840,66 +842,65 @@ done:
  * Method:    H5Aread_double
  * Signature: (JJ[DZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1double(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                    jdoubleArray buf, jboolean isCriticalPinning)
-{
-    jboolean readBufIsCopy;
-    jdouble *readBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1double(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
+    jdoubleArray buf, jboolean isCriticalPinning) {
+  jboolean readBufIsCopy;
+  jdouble *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_double: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_double: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class) {
-        /* Get size of data array */
-        if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-        }
+  if (vl_data_class) {
+    /* Get size of data array */
+    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+    }
 
-        dims[0] = (hsize_t)n;
-        if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+    dims[0] = (hsize_t)n;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+  }
+
+  if (isCriticalPinning) {
+    PIN_DOUBLE_ARRAY_CRITICAL(
+        ENVONLY, buf, readBuf, &readBufIsCopy,
+        "H5Aread_double: read buffer not critically pinned");
+  } else {
+    PIN_DOUBLE_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy,
+                     "H5Aread_double: read buffer not pinned");
+  }
+
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      if (sid >= 0)
+        H5Sclose(sid);
     }
 
     if (isCriticalPinning) {
-        PIN_DOUBLE_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
-                                  "H5Aread_double: read buffer not critically pinned");
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_DOUBLE_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
     }
-    else {
-        PIN_DOUBLE_ARRAY(ENVONLY, buf, readBuf, &readBufIsCopy, "H5Aread_double: read buffer not pinned");
-    }
+  }
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_DOUBLE_ARRAY(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-    }
-
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1double */
 
 /*
@@ -907,60 +908,60 @@ done:
  * Method:    H5Awrite_double
  * Signature: (JJ[DZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1double(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                     jdoubleArray buf, jboolean isCriticalPinning)
-{
-    jboolean writeBufIsCopy;
-    jdouble *writeBuf = NULL;
-    hsize_t  dims[H5S_MAX_RANK];
-    hid_t    sid = H5I_INVALID_HID;
-    jsize    n;
-    htri_t   vl_data_class;
-    herr_t   status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite_1double(
+    JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
+    jdoubleArray buf, jboolean isCriticalPinning) {
+  jboolean writeBufIsCopy;
+  jdouble *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_double: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_double: write buffer is NULL");
 
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite_double: buf length < 0");
-    }
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite_double: buf length < 0");
+  }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (isCriticalPinning) {
-        PIN_DOUBLE_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
-                                  "H5Awrite_double: write buffer not critically pinned");
-    }
-    else {
-        PIN_DOUBLE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5Awrite_double: write buffer not pinned");
-    }
+  if (isCriticalPinning) {
+    PIN_DOUBLE_ARRAY_CRITICAL(
+        ENVONLY, buf, writeBuf, &writeBufIsCopy,
+        "H5Awrite_double: write buffer not critically pinned");
+  } else {
+    PIN_DOUBLE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy,
+                     "H5Awrite_double: write buffer not pinned");
+  }
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class)
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class)
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
 
-        if (isCriticalPinning) {
-            UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
-        else {
-            UNPIN_DOUBLE_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
-        }
+    if (isCriticalPinning) {
+      UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf,
+                           (status < 0) ? JNI_ABORT : 0);
+    } else {
+      UNPIN_DOUBLE_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
     }
+  }
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1double */
 
 /*
@@ -968,65 +969,67 @@ done:
  * Method:    H5Aread_string
  * Signature: (JJ[Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1string(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                    jobjectArray j_buf)
-{
-    jstring jstr;
-    size_t  str_len;
-    size_t  pos;
-    jsize   i, n;
-    char   *c_buf  = NULL;
-    char   *cstr   = NULL;
-    herr_t  status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1string(JNIEnv *env,
+                                                           jclass clss,
+                                                           jlong attr_id,
+                                                           jlong mem_type_id,
+                                                           jobjectArray j_buf) {
+  jstring jstr;
+  size_t str_len;
+  size_t pos;
+  jsize i, n;
+  char *c_buf = NULL;
+  char *cstr = NULL;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == j_buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_string: read buffer is NULL");
+  if (NULL == j_buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_string: read buffer is NULL");
 
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, j_buf)) <= 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_string: read buffer length <= 0");
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, j_buf)) <= 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_string: read buffer length <= 0");
+  }
+
+  if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if (NULL == (cstr = (char *)malloc(str_len + 1)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_string: memory allocation failed");
+
+  if (NULL == (c_buf = (char *)malloc((size_t)n * str_len)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_string: memory allocation failed");
+
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, c_buf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  for (i = 0, pos = 0; i < n; i++) {
+    memcpy(cstr, c_buf + pos, str_len);
+    cstr[str_len] = '\0';
+
+    if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, cstr))) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+      H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                             "H5Aread_string: out of memory - unable to "
+                             "construct string from UTF characters");
     }
 
-    if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
-        H5_LIBRARY_ERROR(ENVONLY);
+    ENVPTR->SetObjectArrayElement(ENVONLY, j_buf, i, jstr);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    if (NULL == (cstr = (char *)malloc(str_len + 1)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_string: memory allocation failed");
+    pos += str_len;
 
-    if (NULL == (c_buf = (char *)malloc((size_t)n * str_len)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_string: memory allocation failed");
-
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, c_buf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    for (i = 0, pos = 0; i < n; i++) {
-        memcpy(cstr, c_buf + pos, str_len);
-        cstr[str_len] = '\0';
-
-        if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, cstr))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(
-                ENVONLY, "H5Aread_string: out of memory - unable to construct string from UTF characters");
-        }
-
-        ENVPTR->SetObjectArrayElement(ENVONLY, j_buf, i, jstr);
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-        pos += str_len;
-
-        ENVPTR->DeleteLocalRef(ENVONLY, jstr);
-    } /* end for */
+    ENVPTR->DeleteLocalRef(ENVONLY, jstr);
+  } /* end for */
 
 done:
-    if (c_buf)
-        free(c_buf);
-    if (cstr)
-        free(cstr);
+  if (c_buf)
+    free(c_buf);
+  if (cstr)
+    free(cstr);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1string */
 
 /*
@@ -1035,68 +1038,70 @@ done:
  * Signature: (JJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                     jobjectArray j_buf)
-{
-    const char *utf8 = NULL;
-    jstring     obj;
-    size_t      i, str_len;
-    jsize       n;
-    char       *c_buf  = NULL;
-    herr_t      status = FAIL;
+Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id,
+                                     jlong mem_type_id, jobjectArray j_buf) {
+  const char *utf8 = NULL;
+  jstring obj;
+  size_t i, str_len;
+  jsize n;
+  char *c_buf = NULL;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == j_buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_string: write buffer is NULL");
+  if (NULL == j_buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_string: write buffer is NULL");
 
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, j_buf)) <= 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite_string: write buffer length <= 0");
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, j_buf)) <= 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite_string: write buffer length <= 0");
+  }
+
+  if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if (NULL == (c_buf = (char *)malloc((size_t)n * str_len)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Awrite_string: memory allocation failed");
+
+  for (i = 0; i < (size_t)n; i++) {
+    if (NULL == (obj = (jstring)ENVPTR->GetObjectArrayElement(
+                     ENVONLY, (jobjectArray)j_buf, (jsize)i))) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+      /*
+       * If the string object was NULL, skip it.
+       */
+      memset(&c_buf[i * str_len], 0, str_len);
+      continue;
     }
 
-    if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
-        H5_LIBRARY_ERROR(ENVONLY);
+    /*
+     * length = ENVPTR->GetStringUTFLength(ENVONLY, obj);
+     * CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+     */
 
-    if (NULL == (c_buf = (char *)malloc((size_t)n * str_len)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Awrite_string: memory allocation failed");
+    PIN_JAVA_STRING(ENVONLY, obj, utf8, NULL,
+                    "H5Awrite_string: string not pinned");
 
-    for (i = 0; i < (size_t)n; i++) {
-        if (NULL == (obj = (jstring)ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)j_buf, (jsize)i))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    strncpy(&c_buf[i * str_len], utf8, str_len);
 
-            /*
-             * If the string object was NULL, skip it.
-             */
-            memset(&c_buf[i * str_len], 0, str_len);
-            continue;
-        }
+    UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
+    utf8 = NULL;
 
-        /*
-         * length = ENVPTR->GetStringUTFLength(ENVONLY, obj);
-         * CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-         */
+    ENVPTR->DeleteLocalRef(ENVONLY, obj);
+  } /* end for */
 
-        PIN_JAVA_STRING(ENVONLY, obj, utf8, NULL, "H5Awrite_string: string not pinned");
-
-        strncpy(&c_buf[i * str_len], utf8, str_len);
-
-        UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
-        utf8 = NULL;
-
-        ENVPTR->DeleteLocalRef(ENVONLY, obj);
-    } /* end for */
-
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, c_buf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, c_buf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (utf8)
-        UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
-    if (c_buf)
-        free(c_buf);
+  if (utf8)
+    UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
+  if (c_buf)
+    free(c_buf);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1string */
 
 /*
@@ -1104,65 +1109,68 @@ done:
  * Method:    H5AreadVL
  * Signature: (JJ[java/util/ArrayList;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
-{
-    jbyte      *readBuf = NULL;
-    hsize_t     dims[H5S_MAX_RANK];
-    hid_t       sid = H5I_INVALID_HID;
-    size_t      typeSize;
-    H5T_class_t type_class;
-    jsize       vl_array_len;
-    htri_t      vl_data_class;
-    herr_t      status      = FAIL;
-    htri_t      is_variable = 0;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss,
+                                                     jlong attr_id,
+                                                     jlong mem_type_id,
+                                                     jobjectArray buf) {
+  jbyte *readBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  size_t typeSize;
+  H5T_class_t type_class;
+  jsize vl_array_len;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
+  htri_t is_variable = 0;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread: read buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-    /* Get size of data array */
-    if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+  /* Get size of data array */
+  if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+  if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (!(typeSize = H5Tget_size(mem_type_id)))
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (!(typeSize = H5Tget_size(mem_type_id)))
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (readBuf = calloc((size_t)vl_array_len, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread: failed to allocate raw VL read buffer");
+  if (NULL == (readBuf = calloc((size_t)vl_array_len, typeSize)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Aread: failed to allocate raw VL read buffer");
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, (void *)readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, (void *)readBuf)) <
+      0)
+    H5_LIBRARY_ERROR(ENVONLY);
+  if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+  translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
 
 done:
-    if (readBuf) {
-        if ((status >= 0) && vl_data_class) {
-            dims[0] = (hsize_t)vl_array_len;
-            if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
+  if (readBuf) {
+    if ((status >= 0) && vl_data_class) {
+      dims[0] = (hsize_t)vl_array_len;
+      if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
 
-            if (sid >= 0)
-                H5Sclose(sid);
-        }
-        if (is_variable) {
-            for (size_t i = 0; i < (size_t)vl_array_len; i++)
-                free(((char **)readBuf)[i]);
-        }
-        free(readBuf);
+      if (sid >= 0)
+        H5Sclose(sid);
     }
+    if (is_variable) {
+      for (size_t i = 0; i < (size_t)vl_array_len; i++)
+        free(((char **)readBuf)[i]);
+    }
+    free(readBuf);
+  }
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5AreadVL */
 
 /*
@@ -1170,67 +1178,69 @@ done:
  * Method:    H5AwriteVL
  * Signature: (JJ[java/util/ArrayList;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
-{
-    jbyte      *writeBuf = NULL;
-    hsize_t     dims[H5S_MAX_RANK];
-    hid_t       sid = H5I_INVALID_HID;
-    size_t      typeSize;
-    H5T_class_t type_class;
-    jsize       vl_array_len;
-    htri_t      vl_data_class;
-    herr_t      status      = FAIL;
-    htri_t      is_variable = 0;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss,
+                                                      jlong attr_id,
+                                                      jlong mem_type_id,
+                                                      jobjectArray buf) {
+  jbyte *writeBuf = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  hid_t sid = H5I_INVALID_HID;
+  size_t typeSize;
+  H5T_class_t type_class;
+  jsize vl_array_len;
+  htri_t vl_data_class;
+  herr_t status = FAIL;
+  htri_t is_variable = 0;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer is NULL");
 
-    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    /* Get size of data array */
-    if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer length < 0");
-    }
-    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  /* Get size of data array */
+  if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer length < 0");
+  }
+  if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (!(typeSize = H5Tget_size(mem_type_id)))
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (!(typeSize = H5Tget_size(mem_type_id)))
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Awrite: failed to allocate raw VL write buffer");
+  if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Awrite: failed to allocate raw VL write buffer");
 
-    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+  translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
 
-    if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (writeBuf) {
-        if ((status >= 0) && vl_data_class) {
-            dims[0] = (hsize_t)vl_array_len;
-            if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
+  if (writeBuf) {
+    if ((status >= 0) && vl_data_class) {
+      dims[0] = (hsize_t)vl_array_len;
+      if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
-        }
-        if (is_variable) {
-            for (size_t i = 0; i < (size_t)vl_array_len; i++)
-                free(((char **)writeBuf)[i]);
-        }
-
-        free(writeBuf);
+      H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+    }
+    if (is_variable) {
+      for (size_t i = 0; i < (size_t)vl_array_len; i++)
+        free(((char **)writeBuf)[i]);
     }
 
-    return (jint)status;
+    free(writeBuf);
+  }
+
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5AwriteVL */
 
 /*
@@ -1239,70 +1249,69 @@ done:
  * Signature: (JJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                       jobjectArray buf)
-{
-    H5T_class_t type_class;
-    htri_t      isStr      = 0;
-    htri_t      isVlenStr  = 0;
-    htri_t      isComplex  = 0;
-    htri_t      isComplex2 = 0;
-    hid_t       nested_tid = H5I_INVALID_HID;
-    herr_t      status     = FAIL;
+Java_hdf_hdf5lib_H5_H5Aread_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id,
+                                       jlong mem_type_id, jobjectArray buf) {
+  H5T_class_t type_class;
+  htri_t isStr = 0;
+  htri_t isVlenStr = 0;
+  htri_t isComplex = 0;
+  htri_t isComplex2 = 0;
+  hid_t nested_tid = H5I_INVALID_HID;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_VLStrings: read buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_VLStrings: read buffer is NULL");
 
-    if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
+  if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if (type_class == H5T_COMPOUND) {
+    unsigned i;
+    int num_members;
+
+    if ((num_members = H5Tget_nmembers(mem_type_id)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+
+    for (i = 0; i < (unsigned)num_members; i++) {
+      if ((nested_tid = H5Tget_member_type((hid_t)mem_type_id, i)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+      if ((isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (type_class == H5T_COMPOUND) {
-        unsigned i;
-        int      num_members;
+      if ((isComplex2 = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-        if ((num_members = H5Tget_nmembers(mem_type_id)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+      isComplex = isComplex || isComplex2;
 
-        for (i = 0; i < (unsigned)num_members; i++) {
-            if ((nested_tid = H5Tget_member_type((hid_t)mem_type_id, i)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if ((isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if ((isComplex2 = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            isComplex = isComplex || isComplex2;
-
-            if (H5Tclose(nested_tid) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-            nested_tid = H5I_INVALID_HID;
-        }
+      if (H5Tclose(nested_tid) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+      nested_tid = H5I_INVALID_HID;
     }
-    else if (type_class == H5T_VLEN) {
-        isVlenStr = 1; /* Strings created by H5Tvlen_create(H5T_C_S1) */
-    }
+  } else if (type_class == H5T_VLEN) {
+    isVlenStr = 1; /* Strings created by H5Tvlen_create(H5T_C_S1) */
+  }
 
-    if (!isStr || isComplex || isVlenStr) {
-        if ((status = H5AreadVL_asstr(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-    }
-    else if (isStr) {
-        if ((status = H5AreadVL_str(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-    }
+  if (!isStr || isComplex || isVlenStr) {
+    if ((status =
+             H5AreadVL_asstr(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  } else if (isStr) {
+    if ((status = H5AreadVL_str(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) <
+        0)
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  }
 
 done:
-    if (nested_tid >= 0)
-        H5Tclose(nested_tid);
+  if (nested_tid >= 0)
+    H5Tclose(nested_tid);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1VLStrings */
 
 /*
@@ -1310,56 +1319,56 @@ done:
  * attribute. Each C-string is converted to a Java string and set in the output
  * buffer in turn.
  */
-static herr_t
-H5AreadVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
-{
-    jstring jstr;
-    jsize   i, n;
-    char  **strs   = NULL;
-    herr_t  status = FAIL;
+static herr_t H5AreadVL_str(JNIEnv *env, hid_t aid, hid_t tid,
+                            jobjectArray buf) {
+  jstring jstr;
+  jsize i, n;
+  char **strs = NULL;
+  herr_t status = FAIL;
 
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL_str: buf length < 0");
-    }
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL_str: buf length < 0");
+  }
 
-    if (NULL == (strs = (char **)calloc((size_t)n, sizeof(char *))))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                               "H5AreadVL_str: failed to allocate variable length string read buffer");
+  if (NULL == (strs = (char **)calloc((size_t)n, sizeof(char *))))
+    H5_OUT_OF_MEMORY_ERROR(
+        ENVONLY,
+        "H5AreadVL_str: failed to allocate variable length string read buffer");
 
-    if ((status = H5Aread(aid, tid, strs)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aread(aid, tid, strs)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    /*
-     * When repeatedly reading a dataset with a large number of strs (e.g., 1,000,000 strings),
-     * H5Treclaim() may crash on Windows because the Java GC will not be able to collect
-     * free space in time. Instead, we use "H5free_memory(strs[i])" to free individual strings
-     * once done.
-     */
-    for (i = 0; i < n; i++) {
-        if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, strs[i])))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  /*
+   * When repeatedly reading a dataset with a large number of strs (e.g.,
+   * 1,000,000 strings), H5Treclaim() may crash on Windows because the Java GC
+   * will not be able to collect free space in time. Instead, we use
+   * "H5free_memory(strs[i])" to free individual strings once done.
+   */
+  for (i = 0; i < n; i++) {
+    if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, strs[i])))
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        ENVPTR->SetObjectArrayElement(ENVONLY, buf, i, jstr);
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    ENVPTR->SetObjectArrayElement(ENVONLY, buf, i, jstr);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        H5free_memory(strs[i]);
-        strs[i] = NULL;
+    H5free_memory(strs[i]);
+    strs[i] = NULL;
 
-        ENVPTR->DeleteLocalRef(ENVONLY, jstr);
-    } /* end for */
+    ENVPTR->DeleteLocalRef(ENVONLY, jstr);
+  } /* end for */
 
 done:
-    if (strs) {
-        for (i = 0; i < n; i++) {
-            if (strs[i])
-                H5free_memory(strs[i]);
-        }
-
-        free(strs);
+  if (strs) {
+    for (i = 0; i < n; i++) {
+      if (strs[i])
+        H5free_memory(strs[i]);
     }
 
-    return status;
+    free(strs);
+  }
+
+  return status;
 } /* end H5AreadVL_str */
 
 /*
@@ -1368,73 +1377,75 @@ done:
  * element's buffer into a Java string. Each string is then set
  * in the output buffer in turn.
  */
-static herr_t
-H5AreadVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
-{
-    hsize_t dims[H5S_MAX_RANK];
-    jstring jstr;
-    h5str_t h5str;
-    size_t  typeSize;
-    size_t  i;
-    hid_t   sid = H5I_INVALID_HID;
-    jsize   n;
-    void   *readBuf = NULL;
-    herr_t  status  = FAIL;
+static herr_t H5AreadVL_asstr(JNIEnv *env, hid_t aid, hid_t tid,
+                              jobjectArray buf) {
+  hsize_t dims[H5S_MAX_RANK];
+  jstring jstr;
+  h5str_t h5str;
+  size_t typeSize;
+  size_t i;
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  void *readBuf = NULL;
+  herr_t status = FAIL;
 
-    memset(&h5str, 0, sizeof(h5str_t));
+  memset(&h5str, 0, sizeof(h5str_t));
 
-    /* Get size of string array */
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL_asstr: buf length < 0");
-    }
+  /* Get size of string array */
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL_asstr: buf length < 0");
+  }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (!(typeSize = H5Tget_size(tid)))
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (!(typeSize = H5Tget_size(tid)))
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (readBuf = calloc((size_t)n, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AreadVL_asstr: failed to allocate read buffer");
+  if (NULL == (readBuf = calloc((size_t)n, typeSize)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5AreadVL_asstr: failed to allocate read buffer");
 
-    if ((status = H5Aread(aid, tid, readBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aread(aid, tid, readBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    /* Allocate a decent-sized initial string */
-    h5str_new(&h5str, 4 * typeSize);
+  /* Allocate a decent-sized initial string */
+  h5str_new(&h5str, 4 * typeSize);
 
-    if (!h5str.s)
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AreadVL_asstr: failed to allocate buffer");
+  if (!h5str.s)
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5AreadVL_asstr: failed to allocate buffer");
 
-    /* Convert each element to a char string */
-    for (i = 0; i < (size_t)n; i++) {
-        h5str.s[0] = '\0';
+  /* Convert each element to a char string */
+  for (i = 0; i < (size_t)n; i++) {
+    h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, aid, tid, &(((char *)readBuf)[i * typeSize]), 0))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (!h5str_sprintf(ENVONLY, &h5str, aid, tid,
+                       &(((char *)readBuf)[i * typeSize]), 0))
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        ENVPTR->SetObjectArrayElement(ENVONLY, buf, (jsize)i, jstr);
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    ENVPTR->SetObjectArrayElement(ENVONLY, buf, (jsize)i, jstr);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        ENVPTR->DeleteLocalRef(ENVONLY, jstr);
-    } /* end for */
+    ENVPTR->DeleteLocalRef(ENVONLY, jstr);
+  } /* end for */
 
 done:
-    if (h5str.s)
-        h5str_free(&h5str);
-    if (readBuf) {
-        H5Treclaim(tid, sid, H5P_DEFAULT, readBuf);
-        free(readBuf);
-    }
-    if (sid >= 0)
-        H5Sclose(sid);
+  if (h5str.s)
+    h5str_free(&h5str);
+  if (readBuf) {
+    H5Treclaim(tid, sid, H5P_DEFAULT, readBuf);
+    free(readBuf);
+  }
+  if (sid >= 0)
+    H5Sclose(sid);
 
-    return status;
+  return status;
 }
 
 /*
@@ -1443,141 +1454,142 @@ done:
  * Signature: (JJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                        jobjectArray buf)
-{
-    H5T_class_t type_class;
-    htri_t      isStr      = 0;
-    htri_t      isVlenStr  = 0;
-    htri_t      isComplex  = 0;
-    htri_t      isComplex2 = 0;
-    hid_t       nested_tid = H5I_INVALID_HID;
-    herr_t      status     = FAIL;
+Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id,
+                                        jlong mem_type_id, jobjectArray buf) {
+  H5T_class_t type_class;
+  htri_t isStr = 0;
+  htri_t isVlenStr = 0;
+  htri_t isComplex = 0;
+  htri_t isComplex2 = 0;
+  hid_t nested_tid = H5I_INVALID_HID;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_VLStrings: write buffer is NULL");
+  if (NULL == buf)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_VLStrings: write buffer is NULL");
 
-    if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
+  if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if (type_class == H5T_COMPOUND) {
+    unsigned i;
+    int num_members;
+
+    if ((num_members = H5Tget_nmembers(mem_type_id)) < 0)
+      H5_LIBRARY_ERROR(ENVONLY);
+
+    for (i = 0; i < (unsigned)num_members; i++) {
+      if ((nested_tid = H5Tget_member_type((hid_t)mem_type_id, i)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+      if ((isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (type_class == H5T_COMPOUND) {
-        unsigned i;
-        int      num_members;
+      if ((isComplex2 = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-        if ((num_members = H5Tget_nmembers(mem_type_id)) < 0)
-            H5_LIBRARY_ERROR(ENVONLY);
+      isComplex = isComplex || isComplex2;
 
-        for (i = 0; i < (unsigned)num_members; i++) {
-            if ((nested_tid = H5Tget_member_type((hid_t)mem_type_id, i)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if ((isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            if ((isComplex2 = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-
-            isComplex = isComplex || isComplex2;
-
-            if (H5Tclose(nested_tid) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
-            nested_tid = H5I_INVALID_HID;
-        }
+      if (H5Tclose(nested_tid) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+      nested_tid = H5I_INVALID_HID;
     }
-    else if (type_class == H5T_VLEN) {
-        isVlenStr = 1; /* Strings created by H5Tvlen_create(H5T_C_S1) */
-    }
+  } else if (type_class == H5T_VLEN) {
+    isVlenStr = 1; /* Strings created by H5Tvlen_create(H5T_C_S1) */
+  }
 
-    if (!isStr || isComplex || isVlenStr) {
-        if ((status = H5AwriteVL_asstr(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-    }
-    else if (isStr) {
-        if ((status = H5AwriteVL_str(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-    }
+  if (!isStr || isComplex || isVlenStr) {
+    if ((status = H5AwriteVL_asstr(env, (hid_t)attr_id, (hid_t)mem_type_id,
+                                   buf)) < 0)
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  } else if (isStr) {
+    if ((status =
+             H5AwriteVL_str(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  }
 
 done:
-    if (nested_tid >= 0)
-        H5Tclose(nested_tid);
+  if (nested_tid >= 0)
+    H5Tclose(nested_tid);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings */
 
 /*
  * Helper method to convert an array of Java strings into a buffer of C-strings.
  * The buffer of C-strings is then written to the HDF5 attribute specified.
  */
-static herr_t
-H5AwriteVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
-{
-    const char *utf8 = NULL;
-    jstring     obj;
-    jsize       size;
-    jint        i;
-    char      **writeBuf = NULL;
-    herr_t      status   = FAIL;
+static herr_t H5AwriteVL_str(JNIEnv *env, hid_t aid, hid_t tid,
+                             jobjectArray buf) {
+  const char *utf8 = NULL;
+  jstring obj;
+  jsize size;
+  jint i;
+  char **writeBuf = NULL;
+  herr_t status = FAIL;
 
-    if ((size = ENVPTR->GetArrayLength(ENVONLY, (jarray)buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL_str: buf length < 0");
+  if ((size = ENVPTR->GetArrayLength(ENVONLY, (jarray)buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL_str: buf length < 0");
+  }
+
+  if (NULL == (writeBuf = (char **)calloc((size_t)size + 1, sizeof(char *))))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AwriteVL_str: failed to allocate "
+                                    "variable length string write buffer");
+
+  for (i = 0; i < size; ++i) {
+    jsize length;
+
+    if (NULL == (obj = (jstring)ENVPTR->GetObjectArrayElement(
+                     ENVONLY, (jobjectArray)buf, i))) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+      /*
+       * If the string object was NULL, skip it.
+       */
+      writeBuf[i] = NULL;
+      continue;
     }
 
-    if (NULL == (writeBuf = (char **)calloc((size_t)size + 1, sizeof(char *))))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                               "H5AwriteVL_str: failed to allocate variable length string write buffer");
+    length = ENVPTR->GetStringUTFLength(ENVONLY, obj);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    for (i = 0; i < size; ++i) {
-        jsize length;
+    PIN_JAVA_STRING(ENVONLY, obj, utf8, NULL,
+                    "H5AwriteVL_str: string not pinned");
 
-        if (NULL == (obj = (jstring)ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)buf, i))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (NULL == (writeBuf[i] = (char *)malloc((size_t)length + 1)))
+      H5_OUT_OF_MEMORY_ERROR(
+          ENVONLY, "H5AwriteVL_str: failed to allocate string buffer");
 
-            /*
-             * If the string object was NULL, skip it.
-             */
-            writeBuf[i] = NULL;
-            continue;
-        }
+    strncpy(writeBuf[i], utf8, (size_t)length + 1);
+    writeBuf[i][length] = '\0';
 
-        length = ENVPTR->GetStringUTFLength(ENVONLY, obj);
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
+    utf8 = NULL;
 
-        PIN_JAVA_STRING(ENVONLY, obj, utf8, NULL, "H5AwriteVL_str: string not pinned");
+    ENVPTR->DeleteLocalRef(ENVONLY, obj);
+  } /* end for (i = 0; i < size; ++i) */
 
-        if (NULL == (writeBuf[i] = (char *)malloc((size_t)length + 1)))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AwriteVL_str: failed to allocate string buffer");
-
-        strncpy(writeBuf[i], utf8, (size_t)length + 1);
-        writeBuf[i][length] = '\0';
-
-        UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
-        utf8 = NULL;
-
-        ENVPTR->DeleteLocalRef(ENVONLY, obj);
-    } /* end for (i = 0; i < size; ++i) */
-
-    if ((status = H5Awrite((hid_t)aid, (hid_t)tid, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite((hid_t)aid, (hid_t)tid, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (utf8)
-        UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
-    if (writeBuf) {
-        for (i = 0; i < size; i++) {
-            if (writeBuf[i])
-                free(writeBuf[i]);
-        }
-
-        free(writeBuf);
+  if (utf8)
+    UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
+  if (writeBuf) {
+    for (i = 0; i < size; i++) {
+      if (writeBuf[i])
+        free(writeBuf[i]);
     }
 
-    return status;
+    free(writeBuf);
+  }
+
+  return status;
 } /* end H5AwriteVL_str */
 
 /*
@@ -1585,89 +1597,92 @@ done:
  * variable-length (hvl_t) elements. The buffer of variable-length
  * elements is then written to the HDF5 attribute.
  */
-static herr_t
-H5AwriteVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
-{
-    const char *utf8 = NULL;
-    hsize_t     dims[H5S_MAX_RANK];
-    jstring     jstr = NULL;
-    size_t      typeSize;
-    size_t      i;
-    hid_t       sid = H5I_INVALID_HID;
-    jsize       n;
-    void       *writeBuf = NULL;
-    herr_t      status   = FAIL;
+static herr_t H5AwriteVL_asstr(JNIEnv *env, hid_t aid, hid_t tid,
+                               jobjectArray buf) {
+  const char *utf8 = NULL;
+  hsize_t dims[H5S_MAX_RANK];
+  jstring jstr = NULL;
+  size_t typeSize;
+  size_t i;
+  hid_t sid = H5I_INVALID_HID;
+  jsize n;
+  void *writeBuf = NULL;
+  herr_t status = FAIL;
 
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL_asstr: buf length < 0");
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL_asstr: buf length < 0");
+  }
+
+  dims[0] = (hsize_t)n;
+  if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if (!(typeSize = H5Tget_size(tid)))
+    H5_LIBRARY_ERROR(ENVONLY);
+
+  if (NULL == (writeBuf = calloc((size_t)n, typeSize)))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5AwriteVL_asstr: failed to allocate write buffer");
+
+  /*
+   * When repeatedly writing a dataset with a large number of strs (e.g.,
+   * 1,000,000 strings), H5Treclaim() may crash on Windows because the Java GC
+   * will not be able to collect free space in time. Instead, we use
+   * "H5free_memory(strs[i])" to free individual strings once done.
+   */
+  for (i = 0; i < (size_t)n; i++) {
+    if (NULL == (jstr = (jstring)ENVPTR->GetObjectArrayElement(
+                     ENVONLY, (jobjectArray)buf, (jsize)i))) {
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+      /*
+       * If the string object was NULL, skip it.
+       */
+      memset(&(((char *)writeBuf)[i * typeSize]), 0, typeSize);
+      continue;
     }
 
-    dims[0] = (hsize_t)n;
-    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (!(typeSize = H5Tget_size(tid)))
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (NULL == (writeBuf = calloc((size_t)n, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AwriteVL_asstr: failed to allocate write buffer");
+    PIN_JAVA_STRING(ENVONLY, jstr, utf8, NULL,
+                    "H5AwriteVL_asstr: failed to pin string buffer");
 
     /*
-     * When repeatedly writing a dataset with a large number of strs (e.g., 1,000,000 strings),
-     * H5Treclaim() may crash on Windows because the Java GC will not be able to collect
-     * free space in time. Instead, we use "H5free_memory(strs[i])" to free individual strings
-     * once done.
+     * Make a copy of the string since h5str_convert uses strtok.
      */
-    for (i = 0; i < (size_t)n; i++) {
-        if (NULL == (jstr = (jstring)ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)buf, (jsize)i))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    char *utf8_copy = NULL;
 
-            /*
-             * If the string object was NULL, skip it.
-             */
-            memset(&(((char *)writeBuf)[i * typeSize]), 0, typeSize);
-            continue;
-        }
+    jsize length = ENVPTR->GetStringUTFLength(ENVONLY, jstr);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        PIN_JAVA_STRING(ENVONLY, jstr, utf8, NULL, "H5AwriteVL_asstr: failed to pin string buffer");
+    if (NULL == (utf8_copy = HDstrndup(utf8, (size_t)length)))
+      H5_LIBRARY_ERROR(ENVONLY);
 
-        /*
-         * Make a copy of the string since h5str_convert uses strtok.
-         */
-        char *utf8_copy = NULL;
+    if (!h5str_convert(ENVONLY, &utf8_copy, aid, tid,
+                       &(((char *)writeBuf)[i * typeSize]), 0))
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        jsize length = ENVPTR->GetStringUTFLength(ENVONLY, jstr);
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    free(utf8_copy);
 
-        if (NULL == (utf8_copy = HDstrndup(utf8, (size_t)length)))
-            H5_LIBRARY_ERROR(ENVONLY);
+    UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
+    utf8 = NULL;
 
-        if (!h5str_convert(ENVONLY, &utf8_copy, aid, tid, &(((char *)writeBuf)[i * typeSize]), 0))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    ENVPTR->DeleteLocalRef(ENVONLY, jstr);
+  } /* end for (i = 0; i < n; i++) */
 
-        free(utf8_copy);
-
-        UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
-        utf8 = NULL;
-
-        ENVPTR->DeleteLocalRef(ENVONLY, jstr);
-    } /* end for (i = 0; i < n; i++) */
-
-    if ((status = H5Awrite(aid, tid, writeBuf)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Awrite(aid, tid, writeBuf)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (utf8)
-        UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
-    if (writeBuf) {
-        H5Treclaim(tid, sid, H5P_DEFAULT, writeBuf);
-        free(writeBuf);
-    }
-    if (sid >= 0)
-        H5Sclose(sid);
+  if (utf8)
+    UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
+  if (writeBuf) {
+    H5Treclaim(tid, sid, H5P_DEFAULT, writeBuf);
+    free(writeBuf);
+  }
+  if (sid >= 0)
+    H5Sclose(sid);
 
-    return status;
+  return status;
 } /* end H5AwriteVL_asstr */
 
 /*
@@ -1675,58 +1690,63 @@ done:
  * Method:    H5Aread_reg_ref
  * Signature: (JJ[Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id,
-                                      jobjectArray buf)
-{
-    H5R_ref_t *ref_data = NULL;
-    h5str_t    h5str;
-    jstring    jstr;
-    jsize      i, n;
-    herr_t     status = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref(JNIEnv *env,
+                                                             jclass clss,
+                                                             jlong attr_id,
+                                                             jlong mem_type_id,
+                                                             jobjectArray buf) {
+  H5R_ref_t *ref_data = NULL;
+  h5str_t h5str;
+  jstring jstr;
+  jsize i, n;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    memset(&h5str, 0, sizeof(h5str_t));
+  memset(&h5str, 0, sizeof(h5str_t));
 
-    if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_reg_ref: buf length < 0");
-    }
+  if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_reg_ref: buf length < 0");
+  }
 
-    if (NULL == (ref_data = (H5R_ref_t *)calloc(1, (size_t)n * sizeof(H5R_ref_t))))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_reg_ref: failed to allocate read buffer");
+  if (NULL ==
+      (ref_data = (H5R_ref_t *)calloc(1, (size_t)n * sizeof(H5R_ref_t))))
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Aread_reg_ref: failed to allocate read buffer");
 
-    if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, ref_data)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, ref_data)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    h5str_new(&h5str, 1024);
+  h5str_new(&h5str, 1024);
 
-    if (!h5str.s)
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_reg_ref: failed to allocate buffer");
+  if (!h5str.s)
+    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                           "H5Aread_reg_ref: failed to allocate buffer");
 
-    for (i = 0; i < n; i++) {
-        h5str.s[0] = '\0';
+  for (i = 0; i < n; i++) {
+    h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)attr_id, (hid_t)mem_type_id, (void *)&ref_data[i], 0))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)attr_id, (hid_t)mem_type_id,
+                       (void *)&ref_data[i], 0))
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))
+      CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        ENVPTR->SetObjectArrayElement(ENVONLY, buf, i, jstr);
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    ENVPTR->SetObjectArrayElement(ENVONLY, buf, i, jstr);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        ENVPTR->DeleteLocalRef(ENVONLY, jstr);
-    } /* end for */
+    ENVPTR->DeleteLocalRef(ENVONLY, jstr);
+  } /* end for */
 
 done:
-    if (h5str.s)
-        h5str_free(&h5str);
-    if (ref_data)
-        free(ref_data);
+  if (h5str.s)
+    h5str_free(&h5str);
+  if (ref_data)
+    free(ref_data);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref */
 
 /*
@@ -1734,18 +1754,18 @@ done:
  * Method:    H5Aget_space
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aget_1space(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    hid_t retVal = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aget_1space(JNIEnv *env,
+                                                            jclass clss,
+                                                            jlong attr_id) {
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Aget_space((hid_t)attr_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aget_space((hid_t)attr_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Aget_1space */
 
 /*
@@ -1753,18 +1773,18 @@ done:
  * Method:    H5Aget_type
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aget_1type(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    hid_t retVal = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aget_1type(JNIEnv *env,
+                                                           jclass clss,
+                                                           jlong attr_id) {
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Aget_type((hid_t)attr_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aget_type((hid_t)attr_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Aget_1type */
 
 /*
@@ -1772,33 +1792,34 @@ done:
  * Method:    H5Aget_name
  * Signature: (J)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1name(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    jstring str = NULL;
-    ssize_t buf_size;
-    char   *attrName = NULL;
+JNIEXPORT jstring JNICALL Java_hdf_hdf5lib_H5_H5Aget_1name(JNIEnv *env,
+                                                           jclass clss,
+                                                           jlong attr_id) {
+  jstring str = NULL;
+  ssize_t buf_size;
+  char *attrName = NULL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((buf_size = H5Aget_name((hid_t)attr_id, 0, NULL)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((buf_size = H5Aget_name((hid_t)attr_id, 0, NULL)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (attrName = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aget_name: failed to allocate attribute name buffer");
+  if (NULL == (attrName = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
+    H5_OUT_OF_MEMORY_ERROR(
+        ENVONLY, "H5Aget_name: failed to allocate attribute name buffer");
 
-    if (H5Aget_name((hid_t)attr_id, (size_t)buf_size + 1, attrName) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-    attrName[buf_size] = '\0';
+  if (H5Aget_name((hid_t)attr_id, (size_t)buf_size + 1, attrName) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+  attrName[buf_size] = '\0';
 
-    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, attrName)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, attrName)))
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
 done:
-    if (attrName)
-        free(attrName);
+  if (attrName)
+    free(attrName);
 
-    return str;
+  return str;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1name */
 
 /*
@@ -1806,23 +1827,23 @@ done:
  * Method:    H5Aget_num_attrs
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1num_1attrs(JNIEnv *env, jclass clss, jlong loc_id)
-{
-    int retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aget_1num_1attrs(JNIEnv *env,
+                                                              jclass clss,
+                                                              jlong loc_id) {
+  int retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
-    UNUSED(loc_id);
-    H5_UNIMPLEMENTED(ENVONLY, "H5Aget_num_attrs: not implemented");
+  UNUSED(loc_id);
+  H5_UNIMPLEMENTED(ENVONLY, "H5Aget_num_attrs: not implemented");
 #else
-    if ((retVal = H5Aget_num_attrs((hid_t)loc_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aget_num_attrs((hid_t)loc_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 #endif
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1num_1attrs */
 
 /*
@@ -1830,27 +1851,28 @@ done:
  * Method:    H5Adelete
  * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Adelete(JNIEnv *env, jclass clss, jlong loc_id, jstring name)
-{
-    const char *attrName = NULL;
-    herr_t      status   = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Adelete(JNIEnv *env, jclass clss,
+                                                     jlong loc_id,
+                                                     jstring name) {
+  const char *attrName = NULL;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete: attribute name is NULL");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Adelete: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, attrName, NULL,
+                  "H5Adelete: attribute name not pinned");
 
-    if ((status = H5Adelete((hid_t)loc_id, attrName)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Adelete((hid_t)loc_id, attrName)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, name, attrName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, name, attrName);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Adelete */
 
 /*
@@ -1858,18 +1880,17 @@ done:
  * Method:    H5Aclose
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5__1H5Aclose(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    herr_t retVal = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5__1H5Aclose(JNIEnv *env, jclass clss,
+                                                      jlong attr_id) {
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Aclose((hid_t)attr_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aclose((hid_t)attr_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Aclose */
 
 /*
@@ -1877,29 +1898,30 @@ done:
  * Method:    _H5Acreate2
  * Signature: (JLjava/lang/String;JJJJ)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Acreate2(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
-                                 jlong space_id, jlong create_plist, jlong access_plist)
-{
-    const char *attrName = NULL;
-    hid_t       status   = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Acreate2(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
+    jlong space_id, jlong create_plist, jlong access_plist) {
+  const char *attrName = NULL;
+  hid_t status = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate2: attribute name is NULL");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate2: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Acreate2: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, attrName, NULL,
+                  "H5Acreate2: attribute name not pinned");
 
-    if ((status = H5Acreate2((hid_t)loc_id, attrName, (hid_t)type_id, (hid_t)space_id, (hid_t)create_plist,
-                             (hid_t)access_plist)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status =
+           H5Acreate2((hid_t)loc_id, attrName, (hid_t)type_id, (hid_t)space_id,
+                      (hid_t)create_plist, (hid_t)access_plist)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, name, attrName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, name, attrName);
 
-    return (jlong)status;
+  return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5__1H5Acreate2 */
 
 /*
@@ -1907,28 +1929,31 @@ done:
  * Method:    _H5Aopen
  * Signature: (JLjava/lang/String;J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aopen(JNIEnv *env, jclass clss, jlong obj_id, jstring name, jlong access_plist)
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen(JNIEnv *env, jclass clss,
+                                                      jlong obj_id,
+                                                      jstring name,
+                                                      jlong access_plist)
 
 {
-    const char *attrName = NULL;
-    hid_t       retVal   = H5I_INVALID_HID;
+  const char *attrName = NULL;
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen: attribute name is NULL");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Aopen: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, attrName, NULL,
+                  "H5Aopen: attribute name not pinned");
 
-    if ((retVal = H5Aopen((hid_t)obj_id, attrName, (hid_t)access_plist)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aopen((hid_t)obj_id, attrName, (hid_t)access_plist)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, name, attrName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, name, attrName);
 
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Aopen */
 
 /*
@@ -1936,29 +1961,30 @@ done:
  * Method:    _H5Aopen_by_idx
  * Signature: (JLjava/lang/String;IIJJJ)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aopen_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint idx_type,
-                                       jint order, jlong n, jlong aapl_id, jlong lapl_id)
-{
-    const char *objName = NULL;
-    hid_t       retVal  = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1by_1idx(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint idx_type,
+    jint order, jlong n, jlong aapl_id, jlong lapl_id) {
+  const char *objName = NULL;
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_idx: object name is NULL");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_idx: object name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Aopen_by_idx: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, objName, NULL,
+                  "H5Aopen_by_idx: object name not pinned");
 
-    if ((retVal = H5Aopen_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
-                                 (hsize_t)n, (hid_t)aapl_id, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aopen_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type,
+                               (H5_iter_order_t)order, (hsize_t)n,
+                               (hid_t)aapl_id, (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, name, objName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Aopen_1by_1idx */
 
 /*
@@ -1966,36 +1992,39 @@ done:
  * Method:    _H5Acreate_by_name
  * Signature: (JLjava/lang/String;Ljava/lang/String;JJJJJ)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Acreate_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                          jstring attr_name, jlong type_id, jlong space_id, jlong acpl_id,
-                                          jlong aapl_id, jlong lapl_id)
-{
-    const char *objName  = NULL;
-    const char *attrName = NULL;
-    hid_t       retVal   = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Acreate_1by_1name(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jstring attr_name,
+    jlong type_id, jlong space_id, jlong acpl_id, jlong aapl_id,
+    jlong lapl_id) {
+  const char *objName = NULL;
+  const char *attrName = NULL;
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate_by_name: object name is NULL");
-    if (NULL == attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate_by_name: attribute name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate_by_name: object name is NULL");
+  if (NULL == attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY,
+                           "H5Acreate_by_name: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Acreate_by_name: object name not pinned");
-    PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Acreate_by_name: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Acreate_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL,
+                  "H5Acreate_by_name: attribute name not pinned");
 
-    if ((retVal = H5Acreate_by_name((hid_t)loc_id, objName, attrName, (hid_t)type_id, (hid_t)space_id,
-                                    (hid_t)acpl_id, (hid_t)aapl_id, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Acreate_by_name(
+           (hid_t)loc_id, objName, attrName, (hid_t)type_id, (hid_t)space_id,
+           (hid_t)acpl_id, (hid_t)aapl_id, (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Acreate_1by_1name */
 
 /*
@@ -2003,36 +2032,39 @@ done:
  * Method:    H5Aexists_by_name
  * Signature: (JLjava/lang/String;Ljava/lang/String;J)Z
  */
-JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Aexists_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                        jstring attr_name, jlong lapl_id)
-{
-    const char *objName  = NULL;
-    const char *attrName = NULL;
-    htri_t      bval     = JNI_FALSE;
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Aexists_1by_1name(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jstring attr_name,
+    jlong lapl_id) {
+  const char *objName = NULL;
+  const char *attrName = NULL;
+  htri_t bval = JNI_FALSE;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists_by_name: object name is NULL");
-    if (NULL == attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists_by_name: attribute name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists_by_name: object name is NULL");
+  if (NULL == attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY,
+                           "H5Aexists_by_name: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aexists_by_name: object name not pinned");
-    PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aexists_by_name: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Aexists_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL,
+                  "H5Aexists_by_name: attribute name not pinned");
 
-    if ((bval = H5Aexists_by_name((hid_t)loc_id, objName, attrName, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((bval = H5Aexists_by_name((hid_t)loc_id, objName, attrName,
+                                (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+  bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return (jboolean)bval;
+  return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Aexists_1by_1name */
 
 /*
@@ -2040,34 +2072,36 @@ done:
  * Method:    H5Arename
  * Signature: (JLjava/lang/String;Ljava/lang/String)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Arename(JNIEnv *env, jclass clss, jlong loc_id, jstring old_attr_name,
-                              jstring new_attr_name)
-{
-    const char *oldAttrName = NULL;
-    const char *newAttrName = NULL;
-    herr_t      retVal      = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Arename(JNIEnv *env, jclass clss,
+                                                     jlong loc_id,
+                                                     jstring old_attr_name,
+                                                     jstring new_attr_name) {
+  const char *oldAttrName = NULL;
+  const char *newAttrName = NULL;
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == old_attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename: old attribute name is NULL");
-    if (NULL == new_attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename: new attribute name is NULL");
+  if (NULL == old_attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename: old attribute name is NULL");
+  if (NULL == new_attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename: new attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName, NULL, "H5Arename: old attribute name not pinned");
-    PIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName, NULL, "H5Arename: new attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName, NULL,
+                  "H5Arename: old attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName, NULL,
+                  "H5Arename: new attribute name not pinned");
 
-    if ((retVal = H5Arename((hid_t)loc_id, oldAttrName, newAttrName)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Arename((hid_t)loc_id, oldAttrName, newAttrName)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (newAttrName)
-        UNPIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName);
-    if (oldAttrName)
-        UNPIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName);
+  if (newAttrName)
+    UNPIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName);
+  if (oldAttrName)
+    UNPIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName);
 
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Arename */
 
 /*
@@ -2075,42 +2109,45 @@ done:
  * Method:    H5Arename_by_name
  * Signature: (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Arename_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                        jstring old_attr_name, jstring new_attr_name, jlong lapl_id)
-{
-    const char *objName     = NULL;
-    const char *oldAttrName = NULL;
-    const char *newAttrName = NULL;
-    herr_t      retVal      = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Arename_1by_1name(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
+    jstring old_attr_name, jstring new_attr_name, jlong lapl_id) {
+  const char *objName = NULL;
+  const char *oldAttrName = NULL;
+  const char *newAttrName = NULL;
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: object name is NULL");
-    if (NULL == old_attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: old attribute name is NULL");
-    if (NULL == new_attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: new attribute name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: object name is NULL");
+  if (NULL == old_attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY,
+                           "H5Arename_by_name: old attribute name is NULL");
+  if (NULL == new_attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY,
+                           "H5Arename_by_name: new attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Arename_by_name: object name not pinned");
-    PIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName, NULL,
-                    "H5Arename_by_name: old attribute name not pinned");
-    PIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName, NULL,
-                    "H5Arename_by_name: new attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Arename_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName, NULL,
+                  "H5Arename_by_name: old attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName, NULL,
+                  "H5Arename_by_name: new attribute name not pinned");
 
-    if ((retVal = H5Arename_by_name((hid_t)loc_id, objName, oldAttrName, newAttrName, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Arename_by_name((hid_t)loc_id, objName, oldAttrName,
+                                  newAttrName, (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (newAttrName)
-        UNPIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName);
-    if (oldAttrName)
-        UNPIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (newAttrName)
+    UNPIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName);
+  if (oldAttrName)
+    UNPIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Arename_1by_1name */
 
 /*
@@ -2118,46 +2155,50 @@ done:
  * Method:    H5Aget_name_by_idx
  * Signature: (JLjava/lang/String;IIJJ)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                          jint idx_type, jint order, jlong n, jlong lapl_id)
-{
-    const char *objName     = NULL;
-    jstring     str         = NULL;
-    ssize_t     status_size = -1;
-    char       *attrName    = NULL;
+JNIEXPORT jstring JNICALL Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jint idx_type,
+    jint order, jlong n, jlong lapl_id) {
+  const char *objName = NULL;
+  jstring str = NULL;
+  ssize_t status_size = -1;
+  char *attrName = NULL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_name_by_idx: object name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_name_by_idx: object name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aget_name_by_idx: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Aget_name_by_idx: object name not pinned");
 
-    /* Get the length of the attribute name */
-    if ((status_size =
-             H5Aget_name_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
-                                (hsize_t)n, (char *)NULL, (size_t)0, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  /* Get the length of the attribute name */
+  if ((status_size = H5Aget_name_by_idx(
+           (hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
+           (hsize_t)n, (char *)NULL, (size_t)0, (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (attrName = (char *)malloc(sizeof(char) * (size_t)status_size + 1)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aget_name_by_idx: failed to allocate buffer for attribute name");
+  if (NULL ==
+      (attrName = (char *)malloc(sizeof(char) * (size_t)status_size + 1)))
+    H5_OUT_OF_MEMORY_ERROR(
+        ENVONLY,
+        "H5Aget_name_by_idx: failed to allocate buffer for attribute name");
 
-    if ((H5Aget_name_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t)n,
-                            (char *)attrName, (size_t)status_size + 1, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-    attrName[status_size] = '\0';
+  if ((H5Aget_name_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type,
+                          (H5_iter_order_t)order, (hsize_t)n, (char *)attrName,
+                          (size_t)status_size + 1, (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
+  attrName[status_size] = '\0';
 
-    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, attrName)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, attrName)))
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
 done:
-    if (attrName)
-        free(attrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (attrName)
+    free(attrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return str;
+  return str;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx */
 
 /*
@@ -2165,18 +2206,17 @@ done:
  * Method:    H5Aget_storage_size
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1storage_1size(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    hsize_t retVal = 0;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Aget_1storage_1size(
+    JNIEnv *env, jclass clss, jlong attr_id) {
+  hsize_t retVal = 0;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (!(retVal = H5Aget_storage_size((hid_t)attr_id)))
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (!(retVal = H5Aget_storage_size((hid_t)attr_id)))
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1storage_1size */
 
 /*
@@ -2184,27 +2224,28 @@ done:
  * Method:    H5Aget_info
  * Signature: (J)Lhdf/hdf5lib/structs/H5A_info_t;
  */
-JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1info(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    H5A_info_t ainfo;
-    jobject    ret_obj = NULL;
-    jvalue     args[4];
+JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Aget_1info(JNIEnv *env,
+                                                           jclass clss,
+                                                           jlong attr_id) {
+  H5A_info_t ainfo;
+  jobject ret_obj = NULL;
+  jvalue args[4];
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (H5Aget_info((hid_t)attr_id, &ainfo) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Aget_info((hid_t)attr_id, &ainfo) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    args[0].z = ainfo.corder_valid;
-    args[1].j = ainfo.corder;
-    args[2].i = ainfo.cset;
-    args[3].j = (jlong)ainfo.data_size;
+  args[0].z = ainfo.corder_valid;
+  args[1].j = ainfo.corder;
+  args[2].i = ainfo.cset;
+  args[3].j = (jlong)ainfo.data_size;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args, ret_obj);
+  CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args,
+                   ret_obj);
 
 done:
-    return ret_obj;
+  return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1info */
 
 /*
@@ -2212,84 +2253,91 @@ done:
  * Method:    H5Aget_info_by_idx
  * Signature: (JLjava/lang/String;IIJJ)Lhdf/hdf5lib/structs/H5A_info_t;
  */
-JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                          jint idx_type, jint order, jlong n, jlong lapl_id)
-{
-    const char *objName = NULL;
-    H5A_info_t  ainfo;
-    herr_t      status;
-    jvalue      args[4];
-    jobject     ret_obj = NULL;
+JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1idx(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jint idx_type,
+    jint order, jlong n, jlong lapl_id) {
+  const char *objName = NULL;
+  H5A_info_t ainfo;
+  herr_t status;
+  jvalue args[4];
+  jobject ret_obj = NULL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_idx: object name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_idx: object name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aget_info_by_idx: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Aget_info_by_idx: object name not pinned");
 
-    if ((status = H5Aget_info_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
-                                     (hsize_t)n, &ainfo, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aget_info_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type,
+                                   (H5_iter_order_t)order, (hsize_t)n, &ainfo,
+                                   (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    args[0].z = ainfo.corder_valid;
-    args[1].j = ainfo.corder;
-    args[2].i = ainfo.cset;
-    args[3].j = (jlong)ainfo.data_size;
+  args[0].z = ainfo.corder_valid;
+  args[1].j = ainfo.corder;
+  args[2].i = ainfo.cset;
+  args[3].j = (jlong)ainfo.data_size;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args, ret_obj);
+  CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args,
+                   ret_obj);
 
 done:
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return ret_obj;
+  return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1idx */
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Aget_info_by_name
- * Signature: (JLjava/lang/String;Ljava/lang/String;J)Lhdf/hdf5lib/structs/H5A_info_t;
+ * Signature:
+ * (JLjava/lang/String;Ljava/lang/String;J)Lhdf/hdf5lib/structs/H5A_info_t;
  */
-JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                           jstring attr_name, jlong lapl_id)
-{
-    const char *objName  = NULL;
-    const char *attrName = NULL;
-    H5A_info_t  ainfo;
-    herr_t      status;
-    jvalue      args[4];
-    jobject     ret_obj = NULL;
+JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1name(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jstring attr_name,
+    jlong lapl_id) {
+  const char *objName = NULL;
+  const char *attrName = NULL;
+  H5A_info_t ainfo;
+  herr_t status;
+  jvalue args[4];
+  jobject ret_obj = NULL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_name: object name is NULL");
-    if (NULL == attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_name: attribute name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_name: object name is NULL");
+  if (NULL == attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY,
+                           "H5Aget_info_by_name: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aget_info_by_name: object name not pinned");
-    PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aget_info_by_name: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Aget_info_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL,
+                  "H5Aget_info_by_name: attribute name not pinned");
 
-    if ((status = H5Aget_info_by_name((hid_t)loc_id, objName, attrName, &ainfo, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aget_info_by_name((hid_t)loc_id, objName, attrName, &ainfo,
+                                    (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    args[0].z = ainfo.corder_valid;
-    args[1].j = ainfo.corder;
-    args[2].i = ainfo.cset;
-    args[3].j = (jlong)ainfo.data_size;
+  args[0].z = ainfo.corder_valid;
+  args[1].j = ainfo.corder;
+  args[2].i = ainfo.cset;
+  args[3].j = (jlong)ainfo.data_size;
 
-    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args, ret_obj);
+  CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args,
+                   ret_obj);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return ret_obj;
+  return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1name */
 
 /*
@@ -2297,34 +2345,37 @@ done:
  * Method:    H5Adelete_by_name
  * Signature: (JLjava/lang/String;Ljava/lang/String;J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Adelete_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                        jstring attr_name, jlong lapl_id)
-{
-    const char *objName  = NULL;
-    const char *attrName = NULL;
-    herr_t      retVal   = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Adelete_1by_1name(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jstring attr_name,
+    jlong lapl_id) {
+  const char *objName = NULL;
+  const char *attrName = NULL;
+  herr_t retVal = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_name: object name is NULL");
-    if (NULL == attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_name: attribute name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_name: object name is NULL");
+  if (NULL == attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY,
+                           "H5Adelete_by_name: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Adelete_by_name: object name not pinned");
-    PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Adelete_by_name: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Adelete_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL,
+                  "H5Adelete_by_name: attribute name not pinned");
 
-    if ((retVal = H5Adelete_by_name((hid_t)loc_id, objName, attrName, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Adelete_by_name((hid_t)loc_id, objName, attrName,
+                                  (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return (jint)retVal;
+  return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Adelete_1by_1name */
 
 /*
@@ -2332,29 +2383,31 @@ done:
  * Method:    H5Aexists
  * Signature: (JLjava/lang/String;)Z
  */
-JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Aexists(JNIEnv *env, jclass clss, jlong obj_id, jstring attr_name)
-{
-    const char *attrName = NULL;
-    htri_t      bval     = JNI_FALSE;
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Aexists(JNIEnv *env,
+                                                         jclass clss,
+                                                         jlong obj_id,
+                                                         jstring attr_name) {
+  const char *attrName = NULL;
+  htri_t bval = JNI_FALSE;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists: attribute name is NULL");
+  if (NULL == attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aexists: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL,
+                  "H5Aexists: attribute name not pinned");
 
-    if ((bval = H5Aexists((hid_t)obj_id, attrName)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((bval = H5Aexists((hid_t)obj_id, attrName)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
-    bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+  bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
 
-    return (jboolean)bval;
+  return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Aexists */
 
 /*
@@ -2362,27 +2415,28 @@ done:
  * Method:    H5Adelete_by_idx
  * Signature: (JLjava/lang/String;IIJJ)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Adelete_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                       jint idx_type, jint order, jlong n, jlong lapl_id)
-{
-    const char *objName = NULL;
-    herr_t      status  = FAIL;
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Adelete_1by_1idx(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jint idx_type,
+    jint order, jlong n, jlong lapl_id) {
+  const char *objName = NULL;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_idx: object name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_idx: object name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Adelete_by_idx: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Adelete_by_idx: object name not pinned");
 
-    if ((status = H5Adelete_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
-                                   (hsize_t)n, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Adelete_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type,
+                                 (H5_iter_order_t)order, (hsize_t)n,
+                                 (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 } /* end Java_hdf_hdf5lib_H5_H5Adelete_1by_1idx */
 
 /*
@@ -2390,35 +2444,38 @@ done:
  * Method:    _H5Aopen_by_name
  * Signature: (JLjava/lang/String;Ljava/lang/String;JJ)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aopen_1by_1name(JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name,
-                                        jstring attr_name, jlong aapl_id, jlong lapl_id)
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1by_1name(
+    JNIEnv *env, jclass clss, jlong loc_id, jstring obj_name, jstring attr_name,
+    jlong aapl_id, jlong lapl_id)
 
 {
-    const char *attrName = NULL;
-    const char *objName  = NULL;
-    hid_t       status   = H5I_INVALID_HID;
+  const char *attrName = NULL;
+  const char *objName = NULL;
+  hid_t status = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (NULL == obj_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_name: object name is NULL");
-    if (NULL == attr_name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_name: attribute name is NULL");
+  if (NULL == obj_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_name: object name is NULL");
+  if (NULL == attr_name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_name: attribute name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aopen_by_name: object name not pinned");
-    PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aopen_by_name: attribute name not pinned");
+  PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL,
+                  "H5Aopen_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL,
+                  "H5Aopen_by_name: attribute name not pinned");
 
-    if ((status = H5Aopen_by_name((hid_t)loc_id, objName, attrName, (hid_t)aapl_id, (hid_t)lapl_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aopen_by_name((hid_t)loc_id, objName, attrName,
+                                (hid_t)aapl_id, (hid_t)lapl_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (attrName)
-        UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
+  if (attrName)
+    UNPIN_JAVA_STRING(ENVONLY, attr_name, attrName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 
-    return (jlong)status;
+  return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5__1H5Aopen_1by_1name */
 
 /*
@@ -2426,66 +2483,67 @@ done:
  * Method:    H5Aget_create_plist
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Aget_1create_1plist(JNIEnv *env, jclass clss, jlong attr_id)
-{
-    hid_t retVal = H5I_INVALID_HID;
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aget_1create_1plist(
+    JNIEnv *env, jclass clss, jlong attr_id) {
+  hid_t retVal = H5I_INVALID_HID;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if ((retVal = H5Aget_create_plist((hid_t)attr_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((retVal = H5Aget_create_plist((hid_t)attr_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jlong)retVal;
+  return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Aget_1create_1plist */
 
-static herr_t
-H5A_iterate_cb(hid_t g_id, const char *name, const H5A_info_t *info, void *cb_data)
-{
-    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
-    jmethodID   mid;
-    jobject     cb_info_t      = NULL;
-    jobject     visit_callback = wrapper->visit_callback;
-    jstring     str;
-    JNIEnv     *cbenv = NULL;
-    jclass      cbcls;
-    jvalue      args[4];
-    void       *op_data = (void *)wrapper->op_data;
-    jint        status  = -1;
+static herr_t H5A_iterate_cb(hid_t g_id, const char *name,
+                             const H5A_info_t *info, void *cb_data) {
+  cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+  jmethodID mid;
+  jobject cb_info_t = NULL;
+  jobject visit_callback = wrapper->visit_callback;
+  jstring str;
+  JNIEnv *cbenv = NULL;
+  jclass cbcls;
+  jvalue args[4];
+  void *op_data = (void *)wrapper->op_data;
+  jint status = -1;
 
-    if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(CBENVONLY, "H5A_iterate_cb: failed to attach current thread to JVM");
-    }
+  if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
+    H5_JNI_FATAL_ERROR(
+        CBENVONLY, "H5A_iterate_cb: failed to attach current thread to JVM");
+  }
 
-    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    if (NULL ==
-        (mid = CBENVPTR->GetMethodID(
-             CBENVONLY, cbcls, "callback",
-             "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5A_info_t;Lhdf/hdf5lib/callbacks/H5A_iterate_t;)I")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    args[0].z = info->corder_valid;
-    args[1].j = info->corder;
-    args[2].i = info->cset;
-    args[3].j = (jlong)info->data_size;
-
-    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args, cb_info_t);
-
-    status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, g_id, str, cb_info_t, op_data);
+  if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-done:
-    if (cbenv)
-        JVMPTR->DetachCurrentThread(JVMPAR);
+  if (NULL == (mid = CBENVPTR->GetMethodID(
+                   CBENVONLY, cbcls, "callback",
+                   "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5A_info_t;Lhdf/"
+                   "hdf5lib/callbacks/H5A_iterate_t;)I")))
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    return (herr_t)status;
+  if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+  args[0].z = info->corder_valid;
+  args[1].j = info->corder;
+  args[2].i = info->cset;
+  args[3].j = (jlong)info->data_size;
+
+  CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5A_info_t", "(ZJIJ)V", args,
+                   cb_info_t);
+
+  status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, g_id, str,
+                                   cb_info_t, op_data);
+  CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+done:
+  if (cbenv)
+    JVMPTR->DetachCurrentThread(JVMPAR);
+
+  return (herr_t)status;
 } /* end H5A_iterate_cb */
 
 /*
@@ -2493,30 +2551,31 @@ done:
  * Method:    H5Aiterate
  * Signature: (JIIJLjava/lang/Object;Ljava/lang/Object;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aiterate(JNIEnv *env, jclass clss, jlong grp_id, jint idx_type, jint order, jlong idx,
-                               jobject callback_op, jobject op_data)
-{
-    cb_wrapper wrapper   = {callback_op, op_data};
-    hsize_t    start_idx = (hsize_t)idx;
-    herr_t     status    = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aiterate(
+    JNIEnv *env, jclass clss, jlong grp_id, jint idx_type, jint order,
+    jlong idx, jobject callback_op, jobject op_data) {
+  cb_wrapper wrapper = {callback_op, op_data};
+  hsize_t start_idx = (hsize_t)idx;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    ENVPTR->GetJavaVM(ENVONLY, &jvm);
-    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  ENVPTR->GetJavaVM(ENVONLY, &jvm);
+  CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    if (NULL == op_data)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate: op_data is NULL");
-    if (NULL == callback_op)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate: callback_op is NULL");
+  if (NULL == op_data)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate: op_data is NULL");
+  if (NULL == callback_op)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate: callback_op is NULL");
 
-    if ((status = H5Aiterate2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order,
-                              (hsize_t *)&start_idx, (H5A_operator2_t)H5A_iterate_cb, (void *)&wrapper)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status =
+           H5Aiterate2((hid_t)grp_id, (H5_index_t)idx_type,
+                       (H5_iter_order_t)order, (hsize_t *)&start_idx,
+                       (H5A_operator2_t)H5A_iterate_cb, (void *)&wrapper)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aiterate */
 
 /*
@@ -2524,40 +2583,41 @@ done:
  * Method:    H5Aiterate_by_name
  * Signature: (JLjava/lang/String;IIJLjava/lang/Object;Ljava/lang/Object;J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aiterate_1by_1name(JNIEnv *env, jclass clss, jlong grp_id, jstring name, jint idx_type,
-                                         jint order, jlong idx, jobject callback_op, jobject op_data,
-                                         jlong access_id)
-{
-    const char *objName   = NULL;
-    cb_wrapper  wrapper   = {callback_op, op_data};
-    hsize_t     start_idx = (hsize_t)idx;
-    herr_t      status    = FAIL;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aiterate_1by_1name(
+    JNIEnv *env, jclass clss, jlong grp_id, jstring name, jint idx_type,
+    jint order, jlong idx, jobject callback_op, jobject op_data,
+    jlong access_id) {
+  const char *objName = NULL;
+  cb_wrapper wrapper = {callback_op, op_data};
+  hsize_t start_idx = (hsize_t)idx;
+  herr_t status = FAIL;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    ENVPTR->GetJavaVM(ENVONLY, &jvm);
-    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+  ENVPTR->GetJavaVM(ENVONLY, &jvm);
+  CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    if (NULL == op_data)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: op_data is NULL");
-    if (NULL == callback_op)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: callback_op is NULL");
-    if (NULL == name)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: object name is NULL");
+  if (NULL == op_data)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: op_data is NULL");
+  if (NULL == callback_op)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: callback_op is NULL");
+  if (NULL == name)
+    H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: object name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Aiterate_by_name: object name not pinned");
+  PIN_JAVA_STRING(ENVONLY, name, objName, NULL,
+                  "H5Aiterate_by_name: object name not pinned");
 
-    if ((status = H5Aiterate_by_name((hid_t)grp_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
-                                     (hsize_t *)&start_idx, (H5A_operator2_t)H5A_iterate_cb, (void *)&wrapper,
-                                     (hid_t)access_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if ((status = H5Aiterate_by_name(
+           (hid_t)grp_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order,
+           (hsize_t *)&start_idx, (H5A_operator2_t)H5A_iterate_cb,
+           (void *)&wrapper, (hid_t)access_id)) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    if (objName)
-        UNPIN_JAVA_STRING(ENVONLY, name, objName);
+  if (objName)
+    UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
-    return (jint)status;
+  return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aiterate_1by_1name */
 
 #ifdef __cplusplus

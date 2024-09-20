@@ -17,31 +17,29 @@
  */
 static int (*par_misc_tests[])(void) = {NULL};
 
-int
-H5_api_misc_test_parallel(void)
-{
-    size_t i;
-    int    nerrors;
+int H5_api_misc_test_parallel(void) {
+  size_t i;
+  int nerrors;
 
-    if (MAINPROCESS) {
-        printf("**********************************************\n");
-        printf("*                                            *\n");
-        printf("*      API Parallel Miscellaneous Tests      *\n");
-        printf("*                                            *\n");
-        printf("**********************************************\n\n");
+  if (MAINPROCESS) {
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*      API Parallel Miscellaneous Tests      *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
+  }
+
+  for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_misc_tests); i++) {
+    /* nerrors += (*par_misc_tests[i])() ? 1 : 0; */
+
+    if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
+      if (MAINPROCESS)
+        printf("    MPI_Barrier() failed!\n");
     }
+  }
 
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_misc_tests); i++) {
-        /* nerrors += (*par_misc_tests[i])() ? 1 : 0; */
+  if (MAINPROCESS)
+    printf("\n");
 
-        if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
-            if (MAINPROCESS)
-                printf("    MPI_Barrier() failed!\n");
-        }
-    }
-
-    if (MAINPROCESS)
-        printf("\n");
-
-    return nerrors;
+  return nerrors;
 }

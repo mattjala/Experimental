@@ -18,8 +18,8 @@
  ******
  */
 
-#include "H5f90.h"
 #include "H5Eprivate.h"
+#include "H5f90.h"
 
 /****if* H5Rf/h5rcreate_region_c
  * NAME
@@ -38,33 +38,34 @@
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id)
+int_f h5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen,
+                         hid_t_f *space_id)
 /******/
 {
-    char           *c_name = NULL;
-    hdset_reg_ref_t ref_c;
-    int_f           ret_value = 0;
+  char *c_name = NULL;
+  hdset_reg_ref_t ref_c;
+  int_f ret_value = 0;
 
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL);
+  /*
+   * Convert FORTRAN name to C name
+   */
+  if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+    HGOTO_DONE(FAIL);
 
-    /*
-     * Call H5Rcreate function.
-     */
-    if (H5Rcreate(&ref_c, (hid_t)*loc_id, c_name, H5R_DATASET_REGION, (hid_t)*space_id) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Rcreate function.
+   */
+  if (H5Rcreate(&ref_c, (hid_t)*loc_id, c_name, H5R_DATASET_REGION,
+                (hid_t)*space_id) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Copy the reference created */
-    memcpy(ref, &ref_c, H5R_DSET_REG_REF_BUF_SIZE);
+  /* Copy the reference created */
+  memcpy(ref, &ref_c, H5R_DSET_REG_REF_BUF_SIZE);
 
 done:
-    if (c_name)
-        free(c_name);
-    return ret_value;
+  if (c_name)
+    free(c_name);
+  return ret_value;
 } /* end h5rcreate_region_c() */
 
 /****if* H5Rf/h5rcreate_ptr_c
@@ -83,28 +84,29 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *ref_type, hid_t_f *space_id)
+int_f h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen,
+                      int_f *ref_type, hid_t_f *space_id)
 /******/
 {
-    int   ret_value = -1;
-    char *c_name;
+  int ret_value = -1;
+  char *c_name;
 
-    /*
-     * Convert FORTRAN name to C name
-     */
-    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
-    if (c_name == NULL)
-        return ret_value;
-
-    /*
-     * Call H5Rcreate function.
-     */
-    if (H5Rcreate(ref, (hid_t)*loc_id, c_name, (H5R_type_t)*ref_type, (hid_t)*space_id) >= 0)
-        ret_value = 0;
-
-    free(c_name);
+  /*
+   * Convert FORTRAN name to C name
+   */
+  c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
+  if (c_name == NULL)
     return ret_value;
+
+  /*
+   * Call H5Rcreate function.
+   */
+  if (H5Rcreate(ref, (hid_t)*loc_id, c_name, (H5R_type_t)*ref_type,
+                (hid_t)*space_id) >= 0)
+    ret_value = 0;
+
+  free(c_name);
+  return ret_value;
 }
 
 /****if* H5Rf/h5rdereference_ptr_c
@@ -123,22 +125,23 @@ h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *re
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rdereference_ptr_c(hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_obj_id)
+int_f h5rdereference_ptr_c(hid_t_f *obj_id, int_f *ref_type, void *ref,
+                           hid_t_f *ref_obj_id)
 /******/
 {
-    int   ret_value = -1;
-    hid_t c_ref_obj_id;
+  int ret_value = -1;
+  hid_t c_ref_obj_id;
 
-    /*
-     * Call H5Rdereference function.
-     */
-    c_ref_obj_id = H5Rdereference2((hid_t)*obj_id, H5P_DEFAULT, (H5R_type_t)*ref_type, ref);
-    if (c_ref_obj_id < 0)
-        return ret_value;
-    *ref_obj_id = (hid_t_f)c_ref_obj_id;
-    ret_value   = 0;
+  /*
+   * Call H5Rdereference function.
+   */
+  c_ref_obj_id =
+      H5Rdereference2((hid_t)*obj_id, H5P_DEFAULT, (H5R_type_t)*ref_type, ref);
+  if (c_ref_obj_id < 0)
     return ret_value;
+  *ref_obj_id = (hid_t_f)c_ref_obj_id;
+  ret_value = 0;
+  return ret_value;
 }
 
 /****if* H5Rf/h5rget_region_region_object_c
@@ -155,28 +158,28 @@ h5rdereference_ptr_c(hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_o
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
+int_f h5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
 /******/
 {
-    hid_t           c_space_id;
-    hdset_reg_ref_t ref_c;
-    int_f           ret_value = 0;
+  hid_t c_space_id;
+  hdset_reg_ref_t ref_c;
+  int_f ret_value = 0;
 
-    /* Copy the reference to dereference */
-    memcpy(&ref_c, ref, H5R_DSET_REG_REF_BUF_SIZE);
+  /* Copy the reference to dereference */
+  memcpy(&ref_c, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
-    /*
-     * Call H5Rget_region function.
-     */
-    if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, &ref_c)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Rget_region function.
+   */
+  if ((c_space_id =
+           H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, &ref_c)) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Copy the dataspace ID */
-    *space_id = (hid_t_f)c_space_id;
+  /* Copy the dataspace ID */
+  *space_id = (hid_t_f)c_space_id;
 
 done:
-    return ret_value;
+  return ret_value;
 } /* end h5rget_region_region_c() */
 
 /****if* H5Rf/h5rget_region_ptr_c
@@ -193,24 +196,24 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
+int_f h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
 /******/
 {
-    hid_t c_space_id;
-    int_f ret_value = 0;
+  hid_t c_space_id;
+  int_f ret_value = 0;
 
-    /*
-     * Call H5Rget_region function.
-     */
-    if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, ref)) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Rget_region function.
+   */
+  if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, ref)) <
+      0)
+    HGOTO_DONE(FAIL);
 
-    /* Copy the dataspace ID */
-    *space_id = (hid_t_f)c_space_id;
+  /* Copy the dataspace ID */
+  *space_id = (hid_t_f)c_space_id;
 
 done:
-    return ret_value;
+  return ret_value;
 } /* end h5rget_region_ptr_c() */
 
 /****if* H5Rf/h5rget_object_type_obj_c
@@ -228,25 +231,25 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
+int_f h5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref,
+                               int_f *obj_type)
 /******/
 {
-    H5O_type_t c_obj_type;
-    hobj_ref_t ref_c     = (hobj_ref_t)*ref;
-    int_f      ret_value = 0;
+  H5O_type_t c_obj_type;
+  hobj_ref_t ref_c = (hobj_ref_t)*ref;
+  int_f ret_value = 0;
 
-    /*
-     * Call H5Rget_object_type function.
-     */
-    if (H5Rget_obj_type2((hid_t)*dset_id, H5R_OBJECT, &ref_c, &c_obj_type) < 0)
-        HGOTO_DONE(FAIL);
+  /*
+   * Call H5Rget_object_type function.
+   */
+  if (H5Rget_obj_type2((hid_t)*dset_id, H5R_OBJECT, &ref_c, &c_obj_type) < 0)
+    HGOTO_DONE(FAIL);
 
-    /* Copy the object type */
-    *obj_type = (int_f)c_obj_type;
+  /* Copy the object type */
+  *obj_type = (int_f)c_obj_type;
 
 done:
-    return ret_value;
+  return ret_value;
 } /* end h5rget_object_type_obj_c() */
 
 /****if* H5Rf/h5rget_name_ptr_c
@@ -256,9 +259,9 @@ done:
  *  Call H5Rget_name
  * INPUTS
  *
- *  loc_id - Identifier for the dataset containing the reference or for the group that dataset is in.
- *  ref_type - Type of reference.
- *  ref - An object or dataset region reference.
+ *  loc_id - Identifier for the dataset containing the reference or for the
+ * group that dataset is in. ref_type - Type of reference. ref - An object or
+ * dataset region reference.
  *
  * OUTPUTS
  *  name - A name associated with the referenced object or dataset region.
@@ -268,42 +271,42 @@ done:
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t_f *name_len,
-                  size_t_f *size_default)
+int_f h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name,
+                        size_t_f *name_len, size_t_f *size_default)
 /******/
 {
-    int_f   ret_value = -1;
-    ssize_t c_size;
-    size_t  c_bufsize;
-    char   *c_buf = NULL; /* Buffer to hold C string */
+  int_f ret_value = -1;
+  ssize_t c_size;
+  size_t c_bufsize;
+  char *c_buf = NULL; /* Buffer to hold C string */
 
-    c_bufsize = (size_t)*name_len + 1;
-    /*
-     * Allocate buffer to hold name of an attribute
-     */
-    if ((c_buf = (char *)malloc(c_bufsize)) == NULL)
-        return ret_value;
-
-    /*
-     * Call H5Rget_name function.
-     */
-    if ((c_size = H5Rget_name((hid_t)*loc_id, (H5R_type_t)*ref_type, ref, c_buf, c_bufsize)) < 0) {
-        if (c_buf)
-            free(c_buf);
-        return ret_value;
-    }
-    /*
-     * Convert C name to FORTRAN and place it in the given buffer
-     */
-    HD5packFstring(c_buf, _fcdtocp(name), c_bufsize - 1);
-
-    *size_default = (size_t_f)c_size;
-    ret_value     = 0;
-    if (c_buf)
-        free(c_buf);
-
+  c_bufsize = (size_t)*name_len + 1;
+  /*
+   * Allocate buffer to hold name of an attribute
+   */
+  if ((c_buf = (char *)malloc(c_bufsize)) == NULL)
     return ret_value;
+
+  /*
+   * Call H5Rget_name function.
+   */
+  if ((c_size = H5Rget_name((hid_t)*loc_id, (H5R_type_t)*ref_type, ref, c_buf,
+                            c_bufsize)) < 0) {
+    if (c_buf)
+      free(c_buf);
+    return ret_value;
+  }
+  /*
+   * Convert C name to FORTRAN and place it in the given buffer
+   */
+  HD5packFstring(c_buf, _fcdtocp(name), c_bufsize - 1);
+
+  *size_default = (size_t_f)c_size;
+  ret_value = 0;
+  if (c_buf)
+    free(c_buf);
+
+  return ret_value;
 }
 
 /****if* H5Rf/h5rget_obj_type_c
@@ -325,21 +328,22 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
  *  0 on success, -1 on failure
  * SOURCE
  */
-int_f
-h5rget_obj_type_c(hid_t_f *loc_id, int_f *ref_type, void *ref, int_f *obj_type)
+int_f h5rget_obj_type_c(hid_t_f *loc_id, int_f *ref_type, void *ref,
+                        int_f *obj_type)
 /******/
 {
-    int_f      ret_value = -1;
-    H5O_type_t obj_type_c;
+  int_f ret_value = -1;
+  H5O_type_t obj_type_c;
 
-    /*
-     * Call H5Rget_obj_type function.
-     */
-    if ((H5Rget_obj_type2((hid_t)*loc_id, (H5R_type_t)*ref_type, ref, &obj_type_c)) < 0)
-        return ret_value;
-
-    *obj_type = (int_f)obj_type_c;
-
-    ret_value = 0;
+  /*
+   * Call H5Rget_obj_type function.
+   */
+  if ((H5Rget_obj_type2((hid_t)*loc_id, (H5R_type_t)*ref_type, ref,
+                        &obj_type_c)) < 0)
     return ret_value;
+
+  *obj_type = (int_f)obj_type_c;
+
+  ret_value = 0;
+  return ret_value;
 }

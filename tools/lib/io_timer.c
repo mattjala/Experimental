@@ -41,11 +41,9 @@ static io_time_t *timer_g; /* timer: global for stub functions     */
  *
  *         Note that the function assumes that a > b
  */
-static double
-sub_time(struct timeval *a, struct timeval *b)
-{
-    return (((double)a->tv_sec + ((double)a->tv_usec) / (double)MICROSECOND) -
-            ((double)b->tv_sec + ((double)b->tv_usec) / (double)MICROSECOND));
+static double sub_time(struct timeval *a, struct timeval *b) {
+  return (((double)a->tv_sec + ((double)a->tv_usec) / (double)MICROSECOND) -
+          ((double)b->tv_sec + ((double)b->tv_usec) / (double)MICROSECOND));
 }
 
 /*
@@ -56,16 +54,14 @@ sub_time(struct timeval *a, struct timeval *b)
  *              SYS_CLOCK for system time).
  * Return:      Pointer to io_time object
  */
-io_time_t *
-io_time_new(clock_type type)
-{
-    io_time_t *pt = (io_time_t *)calloc(1, sizeof(struct io_time_t));
+io_time_t *io_time_new(clock_type type) {
+  io_time_t *pt = (io_time_t *)calloc(1, sizeof(struct io_time_t));
 
-    /* set global timer variable */
-    timer_g = pt;
+  /* set global timer variable */
+  timer_g = pt;
 
-    pt->type = type;
-    return pt;
+  pt->type = type;
+  return pt;
 }
 
 /*
@@ -75,12 +71,10 @@ io_time_new(clock_type type)
  *              function.
  * Return:      Nothing
  */
-void
-io_time_destroy(io_time_t *pt)
-{
-    free(pt);
-    /* reset the global timer pointer too. */
-    timer_g = NULL;
+void io_time_destroy(io_time_t *pt) {
+  free(pt);
+  /* reset the global timer pointer too. */
+  timer_g = NULL;
 }
 
 #if 0
@@ -113,89 +107,90 @@ get_timer_type(io_time_t *pt)
 /*
  * Function:    io_time_set
  * Purpose:     Set the time in a ``io_time_t'' object.
- * Return:      Pointer to the passed in ``io_time_t'' object if SUCCEED; Null otherwise.
+ * Return:      Pointer to the passed in ``io_time_t'' object if SUCCEED; Null
+ * otherwise.
  */
-io_time_t *
-io_time_set(io_time_t *pt, timer_type t, int start_stop)
-{
-    /* sanity check */
-    assert(pt);
+io_time_t *io_time_set(io_time_t *pt, timer_type t, int start_stop) {
+  /* sanity check */
+  assert(pt);
 
-    switch (pt->type) {
+  switch (pt->type) {
 #ifdef H5_HAVE_PARALLEL
-        case MPI_CLOCK:
-            if (start_stop == TSTART) {
-                pt->mpi_timer[t] = MPI_Wtime();
+  case MPI_CLOCK:
+    if (start_stop == TSTART) {
+      pt->mpi_timer[t] = MPI_Wtime();
 
-                /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or HDF5_FINE_READ_FIXED_DIMS
-                 * we compute the time it took to only open the file */
-                if (t == HDF5_FINE_WRITE_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_WRITE_OPEN] +=
-                        pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_WRITE_FIXED_DIMS];
-                else if (t == HDF5_FINE_READ_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_READ_OPEN] +=
-                        pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_READ_FIXED_DIMS];
-            }
-            else {
-                pt->total_time[t] += MPI_Wtime() - pt->mpi_timer[t];
-                pt->mpi_timer[t] = MPI_Wtime();
+      /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or
+       * HDF5_FINE_READ_FIXED_DIMS
+       * we compute the time it took to only open the file */
+      if (t == HDF5_FINE_WRITE_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_WRITE_OPEN] +=
+            pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_WRITE_FIXED_DIMS];
+      else if (t == HDF5_FINE_READ_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_READ_OPEN] +=
+            pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_READ_FIXED_DIMS];
+    } else {
+      pt->total_time[t] += MPI_Wtime() - pt->mpi_timer[t];
+      pt->mpi_timer[t] = MPI_Wtime();
 
-                /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
-                 * we compute the time it took to close the file after the last read/write finished */
-                if (t == HDF5_GROSS_WRITE_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_WRITE_CLOSE] +=
-                        pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_WRITE_FIXED_DIMS];
-                else if (t == HDF5_GROSS_READ_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_READ_CLOSE] +=
-                        pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_READ_FIXED_DIMS];
-            }
-            break;
+      /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or
+       * HDF5_GROSS_READ_FIXED_DIMS we compute the time it took to close the
+       * file after the last read/write finished */
+      if (t == HDF5_GROSS_WRITE_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_WRITE_CLOSE] +=
+            pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_WRITE_FIXED_DIMS];
+      else if (t == HDF5_GROSS_READ_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_READ_CLOSE] +=
+            pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_READ_FIXED_DIMS];
+    }
+    break;
 #else
-        case MPI_CLOCK:
-            fprintf(stderr, "MPI clock set in serial library\n");
-            return NULL;
+  case MPI_CLOCK:
+    fprintf(stderr, "MPI clock set in serial library\n");
+    return NULL;
 #endif /* H5_HAVE_PARALLEL */
-        case SYS_CLOCK:
-            if (start_stop == TSTART) {
-                HDgettimeofday(&pt->sys_timer[t], NULL);
+  case SYS_CLOCK:
+    if (start_stop == TSTART) {
+      HDgettimeofday(&pt->sys_timer[t], NULL);
 
-                /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or HDF5_FINE_READ_FIXED_DIMS
-                 * we compute the time it took to only open the file */
-                if (t == HDF5_FINE_WRITE_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_WRITE_OPEN] +=
-                        sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_WRITE_FIXED_DIMS]));
-                else if (t == HDF5_FINE_READ_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_READ_OPEN] +=
-                        sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_READ_FIXED_DIMS]));
-            }
-            else {
-                struct timeval sys_t;
+      /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or
+       * HDF5_FINE_READ_FIXED_DIMS
+       * we compute the time it took to only open the file */
+      if (t == HDF5_FINE_WRITE_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_WRITE_OPEN] += sub_time(
+            &(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_WRITE_FIXED_DIMS]));
+      else if (t == HDF5_FINE_READ_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_READ_OPEN] += sub_time(
+            &(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_READ_FIXED_DIMS]));
+    } else {
+      struct timeval sys_t;
 
-                HDgettimeofday(&sys_t, NULL);
-                pt->total_time[t] += sub_time(&sys_t, &(pt->sys_timer[t]));
+      HDgettimeofday(&sys_t, NULL);
+      pt->total_time[t] += sub_time(&sys_t, &(pt->sys_timer[t]));
 
-                /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
-                 * we compute the time it took to close the file after the last read/write finished */
-                if (t == HDF5_GROSS_WRITE_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_WRITE_CLOSE] +=
-                        sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_WRITE_FIXED_DIMS]));
-                else if (t == HDF5_GROSS_READ_FIXED_DIMS)
-                    pt->total_time[HDF5_FILE_READ_CLOSE] +=
-                        sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_READ_FIXED_DIMS]));
-            }
-            break;
+      /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or
+       * HDF5_GROSS_READ_FIXED_DIMS we compute the time it took to close the
+       * file after the last read/write finished */
+      if (t == HDF5_GROSS_WRITE_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_WRITE_CLOSE] += sub_time(
+            &(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_WRITE_FIXED_DIMS]));
+      else if (t == HDF5_GROSS_READ_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_READ_CLOSE] += sub_time(
+            &(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_READ_FIXED_DIMS]));
+    }
+    break;
 
-        default:
-            fprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
-            return NULL;
-    } /* end switch */
+  default:
+    fprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+    return NULL;
+  } /* end switch */
 
 #if 0
     /* this does not belong here. Need fix in h5perf code when set_time() is called. -AKC- */
     debug_start_stop_time(pt, t, start_stop);
 #endif
 
-    return pt;
+  return pt;
 }
 
 /*
@@ -203,11 +198,9 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
  * Purpose:     Get the time from a ``io_time_t'' object.
  * Return:      The number of seconds as a DOUBLE.
  */
-H5_ATTR_PURE double
-io_time_get(io_time_t *pt, timer_type t)
-{
-    /* sanity check */
-    assert(pt);
+H5_ATTR_PURE double io_time_get(io_time_t *pt, timer_type t) {
+  /* sanity check */
+  assert(pt);
 
-    return pt->total_time[t];
+  return pt->total_time[t];
 }

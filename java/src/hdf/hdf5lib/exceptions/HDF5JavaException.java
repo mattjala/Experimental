@@ -23,22 +23,22 @@ package hdf.hdf5lib.exceptions;
  * @defgroup JERRJAVA HDF5 Library Java Exception Interface
  */
 public class HDF5JavaException extends HDF5Exception {
-    /**
-     * @ingroup JERRJAVA
-     *
-     * Constructs an <code>HDF5JavaException</code> with no specified detail
-     * message.
-     */
-    public HDF5JavaException() { super(); }
+  /**
+   * @ingroup JERRJAVA
+   *
+   * Constructs an <code>HDF5JavaException</code> with no specified detail
+   * message.
+   */
+  public HDF5JavaException() { super(); }
 
-    /**
-     * @ingroup JERRJAVA
-     *
-     * Constructs an <code>HDF5JavaException</code> with the specified detail
-     * message.
-     *
-     * @param s
-     *            the detail message.
-     */
-    public HDF5JavaException(String s) { super(s); }
+  /**
+   * @ingroup JERRJAVA
+   *
+   * Constructs an <code>HDF5JavaException</code> with the specified detail
+   * message.
+   *
+   * @param s
+   *            the detail message.
+   */
+  public HDF5JavaException(String s) { super(s); }
 }

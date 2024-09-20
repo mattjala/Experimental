@@ -22,7 +22,7 @@
  *      reporting macros.
  */
 #define H5L_MODULE
-#define H5_MY_PKG     H5L
+#define H5_MY_PKG H5L
 #define H5_MY_PKG_ERR H5E_LINK
 
 /** \page H5L_UG The HDF5 Links

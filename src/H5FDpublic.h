@@ -13,9 +13,9 @@
 #ifndef H5FDpublic_H
 #define H5FDpublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Fpublic.h" /* Files                                    */
 #include "H5Ipublic.h" /* Identifiers                              */
+#include "H5public.h"  /* Generic Functions                        */
 
 /*****************/
 /* Public Macros */
@@ -26,22 +26,22 @@
 /* VFD identifier values
  * These are H5FD_class_value_t values, NOT hid_t values!
  */
-#define H5_VFD_INVALID   ((H5FD_class_value_t)(-1))
-#define H5_VFD_SEC2      ((H5FD_class_value_t)(0))
-#define H5_VFD_CORE      ((H5FD_class_value_t)(1))
-#define H5_VFD_LOG       ((H5FD_class_value_t)(2))
-#define H5_VFD_FAMILY    ((H5FD_class_value_t)(3))
-#define H5_VFD_MULTI     ((H5FD_class_value_t)(4))
-#define H5_VFD_STDIO     ((H5FD_class_value_t)(5))
-#define H5_VFD_SPLITTER  ((H5FD_class_value_t)(6))
-#define H5_VFD_MPIO      ((H5FD_class_value_t)(7))
-#define H5_VFD_DIRECT    ((H5FD_class_value_t)(8))
-#define H5_VFD_MIRROR    ((H5FD_class_value_t)(9))
-#define H5_VFD_HDFS      ((H5FD_class_value_t)(10))
-#define H5_VFD_ROS3      ((H5FD_class_value_t)(11))
+#define H5_VFD_INVALID ((H5FD_class_value_t)(-1))
+#define H5_VFD_SEC2 ((H5FD_class_value_t)(0))
+#define H5_VFD_CORE ((H5FD_class_value_t)(1))
+#define H5_VFD_LOG ((H5FD_class_value_t)(2))
+#define H5_VFD_FAMILY ((H5FD_class_value_t)(3))
+#define H5_VFD_MULTI ((H5FD_class_value_t)(4))
+#define H5_VFD_STDIO ((H5FD_class_value_t)(5))
+#define H5_VFD_SPLITTER ((H5FD_class_value_t)(6))
+#define H5_VFD_MPIO ((H5FD_class_value_t)(7))
+#define H5_VFD_DIRECT ((H5FD_class_value_t)(8))
+#define H5_VFD_MIRROR ((H5FD_class_value_t)(9))
+#define H5_VFD_HDFS ((H5FD_class_value_t)(10))
+#define H5_VFD_ROS3 ((H5FD_class_value_t)(11))
 #define H5_VFD_SUBFILING ((H5FD_class_value_t)(12))
-#define H5_VFD_IOC       ((H5FD_class_value_t)(13))
-#define H5_VFD_ONION     ((H5FD_class_value_t)(14))
+#define H5_VFD_IOC ((H5FD_class_value_t)(13))
+#define H5_VFD_ONION ((H5FD_class_value_t)(14))
 
 /* VFD IDs below this value are reserved for library use. */
 #define H5_VFD_RESERVED 256
@@ -70,9 +70,9 @@
  * read operation, the application would hang.
  */
 #define H5FD_FEAT_ACCUMULATE_METADATA_WRITE 0x00000002
-#define H5FD_FEAT_ACCUMULATE_METADATA_READ  0x00000004
-#define H5FD_FEAT_ACCUMULATE_METADATA                                                                        \
-    (H5FD_FEAT_ACCUMULATE_METADATA_WRITE | H5FD_FEAT_ACCUMULATE_METADATA_READ)
+#define H5FD_FEAT_ACCUMULATE_METADATA_READ 0x00000004
+#define H5FD_FEAT_ACCUMULATE_METADATA                                          \
+  (H5FD_FEAT_ACCUMULATE_METADATA_WRITE | H5FD_FEAT_ACCUMULATE_METADATA_READ)
 /*
  * Defining H5FD_FEAT_DATA_SIEVE for a VFL driver means that
  * the library will attempt to cache raw data as it is read from/written to
@@ -168,23 +168,25 @@
 #define H5FD_FEAT_MEMMANAGE 0x00010000
 
 /* ctl function definitions: */
-#define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */
-#define H5FD_CTL_OPC_EXPER_MIN                                                                               \
-    H5FD_CTL_OPC_RESERVED /* Minimum opcode value available for experimental use                             \
-                           */
-#define H5FD_CTL_OPC_EXPER_MAX                                                                               \
-    (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
+#define H5FD_CTL_OPC_RESERVED                                                  \
+  512 /* Opcodes below this value are reserved for library use */
+#define H5FD_CTL_OPC_EXPER_MIN                                                 \
+  H5FD_CTL_OPC_RESERVED /* Minimum opcode value available for experimental use \
+                         */
+#define H5FD_CTL_OPC_EXPER_MAX                                                 \
+  (H5FD_CTL_OPC_RESERVED +                                                     \
+   511) /* Maximum opcode value available for experimental use */
 
 /* ctl function op codes: */
-#define H5FD_CTL_INVALID_OPCODE              0
-#define H5FD_CTL_TEST_OPCODE                 1
+#define H5FD_CTL_INVALID_OPCODE 0
+#define H5FD_CTL_TEST_OPCODE 1
 #define H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE 2
-#define H5FD_CTL_GET_MPI_RANK_OPCODE         3
-#define H5FD_CTL_GET_MPI_SIZE_OPCODE         4
-#define H5FD_CTL_MEM_ALLOC                   5
-#define H5FD_CTL_MEM_FREE                    6
-#define H5FD_CTL_MEM_COPY                    7
-#define H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE    8
+#define H5FD_CTL_GET_MPI_RANK_OPCODE 3
+#define H5FD_CTL_GET_MPI_SIZE_OPCODE 4
+#define H5FD_CTL_MEM_ALLOC 5
+#define H5FD_CTL_MEM_FREE 6
+#define H5FD_CTL_MEM_COPY 7
+#define H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE 8
 
 /* ctl function flags: */
 
@@ -264,34 +266,34 @@ typedef enum H5F_mem_t H5FD_mem_t;
  */
 //! <!-- [H5FD_file_image_op_t_snip] -->
 typedef enum {
-    H5FD_FILE_IMAGE_OP_NO_OP,
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
-    /**< Passed to the \p image_malloc and \p image_memcpy callbacks when a
-     * file image buffer is to be copied while being set in a file access
-     * property list (FAPL)*/
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
-    /**< Passed to the \p image_malloc and \p image_memcpy callbacks
-     * when a file image buffer is to be copied when a FAPL is copied*/
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
-    /**<Passed to the \p image_malloc and \p image_memcpy callbacks when
-     * a file image buffer is to be copied while being retrieved from a FAPL*/
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
-    /**<Passed to the \p image_free callback when a file image
-     * buffer is to be released during a FAPL close operation*/
-    H5FD_FILE_IMAGE_OP_FILE_OPEN,
-    /**<Passed to the \p image_malloc and
-     * \p image_memcpy callbackswhen a
-     * file image buffer is to be copied during a file open operation \n
-     * While the file image being opened will typically be copied from a
-     * FAPL, this need not always be the case. For example, the core file
-     * driver, also known as the memory file driver, takes its initial
-     * image from a file.*/
-    H5FD_FILE_IMAGE_OP_FILE_RESIZE,
-    /**<Passed to the \p image_realloc callback when a file driver needs
-     * to resize an image buffer*/
-    H5FD_FILE_IMAGE_OP_FILE_CLOSE
-    /**<Passed to the \p image_free callback when an image buffer is to
-     * be released during a file close operation*/
+  H5FD_FILE_IMAGE_OP_NO_OP,
+  H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+  /**< Passed to the \p image_malloc and \p image_memcpy callbacks when a
+   * file image buffer is to be copied while being set in a file access
+   * property list (FAPL)*/
+  H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+  /**< Passed to the \p image_malloc and \p image_memcpy callbacks
+   * when a file image buffer is to be copied when a FAPL is copied*/
+  H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+  /**<Passed to the \p image_malloc and \p image_memcpy callbacks when
+   * a file image buffer is to be copied while being retrieved from a FAPL*/
+  H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
+  /**<Passed to the \p image_free callback when a file image
+   * buffer is to be released during a FAPL close operation*/
+  H5FD_FILE_IMAGE_OP_FILE_OPEN,
+  /**<Passed to the \p image_malloc and
+   * \p image_memcpy callbackswhen a
+   * file image buffer is to be copied during a file open operation \n
+   * While the file image being opened will typically be copied from a
+   * FAPL, this need not always be the case. For example, the core file
+   * driver, also known as the memory file driver, takes its initial
+   * image from a file.*/
+  H5FD_FILE_IMAGE_OP_FILE_RESIZE,
+  /**<Passed to the \p image_realloc callback when a file driver needs
+   * to resize an image buffer*/
+  H5FD_FILE_IMAGE_OP_FILE_CLOSE
+  /**<Passed to the \p image_free callback when an image buffer is to
+   * be released during a file close operation*/
 } H5FD_file_image_op_t;
 //! <!-- [H5FD_file_image_op_t_snip] -->
 
@@ -300,76 +302,79 @@ typedef enum {
  */
 //! <!-- [H5FD_file_image_callbacks_t_snip] -->
 typedef struct {
-    /**
-     * \param[in] size Size in bytes of the file image buffer to allocate
-     * \param[in] file_image_op A value from H5FD_file_image_op_t indicating
-     *                          the operation being performed on the file image
-     *                          when this callback is invoked
-     * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
-     *            parameter \p udata
-     */
-    //! <!-- [image_malloc_snip] -->
-    void *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op, void *udata);
-    //! <!-- [image_malloc_snip] -->
-    /**
-     * \param[in] dest Address of the destination buffer
-     * \param[in] src Address of the source buffer
-     * \param[in] size Size in bytes of the file image buffer to allocate
-     * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
-     *                          the operation being performed on the file image
-     *                          when this callback is invoked
-     * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
-     *            parameter \p udata
-     */
-    //! <!-- [image_memcpy_snip] -->
-    void *(*image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op,
-                          void *udata);
-    //! <!-- [image_memcpy_snip] -->
-    /**
-     * \param[in] ptr Pointer to the buffer being reallocated
-     * \param[in] size Size in bytes of the file image buffer to allocate
-     * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
-     *                          the operation being performed on the file image
-     *                          when this callback is invoked
-     * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
-     *            parameter \p udata
-     */
-    //! <!-- [image_realloc_snip] -->
-    void *(*image_realloc)(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
-    //! <!-- [image_realloc_snip] -->
-    /**
-     * \param[in] ptr Pointer to the buffer being reallocated
-     * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
-     *                          the operation being performed on the file image
-     *                          when this callback is invoked
-     * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
-     *            parameter \p udata
-     */
-    //! <!-- [image_free_snip] -->
-    herr_t (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, void *udata);
-    //! <!-- [image_free_snip] -->
-    /**
-     * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
-     *            parameter \p udata
-     */
-    //! <!-- [udata_copy_snip] -->
-    void *(*udata_copy)(void *udata);
-    //! <!-- [udata_copy_snip] -->
-    /**
-     * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
-     *            parameter \p udata
-     */
-    //! <!-- [udata_free_snip] -->
-    herr_t (*udata_free)(void *udata);
-    //! <!-- [udata_free_snip] -->
-    /**
-     * \brief The final field in the #H5FD_file_image_callbacks_t struct,
-     *        provides a pointer to user-defined data. This pointer will be
-     *        passed to the image_malloc, image_memcpy, image_realloc, and
-     *        image_free callbacks. Define udata as NULL if no user-defined
-     *        data is provided.
-     */
-    void *udata;
+  /**
+   * \param[in] size Size in bytes of the file image buffer to allocate
+   * \param[in] file_image_op A value from H5FD_file_image_op_t indicating
+   *                          the operation being performed on the file image
+   *                          when this callback is invoked
+   * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
+   *            parameter \p udata
+   */
+  //! <!-- [image_malloc_snip] -->
+  void *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op,
+                        void *udata);
+  //! <!-- [image_malloc_snip] -->
+  /**
+   * \param[in] dest Address of the destination buffer
+   * \param[in] src Address of the source buffer
+   * \param[in] size Size in bytes of the file image buffer to allocate
+   * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
+   *                          the operation being performed on the file image
+   *                          when this callback is invoked
+   * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
+   *            parameter \p udata
+   */
+  //! <!-- [image_memcpy_snip] -->
+  void *(*image_memcpy)(void *dest, const void *src, size_t size,
+                        H5FD_file_image_op_t file_image_op, void *udata);
+  //! <!-- [image_memcpy_snip] -->
+  /**
+   * \param[in] ptr Pointer to the buffer being reallocated
+   * \param[in] size Size in bytes of the file image buffer to allocate
+   * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
+   *                          the operation being performed on the file image
+   *                          when this callback is invoked
+   * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
+   *            parameter \p udata
+   */
+  //! <!-- [image_realloc_snip] -->
+  void *(*image_realloc)(void *ptr, size_t size,
+                         H5FD_file_image_op_t file_image_op, void *udata);
+  //! <!-- [image_realloc_snip] -->
+  /**
+   * \param[in] ptr Pointer to the buffer being reallocated
+   * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
+   *                          the operation being performed on the file image
+   *                          when this callback is invoked
+   * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
+   *            parameter \p udata
+   */
+  //! <!-- [image_free_snip] -->
+  herr_t (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op,
+                       void *udata);
+  //! <!-- [image_free_snip] -->
+  /**
+   * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
+   *            parameter \p udata
+   */
+  //! <!-- [udata_copy_snip] -->
+  void *(*udata_copy)(void *udata);
+  //! <!-- [udata_copy_snip] -->
+  /**
+   * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
+   *            parameter \p udata
+   */
+  //! <!-- [udata_free_snip] -->
+  herr_t (*udata_free)(void *udata);
+  //! <!-- [udata_free_snip] -->
+  /**
+   * \brief The final field in the #H5FD_file_image_callbacks_t struct,
+   *        provides a pointer to user-defined data. This pointer will be
+   *        passed to the image_malloc, image_memcpy, image_realloc, and
+   *        image_free callbacks. Define udata as NULL if no user-defined
+   *        data is provided.
+   */
+  void *udata;
 } H5FD_file_image_callbacks_t;
 //! <!-- [H5FD_file_image_callbacks_t_snip] -->
 
@@ -378,11 +383,11 @@ typedef struct {
  */
 //! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
 typedef struct H5FD_ctl_memcpy_args_t {
-    void       *dstbuf;  /**< Destination buffer */
-    hsize_t     dst_off; /**< Offset within destination buffer */
-    const void *srcbuf;  /**< Source buffer */
-    hsize_t     src_off; /**< Offset within source buffer */
-    size_t      len;     /**< Length of data to copy from source buffer */
+  void *dstbuf;       /**< Destination buffer */
+  hsize_t dst_off;    /**< Offset within destination buffer */
+  const void *srcbuf; /**< Source buffer */
+  hsize_t src_off;    /**< Offset within source buffer */
+  size_t len;         /**< Length of data to copy from source buffer */
 } H5FD_ctl_memcpy_args_t;
 //! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
 

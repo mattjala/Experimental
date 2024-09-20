@@ -11,12 +11,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5tools_ref.h"
-#include "H5private.h"
 #include "H5SLprivate.h"
+#include "H5VLnative_private.h"
+#include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5trav.h"
-#include "H5VLnative_private.h"
 
 /*
  *  Table to look up a path name for an object
@@ -33,12 +33,13 @@
  */
 
 typedef struct {
-    H5O_token_t obj_token; /* Object token */
-    char       *path;      /* Object path */
+  H5O_token_t obj_token; /* Object token */
+  char *path;            /* Object path */
 } ref_path_node_t;
 
-static H5SL_t *ref_path_table = NULL; /* the "table" (implemented with a skip list) */
-static hid_t   thefile        = (-1);
+static H5SL_t *ref_path_table =
+    NULL; /* the "table" (implemented with a skip list) */
+static hid_t thefile = (-1);
 
 static int ref_path_table_put(const char *, const H5O_token_t *token);
 
@@ -52,14 +53,14 @@ static int ref_path_table_put(const char *, const H5O_token_t *token);
  *-------------------------------------------------------------------------
  */
 static herr_t
-free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data /*in,out*/)
-{
-    ref_path_node_t *node = (ref_path_node_t *)item;
+free_ref_path_info(void *item, void H5_ATTR_UNUSED *key,
+                   void H5_ATTR_UNUSED *operator_data /*in,out*/) {
+  ref_path_node_t *node = (ref_path_node_t *)item;
 
-    free(node->path);
-    free(node);
+  free(node->path);
+  free(node);
 
-    return (0);
+  return (0);
 }
 
 /*-------------------------------------------------------------------------
@@ -72,17 +73,16 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-init_ref_path_cb(const char *obj_name, const H5O_info2_t *oinfo, const char *already_seen,
-                 void H5_ATTR_UNUSED *_udata)
-{
-    /* Check if the object is already in the path table */
-    if (NULL == already_seen) {
-        /* Insert the object into the path table */
-        ref_path_table_put(obj_name, &oinfo->token);
-    } /* end if */
+static herr_t init_ref_path_cb(const char *obj_name, const H5O_info2_t *oinfo,
+                               const char *already_seen,
+                               void H5_ATTR_UNUSED *_udata) {
+  /* Check if the object is already in the path table */
+  if (NULL == already_seen) {
+    /* Insert the object into the path table */
+    ref_path_table_put(obj_name, &oinfo->token);
+  } /* end if */
 
-    return 0;
+  return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -98,19 +98,17 @@ init_ref_path_cb(const char *obj_name, const H5O_info2_t *oinfo, const char *alr
  *
  *-------------------------------------------------------------------------
  */
-static int
-ref_path_table_cmp(const void *key1, const void *key2)
-{
-    const H5O_token_t *token1    = (const H5O_token_t *)key1;
-    const H5O_token_t *token2    = (const H5O_token_t *)key2;
-    int                cmp_value = 0;
+static int ref_path_table_cmp(const void *key1, const void *key2) {
+  const H5O_token_t *token1 = (const H5O_token_t *)key1;
+  const H5O_token_t *token2 = (const H5O_token_t *)key2;
+  int cmp_value = 0;
 
-    if (thefile > 0)
-        H5Otoken_cmp(thefile, token1, token2, &cmp_value);
-    else
-        cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
+  if (thefile > 0)
+    H5Otoken_cmp(thefile, token1, token2, &cmp_value);
+  else
+    cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
 
-    return cmp_value;
+  return cmp_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -122,25 +120,24 @@ ref_path_table_cmp(const void *key1, const void *key2)
  *
  *-------------------------------------------------------------------------
  */
-static int
-init_ref_path_table(void)
-{
-    /* Sanity check */
-    if (thefile > 0) {
-        /* Create skip list to store reference path information */
-        if ((ref_path_table = H5SL_create(H5SL_TYPE_GENERIC, ref_path_table_cmp)) == NULL)
-            return (-1);
+static int init_ref_path_table(void) {
+  /* Sanity check */
+  if (thefile > 0) {
+    /* Create skip list to store reference path information */
+    if ((ref_path_table = H5SL_create(H5SL_TYPE_GENERIC, ref_path_table_cmp)) ==
+        NULL)
+      return (-1);
 
-        /* Iterate over objects in this file */
-        if (h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL, H5O_INFO_BASIC) < 0) {
-            error_msg("unable to construct reference path table\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        } /* end if */
+    /* Iterate over objects in this file */
+    if (h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL,
+                     H5O_INFO_BASIC) < 0) {
+      error_msg("unable to construct reference path table\n");
+      h5tools_setstatus(EXIT_FAILURE);
+    } /* end if */
 
-        return (0);
-    }
-    else
-        return (-1);
+    return (0);
+  } else
+    return (-1);
 }
 
 /*-------------------------------------------------------------------------
@@ -152,14 +149,12 @@ init_ref_path_table(void)
  *
  *-------------------------------------------------------------------------
  */
-int
-term_ref_path_table(void)
-{
-    /* Destroy reference path table, freeing all memory */
-    if (ref_path_table)
-        H5SL_destroy(ref_path_table, free_ref_path_info, NULL);
+int term_ref_path_table(void) {
+  /* Destroy reference path table, freeing all memory */
+  if (ref_path_table)
+    H5SL_destroy(ref_path_table, free_ref_path_info, NULL);
 
-    return (0);
+  return (0);
 }
 
 /*-------------------------------------------------------------------------
@@ -175,35 +170,36 @@ term_ref_path_table(void)
  *
  *-------------------------------------------------------------------------
  */
-int
-ref_path_table_lookup(const char *thepath, H5O_token_t *token)
-{
-    H5O_info2_t oi;
+int ref_path_table_lookup(const char *thepath, H5O_token_t *token) {
+  H5O_info2_t oi;
 
-    if ((thepath == NULL) || (HDstrlen(thepath) == 0))
-        return -1;
-    /* Allow lookups on the root group, even though it doesn't have any link info */
-    if (HDstrcmp(thepath, "/") != 0) {
-        H5L_info2_t li;
+  if ((thepath == NULL) || (HDstrlen(thepath) == 0))
+    return -1;
+  /* Allow lookups on the root group, even though it doesn't have any link info
+   */
+  if (HDstrcmp(thepath, "/") != 0) {
+    H5L_info2_t li;
 
-        /* Check for external link first, so we don't return the OID of an object in another file */
-        if (H5Lget_info2(thefile, thepath, &li, H5P_DEFAULT) < 0)
-            return -1;
+    /* Check for external link first, so we don't return the OID of an object in
+     * another file */
+    if (H5Lget_info2(thefile, thepath, &li, H5P_DEFAULT) < 0)
+      return -1;
 
-        /* UD links can't be followed, so they always "dangle" like soft links.  */
-        if (li.type >= H5L_TYPE_UD_MIN)
-            return -1;
-    } /* end if */
+    /* UD links can't be followed, so they always "dangle" like soft links.  */
+    if (li.type >= H5L_TYPE_UD_MIN)
+      return -1;
+  } /* end if */
 
-    /* Get the object info now */
-    /* (returns failure for dangling soft links) */
-    if (H5Oget_info_by_name3(thefile, thepath, &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        return -1;
+  /* Get the object info now */
+  /* (returns failure for dangling soft links) */
+  if (H5Oget_info_by_name3(thefile, thepath, &oi, H5O_INFO_BASIC, H5P_DEFAULT) <
+      0)
+    return -1;
 
-    /* Return object token through parameter */
-    memcpy(token, &oi.token, sizeof(H5O_token_t));
+  /* Return object token through parameter */
+  memcpy(token, &oi.token, sizeof(H5O_token_t));
 
-    return 0;
+  return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -221,22 +217,19 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
  *
  *-------------------------------------------------------------------------
  */
-static int
-ref_path_table_put(const char *path, const H5O_token_t *token)
-{
-    ref_path_node_t *new_node;
+static int ref_path_table_put(const char *path, const H5O_token_t *token) {
+  ref_path_node_t *new_node;
 
-    if (ref_path_table && path) {
-        if ((new_node = (ref_path_node_t *)malloc(sizeof(ref_path_node_t))) == NULL)
-            return (-1);
+  if (ref_path_table && path) {
+    if ((new_node = (ref_path_node_t *)malloc(sizeof(ref_path_node_t))) == NULL)
+      return (-1);
 
-        memcpy(&new_node->obj_token, token, sizeof(H5O_token_t));
-        new_node->path = HDstrdup(path);
+    memcpy(&new_node->obj_token, token, sizeof(H5O_token_t));
+    new_node->path = HDstrdup(path);
 
-        return (H5SL_insert(ref_path_table, new_node, &(new_node->obj_token)));
-    }
-    else
-        return (-1);
+    return (H5SL_insert(ref_path_table, new_node, &(new_node->obj_token)));
+  } else
+    return (-1);
 }
 
 /*
@@ -244,11 +237,7 @@ ref_path_table_put(const char *path, const H5O_token_t *token)
  */
 static int xid = 1;
 
-int
-get_next_xid(void)
-{
-    return xid++;
-}
+int get_next_xid(void) { return xid++; }
 
 /*
  *  This counter is used to create fake object ID's
@@ -258,17 +247,15 @@ get_next_xid(void)
  */
 static haddr_t fake_xid = HADDR_MAX;
 
-void
-get_fake_token(H5O_token_t *token)
-{
-    if (thefile > 0) {
-        /* TODO: potential for this to be called with non-native connector objects */
-        if (H5VLnative_addr_to_token(thefile, fake_xid, token) < 0)
-            *token = H5O_TOKEN_UNDEF;
-        fake_xid--;
-    }
-    else
-        *token = H5O_TOKEN_UNDEF;
+void get_fake_token(H5O_token_t *token) {
+  if (thefile > 0) {
+    /* TODO: potential for this to be called with non-native connector objects
+     */
+    if (H5VLnative_addr_to_token(thefile, fake_xid, token) < 0)
+      *token = H5O_TOKEN_UNDEF;
+    fake_xid--;
+  } else
+    *token = H5O_TOKEN_UNDEF;
 }
 
 /*
@@ -279,18 +266,16 @@ get_fake_token(H5O_token_t *token)
  *
  */
 
-void
-ref_path_table_gen_fake(const char *path, H5O_token_t *token)
-{
-    /* Generate fake object token for string */
-    get_fake_token(token);
+void ref_path_table_gen_fake(const char *path, H5O_token_t *token) {
+  /* Generate fake object token for string */
+  get_fake_token(token);
 
-    /* Create ref path table, if it hasn't already been created */
-    if (ref_path_table == NULL)
-        init_ref_path_table();
+  /* Create ref path table, if it hasn't already been created */
+  if (ref_path_table == NULL)
+    init_ref_path_table();
 
-    /* Insert "fake" object into table */
-    ref_path_table_put(path, token);
+  /* Insert "fake" object into table */
+  ref_path_table_put(path, token);
 }
 
 /*-------------------------------------------------------------------------
@@ -302,51 +287,49 @@ ref_path_table_gen_fake(const char *path, H5O_token_t *token)
  *
  *-------------------------------------------------------------------------
  */
-const char *
-lookup_ref_path(H5R_ref_t refbuf)
-{
-    H5O_info2_t      oinfo;
-    H5R_type_t       ref_type;
-    hid_t            ref_object;
-    ref_path_node_t *node;
+const char *lookup_ref_path(H5R_ref_t refbuf) {
+  H5O_info2_t oinfo;
+  H5R_type_t ref_type;
+  hid_t ref_object;
+  ref_path_node_t *node;
 
-    /* Be safer for h5ls */
-    if (thefile < 0)
-        return (NULL);
+  /* Be safer for h5ls */
+  if (thefile < 0)
+    return (NULL);
 
-    /* Retrieve reference type */
-    if (H5R_BADTYPE == (ref_type = H5Rget_type(&refbuf)))
-        return (NULL);
+  /* Retrieve reference type */
+  if (H5R_BADTYPE == (ref_type = H5Rget_type(&refbuf)))
+    return (NULL);
 
-    /* Open the referenced object */
-    switch (ref_type) {
-        case H5R_OBJECT1:
-        case H5R_OBJECT2:
-            if ((ref_object = H5Ropen_object(&refbuf, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                return (NULL);
-            break;
+  /* Open the referenced object */
+  switch (ref_type) {
+  case H5R_OBJECT1:
+  case H5R_OBJECT2:
+    if ((ref_object = H5Ropen_object(&refbuf, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+      return (NULL);
+    break;
 
-        /* Invalid referenced object type */
-        case H5R_DATASET_REGION1:
-        case H5R_DATASET_REGION2:
-        case H5R_ATTR:
-        case H5R_MAXTYPE:
-        case H5R_BADTYPE:
-        default:
-            return (NULL);
-    }
+  /* Invalid referenced object type */
+  case H5R_DATASET_REGION1:
+  case H5R_DATASET_REGION2:
+  case H5R_ATTR:
+  case H5R_MAXTYPE:
+  case H5R_BADTYPE:
+  default:
+    return (NULL);
+  }
 
-    /* Retrieve info about the referenced object */
-    if (H5Oget_info3(ref_object, &oinfo, H5O_INFO_ALL) < 0)
-        return (NULL);
+  /* Retrieve info about the referenced object */
+  if (H5Oget_info3(ref_object, &oinfo, H5O_INFO_ALL) < 0)
+    return (NULL);
 
-    /* Create ref path table, if it hasn't already been created */
-    if (ref_path_table == NULL)
-        init_ref_path_table();
+  /* Create ref path table, if it hasn't already been created */
+  if (ref_path_table == NULL)
+    init_ref_path_table();
 
-    node = (ref_path_node_t *)H5SL_search(ref_path_table, &oinfo.token);
+  node = (ref_path_node_t *)H5SL_search(ref_path_table, &oinfo.token);
 
-    return (node ? node->path : NULL);
+  return (node ? node->path : NULL);
 }
 
 /*-------------------------------------------------------------------------
@@ -359,13 +342,11 @@ lookup_ref_path(H5R_ref_t refbuf)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-fill_ref_path_table(hid_t fid)
-{
-    /* Set file ID for later queries (XXX: this should be fixed) */
-    thefile = fid;
+herr_t fill_ref_path_table(hid_t fid) {
+  /* Set file ID for later queries (XXX: this should be fixed) */
+  thefile = fid;
 
-    /* Defer creating the ref path table until it's needed */
+  /* Defer creating the ref path table until it's needed */
 
-    return 0;
+  return 0;
 }

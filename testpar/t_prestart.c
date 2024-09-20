@@ -21,108 +21,110 @@ int nerrors = 0; /* errors count */
 
 static const char *FILENAME[] = {"shutdown", NULL};
 
-int
-main(int argc, char **argv)
-{
-    hid_t     file_id, dset_id, grp_id;
-    hid_t     fapl, sid, mem_dataspace;
-    herr_t    ret;
-    char      filename[1024];
-    int       mpi_size, mpi_rank, ndims;
-    MPI_Comm  comm = MPI_COMM_WORLD;
-    MPI_Info  info = MPI_INFO_NULL;
-    hsize_t   dims[RANK];
-    hsize_t   start[RANK];
-    hsize_t   count[RANK];
-    hsize_t   stride[RANK];
-    hsize_t   block[RANK];
-    hsize_t   i, j;
-    DATATYPE *data_array = NULL, *dataptr; /* data buffer */
+int main(int argc, char **argv) {
+  hid_t file_id, dset_id, grp_id;
+  hid_t fapl, sid, mem_dataspace;
+  herr_t ret;
+  char filename[1024];
+  int mpi_size, mpi_rank, ndims;
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Info info = MPI_INFO_NULL;
+  hsize_t dims[RANK];
+  hsize_t start[RANK];
+  hsize_t count[RANK];
+  hsize_t stride[RANK];
+  hsize_t block[RANK];
+  hsize_t i, j;
+  DATATYPE *data_array = NULL, *dataptr; /* data buffer */
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);
+  MPI_Init(&argc, &argv);
+  MPI_Comm_size(comm, &mpi_size);
+  MPI_Comm_rank(comm, &mpi_rank);
 
-    if (MAINPROCESS)
-        TESTING("proper shutdown of HDF5 library");
+  if (MAINPROCESS)
+    TESTING("proper shutdown of HDF5 library");
 
-    /* Set up file access property list with parallel I/O access */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY((fapl >= 0), "H5Pcreate succeeded");
-    ret = H5Pset_fapl_mpio(fapl, comm, info);
-    VRFY((ret >= 0), "");
+  /* Set up file access property list with parallel I/O access */
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  VRFY((fapl >= 0), "H5Pcreate succeeded");
+  ret = H5Pset_fapl_mpio(fapl, comm, info);
+  VRFY((ret >= 0), "");
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
-    VRFY((file_id >= 0), "H5Fopen succeeded");
+  h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+  file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+  VRFY((file_id >= 0), "H5Fopen succeeded");
 
-    grp_id = H5Gopen2(file_id, "Group", H5P_DEFAULT);
-    VRFY((grp_id >= 0), "H5Gopen succeeded");
+  grp_id = H5Gopen2(file_id, "Group", H5P_DEFAULT);
+  VRFY((grp_id >= 0), "H5Gopen succeeded");
 
-    dset_id = H5Dopen2(grp_id, "Dataset", H5P_DEFAULT);
-    VRFY((dset_id >= 0), "H5Dopen succeeded");
+  dset_id = H5Dopen2(grp_id, "Dataset", H5P_DEFAULT);
+  VRFY((dset_id >= 0), "H5Dopen succeeded");
 
-    sid = H5Dget_space(dset_id);
-    VRFY((dset_id >= 0), "H5Dget_space succeeded");
+  sid = H5Dget_space(dset_id);
+  VRFY((dset_id >= 0), "H5Dget_space succeeded");
 
-    ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
-    VRFY((ndims == 2), "H5Sget_simple_extent_dims succeeded");
-    VRFY(dims[0] == (hsize_t)(ROW_FACTOR * mpi_size), "Wrong dataset dimensions");
-    VRFY(dims[1] == (hsize_t)(COL_FACTOR * mpi_size), "Wrong dataset dimensions");
+  ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
+  VRFY((ndims == 2), "H5Sget_simple_extent_dims succeeded");
+  VRFY(dims[0] == (hsize_t)(ROW_FACTOR * mpi_size), "Wrong dataset dimensions");
+  VRFY(dims[1] == (hsize_t)(COL_FACTOR * mpi_size), "Wrong dataset dimensions");
 
-    /* allocate memory for data buffer */
-    data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array malloc succeeded");
+  /* allocate memory for data buffer */
+  data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
+  VRFY((data_array != NULL), "data_array malloc succeeded");
 
-    /* Each process takes a slabs of rows. */
-    block[0]  = dims[0] / (hsize_t)mpi_size;
-    block[1]  = dims[1];
-    stride[0] = block[0];
-    stride[1] = block[1];
-    count[0]  = 1;
-    count[1]  = 1;
-    start[0]  = (hsize_t)mpi_rank * block[0];
-    start[1]  = 0;
+  /* Each process takes a slabs of rows. */
+  block[0] = dims[0] / (hsize_t)mpi_size;
+  block[1] = dims[1];
+  stride[0] = block[0];
+  stride[1] = block[1];
+  count[0] = 1;
+  count[1] = 1;
+  start[0] = (hsize_t)mpi_rank * block[0];
+  start[1] = 0;
 
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+  ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
-    /* create a memory dataspace independently */
-    mem_dataspace = H5Screate_simple(RANK, block, NULL);
-    VRFY((mem_dataspace >= 0), "");
+  /* create a memory dataspace independently */
+  mem_dataspace = H5Screate_simple(RANK, block, NULL);
+  VRFY((mem_dataspace >= 0), "");
 
-    /* write data independently */
-    ret = H5Dread(dset_id, H5T_NATIVE_INT, mem_dataspace, sid, H5P_DEFAULT, data_array);
-    VRFY((ret >= 0), "H5Dwrite succeeded");
+  /* write data independently */
+  ret = H5Dread(dset_id, H5T_NATIVE_INT, mem_dataspace, sid, H5P_DEFAULT,
+                data_array);
+  VRFY((ret >= 0), "H5Dwrite succeeded");
 
-    dataptr = data_array;
+  dataptr = data_array;
 
-    for (i = 0; i < block[0]; i++) {
-        for (j = 0; j < block[1]; j++) {
-            if (*dataptr != mpi_rank + 1) {
-                printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
-                       (unsigned long)i, (unsigned long)j, (unsigned long)((hsize_t)i + start[0]),
-                       (unsigned long)((hsize_t)j + start[1]), mpi_rank + 1, *(dataptr));
-                nerrors++;
-            }
-            dataptr++;
-        }
+  for (i = 0; i < block[0]; i++) {
+    for (j = 0; j < block[1]; j++) {
+      if (*dataptr != mpi_rank + 1) {
+        printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect "
+               "%d, got %d\n",
+               (unsigned long)i, (unsigned long)j,
+               (unsigned long)((hsize_t)i + start[0]),
+               (unsigned long)((hsize_t)j + start[1]), mpi_rank + 1,
+               *(dataptr));
+        nerrors++;
+      }
+      dataptr++;
     }
-    MPI_Finalize();
-    HDremove(filename);
+  }
+  MPI_Finalize();
+  HDremove(filename);
 
-    /* release data buffers */
-    if (data_array)
-        free(data_array);
+  /* release data buffers */
+  if (data_array)
+    free(data_array);
 
-    nerrors += GetTestNumErrs();
+  nerrors += GetTestNumErrs();
 
-    if (MAINPROCESS) {
-        if (0 == nerrors)
-            PASSED();
-        else
-            H5_FAILED();
-    }
+  if (MAINPROCESS) {
+    if (0 == nerrors)
+      PASSED();
+    else
+      H5_FAILED();
+  }
 
-    return (nerrors != 0);
+  return (nerrors != 0);
 }

@@ -78,7 +78,8 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          <table>
  *          <tr>
  *          <td>\p memb_map</td>
- *          <td>The default member map contains the value #H5FD_MEM_DEFAULT for each element.</td>
+ *          <td>The default member map contains the value #H5FD_MEM_DEFAULT for
+ * each element.</td>
  *          </tr>
  *          <tr>
  *          <td>
@@ -93,7 +94,8 @@ H5_DLL hid_t H5FD_multi_init(void);
  *          \p memb_name
  *          </td>
  *          <td>
- *          The default string is \Code{%s-X.h5} where \c X is one of the following letters:
+ *          The default string is \Code{%s-X.h5} where \c X is one of the
+ * following letters:
  *          - \c s for #H5FD_MEM_SUPER
  *          - \c b for #H5FD_MEM_BTREE
  *          - \c r for #H5FD_MEM_DRAW
@@ -121,12 +123,10 @@ H5_DLL hid_t H5FD_multi_init(void);
  *
  * \par Example:
  * The following code sample sets up a multi-file access property list that
- * partitions data into meta and raw files, each being one-half of the address:\n
- * \code
- * H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
- * hid_t memb_fapl[H5FD_MEM_NTYPES];
- * const char *memb[H5FD_MEM_NTYPES];
- * haddr_t memb_addr[H5FD_MEM_NTYPES];
+ * partitions data into meta and raw files, each being one-half of the
+ * address:\n \code H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES]; hid_t
+ * memb_fapl[H5FD_MEM_NTYPES]; const char *memb[H5FD_MEM_NTYPES]; haddr_t
+ * memb_addr[H5FD_MEM_NTYPES];
  *
  * // The mapping...
  * for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
@@ -148,11 +148,13 @@ H5_DLL hid_t H5FD_multi_init(void);
  *                   memb_name, memb_addr, TRUE);
  * \endcode
  *
- * \version 1.6.3 \p memb_name parameter type changed to \Code{const char* const*}.
- * \since 1.4.0
+ * \version 1.6.3 \p memb_name parameter type changed to \Code{const char*
+ * const*}. \since 1.4.0
  */
-H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
-                                const char *const *memb_name, const haddr_t *memb_addr, hbool_t relax);
+H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
+                                const hid_t *memb_fapl,
+                                const char *const *memb_name,
+                                const haddr_t *memb_addr, hbool_t relax);
 
 /**
  * \ingroup FAPL
@@ -165,8 +167,8 @@ H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const
  * \param[out] memb_name Name generator for names of member files
  * \param[out] memb_addr The offsets within the virtual address space, from 0
  *           (zero) to #HADDR_MAX, at which each type of data storage begins
- * \param[out] relax Allows read-only access to incomplete file sets when \c TRUE
- * \returns \herr_t
+ * \param[out] relax Allows read-only access to incomplete file sets when \c
+ * TRUE \returns \herr_t
  *
  * \details H5Pget_fapl_multi() returns information about the multi-file access
  *          property list.
@@ -174,8 +176,11 @@ H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl /*out*/,
-                                char **memb_name /*out*/, haddr_t *memb_addr /*out*/, hbool_t *relax /*out*/);
+H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/,
+                                hid_t *memb_fapl /*out*/,
+                                char **memb_name /*out*/,
+                                haddr_t *memb_addr /*out*/,
+                                hbool_t *relax /*out*/);
 
 /**
  * \ingroup FAPL
@@ -184,10 +189,9 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  *
  * \fapl_id{fapl}
  * \param[in] meta_ext Metadata filename extension
- * \param[in] meta_plist_id File access property list identifier for the metadata file
- * \param[in] raw_ext Raw data filename extension
- * \param[in] raw_plist_id
- * \returns \herr_t
+ * \param[in] meta_plist_id File access property list identifier for the
+ * metadata file \param[in] raw_ext Raw data filename extension \param[in]
+ * raw_plist_id \returns \herr_t
  *
  * \details H5Pset_fapl_split() is a compatibility function that enables the
  *          multi-file driver to emulate the split driver from HDF5 Releases 1.0
@@ -243,7 +247,8 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext,
+H5_DLL herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext,
+                                hid_t meta_plist_id, const char *raw_ext,
                                 hid_t raw_plist_id);
 #ifdef __cplusplus
 }

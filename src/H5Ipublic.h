@@ -32,25 +32,25 @@
  */
 //! <!-- [H5I_type_t_snip] -->
 typedef enum H5I_type_t {
-    H5I_UNINIT = (-2),  /**< uninitialized type                        */
-    H5I_BADID  = (-1),  /**< invalid Type                              */
-    H5I_FILE   = 1,     /**< type ID for File objects                  */
-    H5I_GROUP,          /**< type ID for Group objects                 */
-    H5I_DATATYPE,       /**< type ID for Datatype objects              */
-    H5I_DATASPACE,      /**< type ID for Dataspace objects             */
-    H5I_DATASET,        /**< type ID for Dataset objects               */
-    H5I_MAP,            /**< type ID for Map objects                   */
-    H5I_ATTR,           /**< type ID for Attribute objects             */
-    H5I_VFL,            /**< type ID for virtual file layer            */
-    H5I_VOL,            /**< type ID for virtual object layer          */
-    H5I_GENPROP_CLS,    /**< type ID for generic property list classes */
-    H5I_GENPROP_LST,    /**< type ID for generic property lists        */
-    H5I_ERROR_CLASS,    /**< type ID for error classes                 */
-    H5I_ERROR_MSG,      /**< type ID for error messages                */
-    H5I_ERROR_STACK,    /**< type ID for error stacks                  */
-    H5I_SPACE_SEL_ITER, /**< type ID for dataspace selection iterator  */
-    H5I_EVENTSET,       /**< type ID for event sets                    */
-    H5I_NTYPES          /**< number of library types, MUST BE LAST!    */
+  H5I_UNINIT = (-2),  /**< uninitialized type                        */
+  H5I_BADID = (-1),   /**< invalid Type                              */
+  H5I_FILE = 1,       /**< type ID for File objects                  */
+  H5I_GROUP,          /**< type ID for Group objects                 */
+  H5I_DATATYPE,       /**< type ID for Datatype objects              */
+  H5I_DATASPACE,      /**< type ID for Dataspace objects             */
+  H5I_DATASET,        /**< type ID for Dataset objects               */
+  H5I_MAP,            /**< type ID for Map objects                   */
+  H5I_ATTR,           /**< type ID for Attribute objects             */
+  H5I_VFL,            /**< type ID for virtual file layer            */
+  H5I_VOL,            /**< type ID for virtual object layer          */
+  H5I_GENPROP_CLS,    /**< type ID for generic property list classes */
+  H5I_GENPROP_LST,    /**< type ID for generic property lists        */
+  H5I_ERROR_CLASS,    /**< type ID for error classes                 */
+  H5I_ERROR_MSG,      /**< type ID for error messages                */
+  H5I_ERROR_STACK,    /**< type ID for error stacks                  */
+  H5I_SPACE_SEL_ITER, /**< type ID for dataspace selection iterator  */
+  H5I_EVENTSET,       /**< type ID for event sets                    */
+  H5I_NTYPES          /**< number of library types, MUST BE LAST!    */
 } H5I_type_t;
 //! <!-- [H5I_type_t_snip] -->
 
@@ -136,7 +136,8 @@ H5_DLL hid_t H5Iregister(H5I_type_t type, const void *object);
  * \param[in] type The identifier type
 
  *
- * \return Pointer to the object referenced by \p id on success, NULL on failure.
+ * \return Pointer to the object referenced by \p id on success, NULL on
+ failure.
  *
  * \details H5Iobject_verify() returns a pointer to the memory referenced by id
  *          after verifying that \p id is of type \p type. This function is
@@ -190,8 +191,8 @@ H5_DLL void *H5Iremove_verify(hid_t id, H5I_type_t type);
  * \return Returns the object type if successful; otherwise #H5I_BADID.
  *
  * \details H5Iget_type() retrieves the type of the object identified by
- *          \p id. If no valid type can be determined or the identifier submitted is
- *          invalid, the function returns #H5I_BADID.
+ *          \p id. If no valid type can be determined or the identifier
+ * submitted is invalid, the function returns #H5I_BADID.
  *
  *          This function is of particular use in determining the type of
  *          object closing function (H5Dclose(), H5Gclose(), etc.) to call
@@ -416,14 +417,16 @@ H5_DLL int H5Iget_ref(hid_t id);
  *          free_func function should return 0 on success and -1 on failure.
  *
  */
-H5_DLL H5I_type_t H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+H5_DLL H5I_type_t H5Iregister_type(size_t hash_size, unsigned reserved,
+                                   H5I_free_t free_func);
 /**
  * \ingroup H5IUD
  *
  * \brief Deletes all identifiers of the given type
  *
- * \param[in] type Identifier of identifier type which is to be cleared of identifiers
- * \param[in] force Whether or not to force deletion of all identifiers
+ * \param[in] type Identifier of identifier type which is to be cleared of
+ * identifiers \param[in] force Whether or not to force deletion of all
+ * identifiers
  *
  * \return \herr_t
  *
@@ -469,7 +472,8 @@ H5_DLL herr_t H5Idestroy_type(H5I_type_t type);
  *
  * \brief Increments the reference count on an ID type
  *
- * \param[in] type The identifier of the type whose reference count is to be incremented
+ * \param[in] type The identifier of the type whose reference count is to be
+ * incremented
  *
  * \return Returns the current reference count on success, negative on failure.
  *
@@ -488,7 +492,8 @@ H5_DLL int H5Iinc_type_ref(H5I_type_t type);
  *
  * \brief Decrements the reference count on an identifier type
  *
- * \param[in] type The identifier of the type whose reference count is to be decremented
+ * \param[in] type The identifier of the type whose reference count is to be
+ * decremented
  *
  * \return Returns the current reference count on success, negative on failure.
  *
@@ -508,7 +513,8 @@ H5_DLL int H5Idec_type_ref(H5I_type_t type);
  *
  * \brief Retrieves the reference count on an ID type
  *
- * \param[in] type The identifier of the type whose reference count is to be retrieved
+ * \param[in] type The identifier of the type whose reference count is to be
+ * retrieved
  *
  * \return Returns the current reference count on success, negative on failure.
  *
@@ -601,7 +607,8 @@ H5_DLL herr_t H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data);
  * \brief Returns the number of identifiers in a given identifier type
  *
  * \param[in] type The identifier type
- * \param[out] num_members Number of identifiers of the specified identifier type
+ * \param[out] num_members Number of identifiers of the specified identifier
+ * type
  *
  * \return \herr_t
  *

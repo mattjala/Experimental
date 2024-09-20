@@ -18,10 +18,10 @@
 #define H5FDhdfs_H
 
 #ifdef H5_HAVE_LIBHDFS
-#define H5FD_HDFS       (H5FDperform_init(H5FD_hdfs_init))
+#define H5FD_HDFS (H5FDperform_init(H5FD_hdfs_init))
 #define H5FD_HDFS_VALUE H5_VFD_HDFS
 #else /* H5_HAVE_LIBHDFS */
-#define H5FD_HDFS       (H5I_INVALID_HID)
+#define H5FD_HDFS (H5I_INVALID_HID)
 #define H5FD_HDFS_VALUE H5_VFD_INVALID
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -91,17 +91,17 @@ extern "C" {
 
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
 
-#define H5FD__HDFS_NODE_NAME_SPACE       128
-#define H5FD__HDFS_USER_NAME_SPACE       128
+#define H5FD__HDFS_NODE_NAME_SPACE 128
+#define H5FD__HDFS_USER_NAME_SPACE 128
 #define H5FD__HDFS_KERB_CACHE_PATH_SPACE 128
 
 typedef struct H5FD_hdfs_fapl_t {
-    int32_t version;
-    char    namenode_name[H5FD__HDFS_NODE_NAME_SPACE + 1];
-    int32_t namenode_port;
-    char    user_name[H5FD__HDFS_USER_NAME_SPACE + 1];
-    char    kerberos_ticket_cache[H5FD__HDFS_KERB_CACHE_PATH_SPACE + 1];
-    int32_t stream_buffer_size;
+  int32_t version;
+  char namenode_name[H5FD__HDFS_NODE_NAME_SPACE + 1];
+  int32_t namenode_port;
+  char user_name[H5FD__HDFS_USER_NAME_SPACE + 1];
+  char kerberos_ticket_cache[H5FD__HDFS_KERB_CACHE_PATH_SPACE + 1];
+  int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
 
 H5_DLL hid_t H5FD_hdfs_init(void);

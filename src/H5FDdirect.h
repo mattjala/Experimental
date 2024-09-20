@@ -17,10 +17,10 @@
 #define H5FDdirect_H
 
 #ifdef H5_HAVE_DIRECT
-#define H5FD_DIRECT       (H5FDperform_init(H5FD_direct_init))
+#define H5FD_DIRECT (H5FDperform_init(H5FD_direct_init))
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
 #else
-#define H5FD_DIRECT       (H5I_INVALID_HID)
+#define H5FD_DIRECT (H5I_INVALID_HID)
 #define H5FD_DIRECT_VALUE H5_VFD_INVALID
 #endif /* H5_HAVE_DIRECT */
 
@@ -29,11 +29,12 @@
 extern "C" {
 #endif
 
-/* Default values for memory boundary, file block size, and maximal copy buffer size.
- * Application can set these values through the function H5Pset_fapl_direct. */
+/* Default values for memory boundary, file block size, and maximal copy buffer
+ * size. Application can set these values through the function
+ * H5Pset_fapl_direct. */
 #define MBOUNDARY_DEF 4096
-#define FBSIZE_DEF    4096
-#define CBSIZE_DEF    16 * 1024 * 1024
+#define FBSIZE_DEF 4096
+#define CBSIZE_DEF 16 * 1024 * 1024
 
 H5_DLL hid_t H5FD_direct_init(void);
 
@@ -74,7 +75,8 @@ H5_DLL hid_t H5FD_direct_init(void);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_direct(hid_t fapl_id, size_t alignment, size_t block_size, size_t cbuf_size);
+H5_DLL herr_t H5Pset_fapl_direct(hid_t fapl_id, size_t alignment,
+                                 size_t block_size, size_t cbuf_size);
 
 /**
  * \ingroup FAPL
@@ -89,8 +91,8 @@ H5_DLL herr_t H5Pset_fapl_direct(hid_t fapl_id, size_t alignment, size_t block_s
  *
  * \details H5Pget_fapl_direct() retrieves the required memory alignment (\p
  *          alignment), file system block size (\p block_size), and copy buffer
- *          size (\p cbuf_size) settings for the direct I/O driver, #H5FD_DIRECT,
- *          from the file access property list \p fapl_id.
+ *          size (\p cbuf_size) settings for the direct I/O driver,
+ * #H5FD_DIRECT, from the file access property list \p fapl_id.
  *
  *          See H5Pset_fapl_direct() for discussion of these values,
  *          requirements, and important considerations.
@@ -98,7 +100,8 @@ H5_DLL herr_t H5Pset_fapl_direct(hid_t fapl_id, size_t alignment, size_t block_s
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/, size_t *block_size /*out*/,
+H5_DLL herr_t H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/,
+                                 size_t *block_size /*out*/,
                                  size_t *cbuf_size /*out*/);
 
 #ifdef __cplusplus

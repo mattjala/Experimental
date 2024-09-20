@@ -18,8 +18,8 @@
 
 #include <stdio.h> /* FILE arg of H5Eprint() */
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
+#include "H5public.h"  /* Generic Functions                        */
 
 /* Value for the default error stack */
 #define H5E_DEFAULT 0 /* (hid_t) */
@@ -33,23 +33,24 @@ typedef enum H5E_type_t { H5E_MAJOR, H5E_MINOR } H5E_type_t;
  * Information about an error; element of error stack
  */
 typedef struct H5E_error2_t {
-    hid_t cls_id;
-    /**< Class ID                           */
-    hid_t maj_num;
-    /**< Major error ID                        */
-    hid_t min_num;
-    /**< Minor error number                    */
-    unsigned line;
-    /**< Line in file where error occurs    */
-    const char *func_name;
-    /**< Function in which error occurred   */
-    const char *file_name;
-    /**< File in which error occurred       */
-    const char *desc;
-    /**< Optional supplied description      */
+  hid_t cls_id;
+  /**< Class ID                           */
+  hid_t maj_num;
+  /**< Major error ID                        */
+  hid_t min_num;
+  /**< Minor error number                    */
+  unsigned line;
+  /**< Line in file where error occurs    */
+  const char *func_name;
+  /**< Function in which error occurred   */
+  const char *file_name;
+  /**< File in which error occurred       */
+  const char *desc;
+  /**< Optional supplied description      */
 } H5E_error2_t;
 
-/* When this header is included from a private header, don't make calls to H5open() */
+/* When this header is included from a private header, don't make calls to
+ * H5open() */
 #undef H5OPEN
 #ifndef H5private_H
 #define H5OPEN H5open(),
@@ -88,78 +89,78 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * purpose.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-#define H5E_BEGIN_TRY                                                                                        \
-    {                                                                                                        \
-        unsigned H5E_saved_is_v2;                                                                            \
-        union {                                                                                              \
-            H5E_auto1_t efunc1;                                                                              \
-            H5E_auto2_t efunc2;                                                                              \
-        } H5E_saved;                                                                                         \
-        void *H5E_saved_edata;                                                                               \
-                                                                                                             \
-        (void)H5Eauto_is_v2(H5E_DEFAULT, &H5E_saved_is_v2);                                                  \
-        if (H5E_saved_is_v2) {                                                                               \
-            (void)H5Eget_auto2(H5E_DEFAULT, &H5E_saved.efunc2, &H5E_saved_edata);                            \
-            (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);                                                     \
-        }                                                                                                    \
-        else {                                                                                               \
-            (void)H5Eget_auto1(&H5E_saved.efunc1, &H5E_saved_edata);                                         \
-            (void)H5Eset_auto1(NULL, NULL);                                                                  \
-        }
-
-#define H5E_END_TRY                                                                                          \
-    if (H5E_saved_is_v2)                                                                                     \
-        (void)H5Eset_auto2(H5E_DEFAULT, H5E_saved.efunc2, H5E_saved_edata);                                  \
-    else                                                                                                     \
-        (void)H5Eset_auto1(H5E_saved.efunc1, H5E_saved_edata);                                               \
+#define H5E_BEGIN_TRY                                                          \
+  {                                                                            \
+    unsigned H5E_saved_is_v2;                                                  \
+    union {                                                                    \
+      H5E_auto1_t efunc1;                                                      \
+      H5E_auto2_t efunc2;                                                      \
+    } H5E_saved;                                                               \
+    void *H5E_saved_edata;                                                     \
+                                                                               \
+    (void)H5Eauto_is_v2(H5E_DEFAULT, &H5E_saved_is_v2);                        \
+    if (H5E_saved_is_v2) {                                                     \
+      (void)H5Eget_auto2(H5E_DEFAULT, &H5E_saved.efunc2, &H5E_saved_edata);    \
+      (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);                             \
+    } else {                                                                   \
+      (void)H5Eget_auto1(&H5E_saved.efunc1, &H5E_saved_edata);                 \
+      (void)H5Eset_auto1(NULL, NULL);                                          \
     }
+
+#define H5E_END_TRY                                                            \
+  if (H5E_saved_is_v2)                                                         \
+    (void)H5Eset_auto2(H5E_DEFAULT, H5E_saved.efunc2, H5E_saved_edata);        \
+  else                                                                         \
+    (void)H5Eset_auto1(H5E_saved.efunc1, H5E_saved_edata);                     \
+  }
 #else /* H5_NO_DEPRECATED_SYMBOLS */
-#define H5E_BEGIN_TRY                                                                                        \
-    {                                                                                                        \
-        H5E_auto2_t saved_efunc;                                                                             \
-        void       *H5E_saved_edata;                                                                         \
-                                                                                                             \
-        (void)H5Eget_auto2(H5E_DEFAULT, &saved_efunc, &H5E_saved_edata);                                     \
-        (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+#define H5E_BEGIN_TRY                                                          \
+  {                                                                            \
+    H5E_auto2_t saved_efunc;                                                   \
+    void *H5E_saved_edata;                                                     \
+                                                                               \
+    (void)H5Eget_auto2(H5E_DEFAULT, &saved_efunc, &H5E_saved_edata);           \
+    (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-#define H5E_END_TRY                                                                                          \
-    (void)H5Eset_auto2(H5E_DEFAULT, saved_efunc, H5E_saved_edata);                                           \
-    }
+#define H5E_END_TRY                                                            \
+  (void)H5Eset_auto2(H5E_DEFAULT, saved_efunc, H5E_saved_edata);               \
+  }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*
  * Public API Convenience Macros for Error reporting - Documented
  */
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
-#define H5Epush_sim(func, cls, maj, min, str)                                                                \
-    H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str)
+#define H5Epush_sim(func, cls, maj, min, str)                                  \
+  H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str)
 
 /*
  * Public API Convenience Macros for Error reporting - Undocumented
  */
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And return after pushing error onto stack */
-#define H5Epush_ret(func, cls, maj, min, str, ret)                                                           \
-    do {                                                                                                     \
-        H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);                                 \
-        return (ret);                                                                                        \
-    } while (0)
+#define H5Epush_ret(func, cls, maj, min, str, ret)                             \
+  do {                                                                         \
+    H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);       \
+    return (ret);                                                              \
+  } while (0)
 
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in
  * And goto a label after pushing error onto stack.
  */
-#define H5Epush_goto(func, cls, maj, min, str, label)                                                        \
-    do {                                                                                                     \
-        H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);                                 \
-        goto label;                                                                                          \
-    } while (0)
+#define H5Epush_goto(func, cls, maj, min, str, label)                          \
+  do {                                                                         \
+    H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);       \
+    goto label;                                                                \
+  } while (0)
 
 /**
  * Error stack traversal direction
  */
 typedef enum H5E_direction_t {
-    H5E_WALK_UPWARD   = 0, /**< begin w/ most specific error, end at API function */
-    H5E_WALK_DOWNWARD = 1  /**< begin at API function, end w/ most specific error */
+  H5E_WALK_UPWARD = 0, /**< begin w/ most specific error, end at API function */
+  H5E_WALK_DOWNWARD =
+      1 /**< begin at API function, end w/ most specific error */
 } H5E_direction_t;
 
 #ifdef __cplusplus
@@ -177,7 +178,8 @@ extern "C" {
  *                        user-defined function
  * \return \herr_t
  */
-typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *client_data);
+typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc,
+                              void *client_data);
 //! <!-- [H5E_walk2_t_snip] -->
 
 //! <!-- [H5E_auto2_t_snip] -->
@@ -197,13 +199,16 @@ typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
  * --------------------------------------------------------------------------
  * \ingroup H5E
  *
- * \brief Registers a client library or application program to the HDF5 error API
+ * \brief Registers a client library or application program to the HDF5 error
+ API
  *
  * \param[in] cls_name Name of the error class
- * \param[in] lib_name Name of the client library or application to which the error class belongs
+ * \param[in] lib_name Name of the client library or application to which the
+ error class belongs
  * \param[in] version Version of the client library or application to which the
               error class belongs. It can be \c NULL.
- * \return Returns a class identifier on success; otherwise returns H5I_INVALID_ID.
+ * \return Returns a class identifier on success; otherwise returns
+ H5I_INVALID_ID.
  *
  * \details H5Eregister_class() registers a client library or application
  *          program to the HDF5 error API so that the client library or
@@ -214,7 +219,8 @@ typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
  *
  * \since 1.8.0
  */
-H5_DLL hid_t H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
+H5_DLL hid_t H5Eregister_class(const char *cls_name, const char *lib_name,
+                               const char *version);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -276,8 +282,8 @@ H5_DLL hid_t H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
  * \return \hid_ti{error stack}
  *
  * \details H5Ecreate_stack() creates a new empty error stack and returns the
- *          new stack's identifier. Use H5Eclose_stack() to close the error stack
- *          identifier returned by this function.
+ *          new stack's identifier. Use H5Eclose_stack() to close the error
+ * stack identifier returned by this function.
  *
  * \since 1.8.0
  */
@@ -305,8 +311,8 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *
  * \estack_id{dst_stack_id}
  * \estack_id{src_stack_id}
- * \param[in] close_source_stack Flag to indicate whether to close the source stack
- * \return \herr_t
+ * \param[in] close_source_stack Flag to indicate whether to close the source
+ * stack \return \herr_t
  *
  * \details H5Eappend_stack() appends the messages from error stack
  *          \p src_stack_id to the error stack \p dst_stack_id.
@@ -315,7 +321,8 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *
  * \since 1.14.0
  */
-H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
+H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id,
+                              hbool_t close_source_stack);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -340,9 +347,9 @@ H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
  *
  * \param[in] class_id Error class identifier
  * \param[out] name Buffer for the error class name
- * \param[in] size The maximum number of characters of the class name to be returned
- *            by this function in \p name.
- * \return Returns non-negative value as on success; otherwise returns negative value.
+ * \param[in] size The maximum number of characters of the class name to be
+ * returned by this function in \p name. \return Returns non-negative value as
+ * on success; otherwise returns negative value.
  *
  * \details H5Eget_class_name() retrieves the name of the error class specified
  *          by the class identifier. If a non-NULL pointer is passed in for \p
@@ -406,8 +413,9 @@ H5_DLL herr_t H5Eset_current_stack(hid_t err_stack_id);
  *
  * \since 1.8.0
  */
-H5_DLL herr_t H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id,
-                       hid_t maj_id, hid_t min_id, const char *msg, ...);
+H5_DLL herr_t H5Epush2(hid_t err_stack, const char *file, const char *func,
+                       unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id,
+                       const char *msg, ...);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -493,7 +501,8 @@ H5_DLL herr_t H5Eprint2(hid_t err_stack, FILE *stream);
  *
  * \since 1.8.0
  */
-H5_DLL herr_t H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t func, void *client_data);
+H5_DLL herr_t H5Ewalk2(hid_t err_stack, H5E_direction_t direction,
+                       H5E_walk2_t func, void *client_data);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -502,9 +511,9 @@ H5_DLL herr_t H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t f
  *        function and its data
  *
  * \estack_id
- * \param[out] func The function currently set to be called upon an error condition
- * \param[out] client_data Data currently set to be passed to the error function
- * \return \herr_t
+ * \param[out] func The function currently set to be called upon an error
+ * condition \param[out] client_data Data currently set to be passed to the
+ * error function \return \herr_t
  *
  * \details H5Eget_auto2() returns the settings for the automatic error stack
  *          traversal function, \p func, and its data, \p client_data, that are
@@ -536,7 +545,8 @@ H5_DLL herr_t H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t f
  *
  * \since 1.8.0
  */
-H5_DLL herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data);
+H5_DLL herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func,
+                           void **client_data);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -552,9 +562,9 @@ H5_DLL herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_dat
  *          error stack specified with \p estack_id. An \p estack_id value of
  *          #H5E_DEFAULT indicates the current stack.
  *
- *          When automatic printing is turned on, by the use of a non-null \p func
- *          pointer, any API function which returns an error indication will
- *          first call \p func, passing it \p client_data as an argument.
+ *          When automatic printing is turned on, by the use of a non-null \p
+ * func pointer, any API function which returns an error indication will first
+ * call \p func, passing it \p client_data as an argument.
  *
  *          \p func, a function compliant with the #H5E_auto2_t prototype, is
  *          defined in the H5Epublic.h source code file as:
@@ -572,12 +582,14 @@ H5_DLL herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_dat
  *
  * \since 1.8.0
  */
-H5_DLL herr_t H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data);
+H5_DLL herr_t H5Eset_auto2(hid_t estack_id, H5E_auto2_t func,
+                           void *client_data);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
  *
- * \brief Clears the specified error stack or the error stack for the current thread
+ * \brief Clears the specified error stack or the error stack for the current
+ * thread
  *
  * \estack_id{err_stack}
  * \return \herr_t
@@ -643,7 +655,8 @@ H5_DLL herr_t H5Eauto_is_v2(hid_t err_stack, unsigned *is_stack);
  *
  * \since 1.8.0
  */
-H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
+H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg,
+                          size_t size);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -651,7 +664,8 @@ H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size
  * \brief Retrieves the number of error messages in an error stack
  *
  * \estack_id{error_stack_id}
- * \return Returns a non-negative value on success; otherwise returns a negative value.
+ * \return Returns a non-negative value on success; otherwise returns a negative
+ * value.
  *
  * \details H5Eget_num() retrieves the number of error records in the error
  *          stack specified by \p error_stack_id (including major, minor
@@ -679,12 +693,12 @@ typedef hid_t H5E_minor_t;
  * Information about an error element of error stack.
  */
 typedef struct H5E_error1_t {
-    H5E_major_t maj_num;   /**< major error number                 */
-    H5E_minor_t min_num;   /**< minor error number                 */
-    const char *func_name; /**< function in which error occurred   */
-    const char *file_name; /**< file in which error occurred       */
-    unsigned    line;      /**< line in file where error occurs    */
-    const char *desc;      /**< optional supplied description      */
+  H5E_major_t maj_num;   /**< major error number                 */
+  H5E_minor_t min_num;   /**< minor error number                 */
+  const char *func_name; /**< function in which error occurred   */
+  const char *file_name; /**< file in which error occurred       */
+  unsigned line;         /**< line in file where error occurs    */
+  const char *desc;      /**< optional supplied description      */
 } H5E_error1_t;
 
 /* Error stack traversal callback function pointers */
@@ -748,8 +762,8 @@ H5_DLL herr_t H5Eclear1(void);
  *
  * \details H5Eget_auto1() returns the current settings for the automatic error
  *          stack traversal function, \p func, and its data,
- *          \p client_data. Either or both arguments may be \c NULL, in which case the
- *          value is not returned.
+ *          \p client_data. Either or both arguments may be \c NULL, in which
+ * case the value is not returned.
  *
  *          The library initializes its default error stack traversal functions
  *          to H5Eprint1() and H5Eprint2(). A call to H5Eget_auto2() returns
@@ -794,16 +808,16 @@ H5_DLL herr_t H5Eget_auto1(H5E_auto1_t *func, void **client_data);
  * \details H5Epush1() pushes a new error record onto the error stack for the
  *          current thread.\n
  *          The error has major and minor numbers \p maj_num
- *          and \p min_num, the function \p func where the error was detected, the
- *          name of the file \p file where the error was detected, the line \p line
+ *          and \p min_num, the function \p func where the error was detected,
+ * the name of the file \p file where the error was detected, the line \p line
  *          within that file, and an error description string \p str.\n
- *          The function name, filename, and error description strings must be statically
- *          allocated.
+ *          The function name, filename, and error description strings must be
+ * statically allocated.
  *
  * \since 1.4.0
  */
-H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E_minor_t min,
-                       const char *str);
+H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line,
+                       H5E_major_t maj, H5E_minor_t min, const char *str);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -817,8 +831,8 @@ H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line, H5E_ma
  *                   deprecated in this release.
  *
  * \details H5Eprint1() prints the error stack for the current thread
- *          on the specified stream, \p stream. Even if the error stack is empty, a
- *          one-line message of the following form will be printed:
+ *          on the specified stream, \p stream. Even if the error stack is
+ * empty, a one-line message of the following form will be printed:
  *          \code{.unparsed}
  *          HDF5-DIAG: Error detected in thread 0.
  *          \endcode
@@ -891,7 +905,8 @@ H5_DLL herr_t H5Eset_auto1(H5E_auto1_t func, void *client_data);
  *          \snippet this H5E_walk1_t_snip
  *
  */
-H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data);
+H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func,
+                       void *client_data);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -905,7 +920,8 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  * \deprecated 1.8.0 Function deprecated in this release.
  *
  * \details H5Eget_major() returns a constant
- *          character string that describes the error, given a major error number.
+ *          character string that describes the error, given a major error
+ * number.
  *
  * \attention This function returns a dynamically allocated string (\c char
  *            array). An application calling this function must free the memory
@@ -923,10 +939,12 @@ H5_DLL char *H5Eget_major(H5E_major_t maj);
  * \param[in] min Minor error number
  * \return \herr_t
  *
- * \deprecated 1.8.0 Function deprecated and return type changed in this release.
+ * \deprecated 1.8.0 Function deprecated and return type changed in this
+ * release.
  *
  * \details H5Eget_minor() returns a constant
- *          character string that describes the error, given a minor error number.
+ *          character string that describes the error, given a minor error
+ * number.
  *
  * \attention In the Release 1.8.x series, H5Eget_minor() returns a string of
  *            dynamic allocated \c char array. An application calling this

@@ -16,7 +16,7 @@
 #ifndef H5FDcore_H
 #define H5FDcore_H
 
-#define H5FD_CORE       (H5FDperform_init(H5FD_core_init))
+#define H5FD_CORE (H5FDperform_init(H5FD_core_init))
 #define H5FD_CORE_VALUE H5_VFD_CORE
 
 #ifdef __cplusplus
@@ -54,10 +54,10 @@ H5_DLL hid_t H5FD_core_init(void);
  *
  *          The application is allowed to open an existing file with #H5FD_CORE
  *          driver. While using H5Fopen() to open an existing file, if the \p
- *          backing_store is set to 1 (TRUE) and the \c flags for H5Fopen() is set to
- *          #H5F_ACC_RDWR, any change to the file contents are saved to the file
- *          when the file is closed. If \p backing_store is set to 0 (FALSE) and the \c
- *          flags for H5Fopen() is set to #H5F_ACC_RDWR, any change to the file
+ *          backing_store is set to 1 (TRUE) and the \c flags for H5Fopen() is
+ * set to #H5F_ACC_RDWR, any change to the file contents are saved to the file
+ *          when the file is closed. If \p backing_store is set to 0 (FALSE) and
+ * the \c flags for H5Fopen() is set to #H5F_ACC_RDWR, any change to the file
  *          contents will be lost when the file is closed. If the flags for
  *          H5Fopen() is set to #H5F_ACC_RDONLY, no change to the file is
  *          allowed either in memory or on file.
@@ -67,7 +67,8 @@ H5_DLL hid_t H5FD_core_init(void);
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store);
+H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment,
+                               hbool_t backing_store);
 
 /**
  * \ingroup FAPL
@@ -86,7 +87,8 @@ H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/);
+H5_DLL herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/,
+                               hbool_t *backing_store /*out*/);
 #ifdef __cplusplus
 }
 #endif

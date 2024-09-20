@@ -27,76 +27,75 @@
  *-------------------------------------------------------------------------
  */
 
-int
-main(int argc, char *argv[])
-{
-    int         ret;
-    int         i;
-    const char *fname1   = NULL;
-    const char *fname2   = NULL;
-    const char *objname1 = NULL;
-    const char *objname2 = NULL;
-    hsize_t     nfound   = 0;
-    diff_opt_t  opts;
+int main(int argc, char *argv[]) {
+  int ret;
+  int i;
+  const char *fname1 = NULL;
+  const char *fname2 = NULL;
+  const char *objname1 = NULL;
+  const char *objname2 = NULL;
+  hsize_t nfound = 0;
+  diff_opt_t opts;
 
-    h5tools_setprogname(PROGRAMNAME);
-    h5tools_setstatus(EXIT_SUCCESS);
+  h5tools_setprogname(PROGRAMNAME);
+  h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Initialize h5tools lib */
-    h5tools_init();
+  /* Initialize h5tools lib */
+  h5tools_init();
 
-    /*-------------------------------------------------------------------------
-     * process the command-line
-     *-------------------------------------------------------------------------
-     */
-    parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2, &opts);
+  /*-------------------------------------------------------------------------
+   * process the command-line
+   *-------------------------------------------------------------------------
+   */
+  parse_command_line(argc, (const char *const *)argv, &fname1, &fname2,
+                     &objname1, &objname2, &opts);
 
-    /* enable error reporting if command line option */
-    h5tools_error_report();
+  /* enable error reporting if command line option */
+  h5tools_error_report();
 
-    /*-------------------------------------------------------------------------
-     * do the diff
-     *-------------------------------------------------------------------------
-     */
+  /*-------------------------------------------------------------------------
+   * do the diff
+   *-------------------------------------------------------------------------
+   */
 
-    nfound = h5diff(fname1, fname2, objname1, objname2, &opts);
+  nfound = h5diff(fname1, fname2, objname1, objname2, &opts);
 
-    print_info(&opts);
+  print_info(&opts);
 
-    /*-------------------------------------------------------------------------
-     * exit code
-     *   1 if differences, 0 if no differences, 2 if error
-     *-------------------------------------------------------------------------
-     */
+  /*-------------------------------------------------------------------------
+   * exit code
+   *   1 if differences, 0 if no differences, 2 if error
+   *-------------------------------------------------------------------------
+   */
 
-    ret = (nfound == 0 ? 0 : 1);
+  ret = (nfound == 0 ? 0 : 1);
 
-    /* if graph difference return 1 for differences  */
-    if (opts.contents == 0)
-        ret = 1;
+  /* if graph difference return 1 for differences  */
+  if (opts.contents == 0)
+    ret = 1;
 
-    /* and return 2 for error */
-    if (opts.err_stat)
-        ret = 2;
+  /* and return 2 for error */
+  if (opts.err_stat)
+    ret = 2;
 
-    /* free any buffers */
-    for (i = 0; i < 2; i++) {
-        if (opts.sset[i]) {
-            if (opts.sset[i]->start.data)
-                free(opts.sset[i]->start.data);
-            if (opts.sset[i]->stride.data)
-                free(opts.sset[i]->stride.data);
-            if (opts.sset[i]->count.data)
-                free(opts.sset[i]->count.data);
-            if (opts.sset[i]->block.data)
-                free(opts.sset[i]->block.data);
+  /* free any buffers */
+  for (i = 0; i < 2; i++) {
+    if (opts.sset[i]) {
+      if (opts.sset[i]->start.data)
+        free(opts.sset[i]->start.data);
+      if (opts.sset[i]->stride.data)
+        free(opts.sset[i]->stride.data);
+      if (opts.sset[i]->count.data)
+        free(opts.sset[i]->count.data);
+      if (opts.sset[i]->block.data)
+        free(opts.sset[i]->block.data);
 
-            free(opts.sset[i]);
-            opts.sset[i] = NULL;
-        }
+      free(opts.sset[i]);
+      opts.sset[i] = NULL;
     }
+  }
 
-    h5diff_exit(ret);
+  h5diff_exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -108,10 +107,8 @@ main(int argc, char *argv[])
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_NORETURN void
-h5diff_exit(int status)
-{
-    h5tools_close();
+H5_ATTR_NORETURN void h5diff_exit(int status) {
+  h5tools_close();
 
-    exit(status);
+  exit(status);
 }

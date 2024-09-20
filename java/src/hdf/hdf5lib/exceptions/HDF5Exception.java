@@ -32,45 +32,43 @@ package hdf.hdf5lib.exceptions;
  *
  */
 public class HDF5Exception extends RuntimeException {
-    /**
-     *  the specified detail message of this exception
-     */
-    protected String detailMessage;
+  /**
+   *  the specified detail message of this exception
+   */
+  protected String detailMessage;
 
-    /**
-     * @ingroup JERR
-     *
-     * Constructs an <code>HDF5Exception</code> with no specified detail
-     * message.
-     */
-    public HDF5Exception() { super(); }
+  /**
+   * @ingroup JERR
+   *
+   * Constructs an <code>HDF5Exception</code> with no specified detail
+   * message.
+   */
+  public HDF5Exception() { super(); }
 
-    /**
-     * @ingroup JERR
-     *
-     * Constructs an <code>HDF5Exception</code> with the specified detail
-     * message.
-     *
-     * @param message
-     *            the detail message.
-     */
-    public HDF5Exception(String message)
-    {
-        super();
-        detailMessage = message;
-    }
+  /**
+   * @ingroup JERR
+   *
+   * Constructs an <code>HDF5Exception</code> with the specified detail
+   * message.
+   *
+   * @param message
+   *            the detail message.
+   */
+  public HDF5Exception(String message) {
+    super();
+    detailMessage = message;
+  }
 
-    /**
-     * @ingroup JERR
-     *
-     * Returns the detail message of this exception
-     *
-     * @return the detail message or <code>null</code> if this object does not
-     *         have a detail message.
-     */
-    @Override
-    public String getMessage()
-    {
-        return detailMessage;
-    }
+  /**
+   * @ingroup JERR
+   *
+   * Returns the detail message of this exception
+   *
+   * @return the detail message or <code>null</code> if this object does not
+   *         have a detail message.
+   */
+  @Override
+  public String getMessage() {
+    return detailMessage;
+  }
 }

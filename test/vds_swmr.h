@@ -73,10 +73,10 @@
 #define N_SOURCES 6
 
 /* Dataset dimensions */
-#define SM_HEIGHT   2  /* K */
-#define LG_HEIGHT   4  /* N */
+#define SM_HEIGHT 2    /* K */
+#define LG_HEIGHT 4    /* N */
 #define FULL_HEIGHT 18 /* (3 * K) + (3 * N) */
-#define WIDTH       8  /* M */
+#define WIDTH 8        /* M */
 
 /* Number of planes each writer will write */
 #define N_PLANES_TO_WRITE 25

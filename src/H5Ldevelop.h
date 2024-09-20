@@ -52,35 +52,38 @@
 /**
  * \brief Link creation callback
  */
-typedef herr_t (*H5L_create_func_t)(const char *link_name, hid_t loc_group, const void *lnkdata,
-                                    size_t lnkdata_size, hid_t lcpl_id);
+typedef herr_t (*H5L_create_func_t)(const char *link_name, hid_t loc_group,
+                                    const void *lnkdata, size_t lnkdata_size,
+                                    hid_t lcpl_id);
 /**
  * \brief Callback for link move
  */
-typedef herr_t (*H5L_move_func_t)(const char *new_name, hid_t new_loc, const void *lnkdata,
-                                  size_t lnkdata_size);
+typedef herr_t (*H5L_move_func_t)(const char *new_name, hid_t new_loc,
+                                  const void *lnkdata, size_t lnkdata_size);
 /**
  * \brief Callback for link copy
  */
-typedef herr_t (*H5L_copy_func_t)(const char *new_name, hid_t new_loc, const void *lnkdata,
-                                  size_t lnkdata_size);
+typedef herr_t (*H5L_copy_func_t)(const char *new_name, hid_t new_loc,
+                                  const void *lnkdata, size_t lnkdata_size);
 /**
  * \brief Callback during link traversal
  */
-typedef hid_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group, const void *lnkdata,
-                                     size_t lnkdata_size, hid_t lapl_id, hid_t dxpl_id);
+typedef hid_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group,
+                                     const void *lnkdata, size_t lnkdata_size,
+                                     hid_t lapl_id, hid_t dxpl_id);
 /**
  * \brief Callback for link deletion
  */
-typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file, const void *lnkdata,
-                                    size_t lnkdata_size);
+typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file,
+                                    const void *lnkdata, size_t lnkdata_size);
 /**
  * \brief Callback for querying the link.
  *
  * Returns the size of the buffer needed.
  */
-typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, size_t lnkdata_size,
-                                    void *buf /*out*/, size_t buf_size);
+typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
+                                    size_t lnkdata_size, void *buf /*out*/,
+                                    size_t buf_size);
 
 /**
  * \brief Link prototype
@@ -91,15 +94,15 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, 
  */
 //! <!-- [H5L_class_t_snip] -->
 typedef struct {
-    int                 version;     /**< Version number of this struct       */
-    H5L_type_t          id;          /**< Link type ID                        */
-    const char         *comment;     /**< Comment for debugging               */
-    H5L_create_func_t   create_func; /**< Callback during link creation       */
-    H5L_move_func_t     move_func;   /**< Callback after moving link          */
-    H5L_copy_func_t     copy_func;   /**< Callback after copying link         */
-    H5L_traverse_func_t trav_func;   /**< Callback during link traversal      */
-    H5L_delete_func_t   del_func;    /**< Callback for link deletion          */
-    H5L_query_func_t    query_func;  /**< Callback for queries                */
+  int version;                   /**< Version number of this struct       */
+  H5L_type_t id;                 /**< Link type ID                        */
+  const char *comment;           /**< Comment for debugging               */
+  H5L_create_func_t create_func; /**< Callback during link creation       */
+  H5L_move_func_t move_func;     /**< Callback after moving link          */
+  H5L_copy_func_t copy_func;     /**< Callback after copying link         */
+  H5L_traverse_func_t trav_func; /**< Callback during link traversal      */
+  H5L_delete_func_t del_func;    /**< Callback for link deletion          */
+  H5L_query_func_t query_func;   /**< Callback for queries                */
 } H5L_class_t;
 //! <!-- [H5L_class_t_snip] -->
 
@@ -303,20 +306,21 @@ H5_DLL herr_t H5Lunregister(H5L_type_t id);
 #define H5L_LINK_CLASS_T_VERS_0 0
 
 /** Callback during link traversal */
-typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group, const void *lnkdata,
-                                       size_t lnkdata_size, hid_t lapl_id);
+typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group,
+                                       const void *lnkdata, size_t lnkdata_size,
+                                       hid_t lapl_id);
 
 /** User-defined link types */
 typedef struct {
-    int                   version;     /**< Version number of this struct        */
-    H5L_type_t            id;          /**< Link type ID                         */
-    const char           *comment;     /**< Comment for debugging                */
-    H5L_create_func_t     create_func; /**< Callback during link creation        */
-    H5L_move_func_t       move_func;   /**< Callback after moving link           */
-    H5L_copy_func_t       copy_func;   /**< Callback after copying link          */
-    H5L_traverse_0_func_t trav_func;   /**< Callback during link traversal       */
-    H5L_delete_func_t     del_func;    /**< Callback for link deletion           */
-    H5L_query_func_t      query_func;  /**< Callback for queries                 */
+  int version;                     /**< Version number of this struct        */
+  H5L_type_t id;                   /**< Link type ID                         */
+  const char *comment;             /**< Comment for debugging                */
+  H5L_create_func_t create_func;   /**< Callback during link creation        */
+  H5L_move_func_t move_func;       /**< Callback after moving link           */
+  H5L_copy_func_t copy_func;       /**< Callback after copying link          */
+  H5L_traverse_0_func_t trav_func; /**< Callback during link traversal       */
+  H5L_delete_func_t del_func;      /**< Callback for link deletion           */
+  H5L_query_func_t query_func;     /**< Callback for queries                 */
 } H5L_class_0_t;
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

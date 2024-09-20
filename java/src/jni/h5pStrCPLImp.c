@@ -20,10 +20,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdlib.h>
-#include "hdf5.h"
-#include "h5jni.h"
 #include "h5pStrCPLImp.h"
+#include "h5jni.h"
+#include "hdf5.h"
+#include <stdlib.h>
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.
@@ -35,16 +35,15 @@ extern "C" {
  * Method:    H5Pset_char_encoding
  * Signature: (JI)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding(JNIEnv *env, jclass clss, jlong acpl, jint encoding)
-{
-    UNUSED(clss);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding(
+    JNIEnv *env, jclass clss, jlong acpl, jint encoding) {
+  UNUSED(clss);
 
-    if (H5Pset_char_encoding((hid_t)acpl, (H5T_cset_t)encoding) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Pset_char_encoding((hid_t)acpl, (H5T_cset_t)encoding) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return;
+  return;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding */
 
 /*
@@ -52,18 +51,18 @@ done:
  * Method:    H5Pget_char_encoding
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding(JNIEnv *env, jclass clss, jlong acpl)
-{
-    H5T_cset_t encoding = H5T_CSET_ERROR;
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding(JNIEnv *env,
+                                                                  jclass clss,
+                                                                  jlong acpl) {
+  H5T_cset_t encoding = H5T_CSET_ERROR;
 
-    UNUSED(clss);
+  UNUSED(clss);
 
-    if (H5Pget_char_encoding((hid_t)acpl, &encoding) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+  if (H5Pget_char_encoding((hid_t)acpl, &encoding) < 0)
+    H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return encoding;
+  return encoding;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding */
 
 #ifdef __cplusplus

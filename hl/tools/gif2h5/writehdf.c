@@ -9,12 +9,11 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <string.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "gif.h"
 #include "H5IMpublic.h"
+#include "gif.h"
 
 #define PAL_NAME "global"
 
@@ -26,90 +25,91 @@
  *-------------------------------------------------------------------------
  */
 
-int
-WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
-{
-    GIFHEAD       gifHead;      /* GIF Header structure            */
-    GIFIMAGEDESC *gifImageDesc; /* Logical Image Descriptor struct */
-    int           has_pal = 0;
+int WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName) {
+  GIFHEAD gifHead;            /* GIF Header structure            */
+  GIFIMAGEDESC *gifImageDesc; /* Logical Image Descriptor struct */
+  int has_pal = 0;
 
-    long ImageCount; /* number of images */
+  long ImageCount; /* number of images */
 #ifdef UNUSED
-    long CommentCount,    /* number of comments */
-        ApplicationCount, /* number of application extensions */
-        PlainTextCount;   /* number of plain text extensions */
-#endif                    /* UNUSED */
+  long CommentCount,    /* number of comments */
+      ApplicationCount, /* number of application extensions */
+      PlainTextCount;   /* number of plain text extensions */
+#endif                  /* UNUSED */
 
-    char ImageName[256]; /* Image name for the Image */
+  char ImageName[256]; /* Image name for the Image */
 
-    /* H5 variables */
-    hid_t file_id; /* H5 file id */
+  /* H5 variables */
+  hid_t file_id; /* H5 file id */
 
-    /* temp counter */
-    int i;
+  /* temp counter */
+  int i;
 
-    /* get the GIFMem stuff */
-    gifHead = *(GifMemoryStruct.GifHeader);
+  /* get the GIFMem stuff */
+  gifHead = *(GifMemoryStruct.GifHeader);
 
-    /* get some data from gifHead */
-    ImageCount = gifHead.ImageCount;
+  /* get some data from gifHead */
+  ImageCount = gifHead.ImageCount;
 #ifdef UNUSED
-    CommentCount     = (GIFWORD)gifHead.CommentCount;
-    ApplicationCount = (GIFWORD)gifHead.ApplicationCount;
-    PlainTextCount   = (GIFWORD)gifHead.PlainTextCount;
+  CommentCount = (GIFWORD)gifHead.CommentCount;
+  ApplicationCount = (GIFWORD)gifHead.ApplicationCount;
+  PlainTextCount = (GIFWORD)gifHead.PlainTextCount;
 #endif /* UNUSED */
 
-    if ((file_id = H5Fcreate(HDFName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        /* error occurred opening the HDF File for write */
-        fprintf(stderr, "HDF file could not be opened for writing\n");
-        fprintf(stderr,
-                "NOTE: GIF file must be present in the same directory as the binary on UNIX systems.\n");
-        exit(1);
-    }
+  if ((file_id = H5Fcreate(HDFName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) <
+      0) {
+    /* error occurred opening the HDF File for write */
+    fprintf(stderr, "HDF file could not be opened for writing\n");
+    fprintf(stderr, "NOTE: GIF file must be present in the same directory as "
+                    "the binary on UNIX systems.\n");
+    exit(1);
+  }
 
-    /* first create the global palette if there is one */
-    if (gifHead.PackedField & 0x80) { /* global palette exists */
-        hsize_t dims[2];              /* specify the dimensions of the palette */
+  /* first create the global palette if there is one */
+  if (gifHead.PackedField & 0x80) { /* global palette exists */
+    hsize_t dims[2];                /* specify the dimensions of the palette */
 
-        /* size of the palette is tablesize (rows) X 3 (columns) */
-        dims[0] = gifHead.TableSize;
-        dims[1] = 3;
+    /* size of the palette is tablesize (rows) X 3 (columns) */
+    dims[0] = gifHead.TableSize;
+    dims[1] = 3;
 
-        /* make a palette */
-        if (H5IMmake_palette(file_id, PAL_NAME, dims, (unsigned char *)gifHead.HDFPalette) < 0)
-            return -1;
+    /* make a palette */
+    if (H5IMmake_palette(file_id, PAL_NAME, dims,
+                         (unsigned char *)gifHead.HDFPalette) < 0)
+      return -1;
 
-        has_pal = 1;
-    }
+    has_pal = 1;
+  }
 
-    for (i = 0; i < ImageCount; i++) {
-        hsize_t dims[2]; /* dimensions for the dataset */
-        /* get the gifImageDesc */
-        gifImageDesc = GifMemoryStruct.GifImageDesc[i];
+  for (i = 0; i < ImageCount; i++) {
+    hsize_t dims[2]; /* dimensions for the dataset */
+    /* get the gifImageDesc */
+    gifImageDesc = GifMemoryStruct.GifImageDesc[i];
 
-        /* set the dimensions */
-        dims[0] = gifImageDesc->ImageHeight;
-        dims[1] = gifImageDesc->ImageWidth;
+    /* set the dimensions */
+    dims[0] = gifImageDesc->ImageHeight;
+    dims[1] = gifImageDesc->ImageWidth;
 
-        /* create the image name */
-        snprintf(ImageName, sizeof(ImageName), "Image%d", i);
+    /* create the image name */
+    snprintf(ImageName, sizeof(ImageName), "Image%d", i);
 
-        /* write image */
-        if (H5IMmake_image_8bit(file_id, ImageName, dims[1], dims[0], (gifImageDesc->Image)) < 0)
-            return -1;
+    /* write image */
+    if (H5IMmake_image_8bit(file_id, ImageName, dims[1], dims[0],
+                            (gifImageDesc->Image)) < 0)
+      return -1;
 
-        /* attach the palette to the image dataset */
-        if (has_pal) {
-            if (H5IMlink_palette(file_id, ImageName, PAL_NAME) < 0)
-                return -1;
-        }
-    }
-
-    /* close the H5 file */
-    if (H5Fclose(file_id) < 0) {
-        fprintf(stderr, "Could not close HDF5 file. Aborting...\n");
+    /* attach the palette to the image dataset */
+    if (has_pal) {
+      if (H5IMlink_palette(file_id, ImageName, PAL_NAME) < 0)
         return -1;
     }
+  }
 
-    return 0;
+  /* close the H5 file */
+  if (H5Fclose(file_id) < 0) {
+    fprintf(stderr, "Could not close HDF5 file. Aborting...\n");
+    return -1;
+  }
+
+  return 0;
 }

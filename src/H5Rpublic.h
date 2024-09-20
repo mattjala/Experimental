@@ -16,17 +16,17 @@
 #ifndef H5Rpublic_H
 #define H5Rpublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
 #include "H5Gpublic.h" /* Groups                                   */
 #include "H5Ipublic.h" /* Identifiers                              */
 #include "H5Opublic.h" /* Object Headers                           */
+#include "H5public.h"  /* Generic Functions                        */
 
 /*****************/
 /* Public Macros */
 /*****************/
 
 /* Deprecated reference buffer sizes that are kept for backward compatibility */
-#define H5R_OBJ_REF_BUF_SIZE      sizeof(haddr_t)
+#define H5R_OBJ_REF_BUF_SIZE sizeof(haddr_t)
 #define H5R_DSET_REG_REF_BUF_SIZE (sizeof(haddr_t) + 4)
 
 /**
@@ -49,17 +49,18 @@
  *           encoded into the datatype message header.
  */
 typedef enum {
-    H5R_BADTYPE         = (-1), /**< Invalid reference type           */
-    H5R_OBJECT1         = 0,    /**< Backward compatibility (object)  */
-    H5R_DATASET_REGION1 = 1,    /**< Backward compatibility (region)  */
-    H5R_OBJECT2         = 2,    /**< Object reference                 */
-    H5R_DATASET_REGION2 = 3,    /**< Region reference                 */
-    H5R_ATTR            = 4,    /**< Attribute Reference              */
-    H5R_MAXTYPE         = 5     /**< Highest type (invalid)           */
+  H5R_BADTYPE = (-1),      /**< Invalid reference type           */
+  H5R_OBJECT1 = 0,         /**< Backward compatibility (object)  */
+  H5R_DATASET_REGION1 = 1, /**< Backward compatibility (region)  */
+  H5R_OBJECT2 = 2,         /**< Object reference                 */
+  H5R_DATASET_REGION2 = 3, /**< Region reference                 */
+  H5R_ATTR = 4,            /**< Attribute Reference              */
+  H5R_MAXTYPE = 5          /**< Highest type (invalid)           */
 } H5R_type_t;
 //! <!-- [H5R_type_t_snip] -->
 
-/* Deprecated types are kept for backward compatibility with previous versions */
+/* Deprecated types are kept for backward compatibility with previous versions
+ */
 
 //! <!-- [hobj_ref_t_snip] -->
 /**
@@ -84,7 +85,7 @@ typedef haddr_t hobj_ref_t;
  * \note This type can only be used with the "native" HDF5 VOL connector.
  */
 typedef struct {
-    uint8_t __data[H5R_DSET_REG_REF_BUF_SIZE];
+  uint8_t __data[H5R_DSET_REG_REF_BUF_SIZE];
 } hdset_reg_ref_t;
 //! <!-- [hdset_reg_ref_t_snip] -->
 
@@ -95,10 +96,10 @@ typedef struct {
  * should always be used with the current reference API.
  */
 typedef struct {
-    union {
-        uint8_t __data[H5R_REF_BUF_SIZE]; /**< opaque data */
-        int64_t align;                    /**< ensures alignment */
-    } u;
+  union {
+    uint8_t __data[H5R_REF_BUF_SIZE]; /**< opaque data */
+    int64_t align;                    /**< ensures alignment */
+  } u;
 } H5R_ref_t;
 //! <!-- [H5R_ref_t_snip] -->
 
@@ -144,7 +145,8 @@ extern "C" {
  *          reference.
  *
  */
-H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id,
+                               H5R_ref_t *ref_ptr);
 
 /**
  * --------------------------------------------------------------------------
@@ -180,8 +182,8 @@ H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5
  *          reference.
  *
  */
-H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id,
-                               H5R_ref_t *ref_ptr);
+H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
+                               hid_t oapl_id, H5R_ref_t *ref_ptr);
 
 /**
  * --------------------------------------------------------------------------
@@ -217,7 +219,8 @@ H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, h
  *          reference.
  *
  */
-H5_DLL herr_t H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl_id,
+H5_DLL herr_t H5Rcreate_attr(hid_t loc_id, const char *name,
+                             const char *attr_name, hid_t oapl_id,
                              H5R_ref_t *ref_ptr);
 
 /**
@@ -250,7 +253,8 @@ H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
  *
  * \param[in] ref_ptr  Pointer to reference
  *
- * \return Returns a valid reference type if successful; otherwise returns #H5R_BADTYPE .
+ * \return Returns a valid reference type if successful; otherwise returns
+ * #H5R_BADTYPE .
  *
  * \details Given a reference, \p ref_ptr, H5Rget_type() returns the
  *          type of the reference.
@@ -259,8 +263,8 @@ H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
  *          \snippet this H5R_type_t_snip
  *
  *          Note that #H5R_OBJECT1 and #H5R_DATASET_REGION1 can never be
- *          associated with an \ref H5R_ref_t reference and can, therefore, never be
- *          returned through that function.
+ *          associated with an \ref H5R_ref_t reference and can, therefore,
+ * never be returned through that function.
  *
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
@@ -302,8 +306,8 @@ H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
  * \return \herr_t
  *
  * \details H5Rcopy() creates a copy of an existing reference.
- *          \p src_ref_ptr points to the reference to copy, and \p dst_ref_ptr is the
- *          pointer to the destination reference.
+ *          \p src_ref_ptr points to the reference to copy, and \p dst_ref_ptr
+ * is the pointer to the destination reference.
  *
  */
 H5_DLL herr_t H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
@@ -348,11 +352,12 @@ H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
  * \async_variant_of{H5Ropen_object}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line,
-                                  H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
+H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func,
+                                  unsigned app_line, H5R_ref_t *ref_ptr,
+                                  hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 #else
-H5_DLL hid_t H5Ropen_object_async(unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id,
-                                  hid_t es_id);
+H5_DLL hid_t H5Ropen_object_async(unsigned app_line, H5R_ref_t *ref_ptr,
+                                  hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 #endif
 
 /**
@@ -394,10 +399,12 @@ H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
  * \async_variant_of{H5Ropen_region}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line,
-                                  H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
+H5_DLL hid_t H5Ropen_region_async(const char *app_file, const char *app_func,
+                                  unsigned app_line, H5R_ref_t *ref_ptr,
+                                  hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 #else
-H5_DLL hid_t H5Ropen_region_async(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
+H5_DLL hid_t H5Ropen_region_async(H5R_ref_t *ref_ptr, hid_t rapl_id,
+                                  hid_t oapl_id, hid_t es_id);
 #endif
 
 /**
@@ -436,10 +443,12 @@ H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
  * \async_variant_of{H5Ropen_attr}
  */
 #ifndef H5_DOXYGEN
-H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line,
-                                H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func,
+                                unsigned app_line, H5R_ref_t *ref_ptr,
+                                hid_t rapl_id, hid_t aapl_id, hid_t es_id);
 #else
-H5_DLL hid_t H5Ropen_attr_async(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Ropen_attr_async(H5R_ref_t *ref_ptr, hid_t rapl_id,
+                                hid_t aapl_id, hid_t es_id);
 #endif
 
 /* Get type */
@@ -470,7 +479,8 @@ H5_DLL hid_t H5Ropen_attr_async(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id
  *          \snippet H5Opublic.h H5O_type_t_snip
  *
  */
-H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
+H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id,
+                               H5O_type_t *obj_type);
 
 /* Get name */
 
@@ -484,7 +494,8 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  * \param[in,out] name Buffer to place the file name of the reference
  * \param[in] size     Size of the \p name buffer
  *
- * \return Returns the length of the name if successful, otherwise, a negative value.
+ * \return Returns the length of the name if successful, otherwise, a negative
+ * value.
  *
  * \details H5Rget_file_name() retrieves the file name for the object,
  *          region or attribute reference pointed to by \p ref_ptr.
@@ -499,7 +510,8 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  *          which will retrieve the actual name.
  *
  */
-H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t size);
+H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name,
+                                size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -524,8 +536,8 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          be used to access external files that the reference points to
  *          (through a file access property list).
  *
- *          Up to size characters of the name are returned in \p name; additional
- *          characters, if any, are not returned to the user application. If
+ *          Up to size characters of the name are returned in \p name;
+ * additional characters, if any, are not returned to the user application. If
  *          the length of the name, which determines the required value of
  *          \p size, is unknown, a preliminary call to H5Rget_obj_name() call
  *          can be made. The return value of this call will be the size of the
@@ -545,7 +557,8 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          return any one of these paths.
  *
  */
-H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, size_t size);
+H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name,
+                               size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -557,7 +570,8 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  * \param[in,out] name Buffer to place the attribute name of the reference
  * \param[in] size     Size of the \p name buffer
  *
- * \return Returns the length of the name if successful, otherwise, a negative value.
+ * \return Returns the length of the name if successful, otherwise, a negative
+ * value.
  *
  * \details H5Rget_attr_name() retrieves the attribute name for the
  *          attribute reference pointed to by \p ref_ptr.
@@ -572,22 +586,26 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  *          which will retrieve the actual name.
  *
  */
-H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t size);
+H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name,
+                                size_t size);
 
 /// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5R_MODULE
-#define H5Ropen_object_async(...) H5Ropen_object_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Ropen_region_async(...) H5Ropen_region_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Ropen_attr_async(...)   H5Ropen_attr_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ropen_object_async(...)                                              \
+  H5Ropen_object_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ropen_region_async(...)                                              \
+  H5Ropen_region_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ropen_attr_async(...)                                                \
+  H5Ropen_attr_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  * be passed in by language wrapper or library layer on top of HDF5. */
 #define H5Ropen_object_async_wrap H5_NO_EXPAND(H5Ropen_object_async)
 #define H5Ropen_region_async_wrap H5_NO_EXPAND(H5Ropen_region_async)
-#define H5Ropen_attr_async_wrap   H5_NO_EXPAND(H5Ropen_attr_async)
+#define H5Ropen_attr_async_wrap H5_NO_EXPAND(H5Ropen_attr_async)
 #endif /* H5R_MODULE */
 /// \endcond
 
@@ -599,7 +617,7 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
 /* Macros */
 
 /* Versions for compatibility */
-#define H5R_OBJECT         H5R_OBJECT1
+#define H5R_OBJECT H5R_OBJECT1
 #define H5R_DATASET_REGION H5R_DATASET_REGION1
 
 /* Function prototypes */
@@ -648,8 +666,8 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *
  *          \li Call H5Dget_type() on the dataset containing the reference to
  *              get a datatype identifier for the dataset's datatype.
- *          \li Using that datatype identifier, H5Tget_class() returns a datatype
- *              class.\n If the datatype class is #H5T_REFERENCE, H5Tequal() can
+ *          \li Using that datatype identifier, H5Tget_class() returns a
+ * datatype class.\n If the datatype class is #H5T_REFERENCE, H5Tequal() can
  *              then be used to determine whether the reference's datatype is
  *              #H5T_STD_REF_OBJ or #H5T_STD_REF_DSETREG:
  *              - If the datatype is #H5T_STD_REF_OBJ, the reference object type
@@ -666,7 +684,8 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  * \since 1.6.0
  *
  */
-H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref);
+H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type,
+                                  const void *ref);
 
 /**
  * --------------------------------------------------------------------------
@@ -708,7 +727,8 @@ H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref
  * \since 1.8.0
  *
  */
-H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref);
+H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type,
+                             const void *ref);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -719,12 +739,11 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  * \brief Creates a reference
  *
  * \param[out] ref Reference created by the function call
- * \param[in] loc_id Location identifier used to locate the object being pointed to
- * \param[in] name Name of object at location \p loc_id
- * \param[in] ref_type Type of reference
- * \param[in] space_id Dataspace identifier with selection. Used only for
- *                     dataset region references; pass as -1 if reference is
- *                     an object reference, i.e., of type #H5R_OBJECT
+ * \param[in] loc_id Location identifier used to locate the object being pointed
+ * to \param[in] name Name of object at location \p loc_id \param[in] ref_type
+ * Type of reference \param[in] space_id Dataspace identifier with selection.
+ * Used only for dataset region references; pass as -1 if reference is an object
+ * reference, i.e., of type #H5R_OBJECT
  *
  * \return \herr_t
  *
@@ -732,8 +751,8 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *          \p ref_type, pointing to the object \p name located at \p loc_id.
  *
  *          The HDF5 library maps the void type specified above for \p ref to
- *          the type specified in \p ref_type, which will be one of the following:
- *          \snippet this H5R_type_t_snip
+ *          the type specified in \p ref_type, which will be one of the
+ * following: \snippet this H5R_type_t_snip
  *
  *          The parameters \p loc_id and \p name are used to locate the object.
  *
@@ -744,7 +763,8 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *
  * \since 1.8.0
  */
-H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id);
+H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
+                        H5R_type_t ref_type, hid_t space_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -785,8 +805,8 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  *
  *          \li Call H5Dget_type() on the dataset containing the reference to
  *              get a datatype identifier for the dataset's datatype.
- *          \li Using that datatype identifier, H5Tget_class() returns a datatype
- *              class.\n If the datatype class is #H5T_REFERENCE, H5Tequal() can
+ *          \li Using that datatype identifier, H5Tget_class() returns a
+ * datatype class.\n If the datatype class is #H5T_REFERENCE, H5Tequal() can
  *              then be used to determine whether the reference's datatype is
  *              #H5T_STD_REF_OBJ or #H5T_STD_REF_DSETREG:
  *              - If the datatype is #H5T_STD_REF_OBJ, the reference object type
@@ -801,7 +821,8 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj_type);
+H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
+                               H5O_type_t *obj_type);
 
 /**
  * --------------------------------------------------------------------------
@@ -843,7 +864,8 @@ H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H
  * \since 1.10.0
  *
  */
-H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *ref);
+H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type,
+                             const void *ref);
 
 /**
  * --------------------------------------------------------------------------
@@ -853,8 +875,8 @@ H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, c
  *
  * \param[in] dataset File identifier or identifier for any object in the file
  *                    containing the referenced region
- * \param[in] ref_type Reference type of \p ref, which must be #H5R_DATASET_REGION
- * \param[in] ref Region reference to open
+ * \param[in] ref_type Reference type of \p ref, which must be
+ * #H5R_DATASET_REGION \param[in] ref Region reference to open
  *
  * \return Returns a valid dataspace identifier if successful; otherwise returns
  *         a negative value.
@@ -896,8 +918,8 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *         no name is associated with the identifier. Otherwise returns a
  *         negative value.
  *
- * \details H5Rget_name() retrieves a name for the object identified by \p ref.\n
- *          \p loc_id is used to identify the file containing the reference. It
+ * \details H5Rget_name() retrieves a name for the object identified by \p
+ * ref.\n \p loc_id is used to identify the file containing the reference. It
  *          can be the file identifier for the file containing the reference or
  *          an identifier for any object in that file.
  *
@@ -933,7 +955,8 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *
  * \since 1.8.0
  */
-H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, char *name, size_t size);
+H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref,
+                           char *name, size_t size);
 
 #ifdef __cplusplus
 }

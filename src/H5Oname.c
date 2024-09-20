@@ -21,19 +21,23 @@
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
-#include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
+#include "H5private.h"   /* Generic Functions			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O__name_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
+static void *H5O__name_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+                              unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void  *H5O__name_copy(const void *_mesg, void *_dest);
-static size_t H5O__name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p,
+                               const void *_mesg);
+static void *H5O__name_copy(const void *_mesg, void *_dest);
+static size_t H5O__name_size(const H5F_t *f, hbool_t disable_shared,
+                             const void *_mesg);
 static herr_t H5O__name_reset(void *_mesg);
-static herr_t H5O__name_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
+static herr_t H5O__name_debug(H5F_t *f, const void *_mesg, FILE *stream,
+                              int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_NAME[1] = {{
@@ -69,35 +73,35 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-static void *
-H5O__name_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                 unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
-                 const uint8_t *p)
-{
-    H5O_name_t *mesg      = NULL;
-    void       *ret_value = NULL;
+static void *H5O__name_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f,
+                              H5O_t H5_ATTR_UNUSED *open_oh,
+                              unsigned H5_ATTR_UNUSED mesg_flags,
+                              unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                              const uint8_t *p) {
+  H5O_name_t *mesg = NULL;
+  void *ret_value = NULL;
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    assert(f);
-    assert(p);
+  assert(f);
+  assert(p);
 
-    if (NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  if (NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    if (NULL == (mesg->s = (char *)H5MM_strndup((const char *)p, p_size - 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  if (NULL == (mesg->s = (char *)H5MM_strndup((const char *)p, p_size - 1)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    ret_value = mesg;
+  ret_value = mesg;
 
 done:
-    if (NULL == ret_value)
-        if (mesg) {
-            H5MM_xfree(mesg->s);
-            H5MM_xfree(mesg);
-        }
+  if (NULL == ret_value)
+    if (mesg) {
+      H5MM_xfree(mesg->s);
+      H5MM_xfree(mesg);
+    }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_decode() */
 
 /*-------------------------------------------------------------------------
@@ -109,23 +113,22 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                 const void *_mesg)
-{
-    const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
+static herr_t H5O__name_encode(H5F_t H5_ATTR_UNUSED *f,
+                               hbool_t H5_ATTR_UNUSED disable_shared,
+                               uint8_t *p, const void *_mesg) {
+  const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg && mesg->s);
+  /* check args */
+  assert(f);
+  assert(p);
+  assert(mesg && mesg->s);
 
-    /* encode */
-    HDstrcpy((char *)p, mesg->s);
+  /* encode */
+  HDstrcpy((char *)p, mesg->s);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_encode() */
 
 /*-------------------------------------------------------------------------
@@ -140,35 +143,33 @@ H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5O__name_copy(const void *_mesg, void *_dest)
-{
-    const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
-    H5O_name_t       *dest      = (H5O_name_t *)_dest;
-    void             *ret_value = NULL; /* Return value */
+static void *H5O__name_copy(const void *_mesg, void *_dest) {
+  const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
+  H5O_name_t *dest = (H5O_name_t *)_dest;
+  void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+  FUNC_ENTER_PACKAGE
 
-    /* check args */
-    assert(mesg);
+  /* check args */
+  assert(mesg);
 
-    if (!dest && NULL == (dest = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  if (!dest && NULL == (dest = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* copy */
-    *dest = *mesg;
-    if (NULL == (dest->s = H5MM_xstrdup(mesg->s)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+  /* copy */
+  *dest = *mesg;
+  if (NULL == (dest->s = H5MM_xstrdup(mesg->s)))
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* Set return value */
-    ret_value = dest;
+  /* Set return value */
+  ret_value = dest;
 
 done:
-    if (NULL == ret_value)
-        if (dest && NULL == _dest)
-            dest = (H5O_name_t *)H5MM_xfree(dest);
+  if (NULL == ret_value)
+    if (dest && NULL == _dest)
+      dest = (H5O_name_t *)H5MM_xfree(dest);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_copy() */
 
 /*-------------------------------------------------------------------------
@@ -185,21 +186,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
-{
-    const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
-    size_t            ret_value = 0; /* Return value */
+static size_t H5O__name_size(const H5F_t H5_ATTR_UNUSED *f,
+                             hbool_t H5_ATTR_UNUSED disable_shared,
+                             const void *_mesg) {
+  const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
+  size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(mesg);
+  /* check args */
+  assert(f);
+  assert(mesg);
 
-    ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
+  ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+  FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_size() */
 
 /*-------------------------------------------------------------------------
@@ -212,20 +213,18 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__name_reset(void *_mesg)
-{
-    H5O_name_t *mesg = (H5O_name_t *)_mesg;
+static herr_t H5O__name_reset(void *_mesg) {
+  H5O_name_t *mesg = (H5O_name_t *)_mesg;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(mesg);
+  /* check args */
+  assert(mesg);
 
-    /* reset */
-    mesg->s = (char *)H5MM_xfree(mesg->s);
+  /* reset */
+  mesg->s = (char *)H5MM_xfree(mesg->s);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_reset() */
 
 /*-------------------------------------------------------------------------
@@ -237,21 +236,20 @@ H5O__name_reset(void *_mesg)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__name_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int indent, int fwidth)
-{
-    const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
+static herr_t H5O__name_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg,
+                              FILE *stream, int indent, int fwidth) {
+  const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
 
-    FUNC_ENTER_PACKAGE_NOERR
+  FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+  /* check args */
+  assert(f);
+  assert(mesg);
+  assert(stream);
+  assert(indent >= 0);
+  assert(fwidth >= 0);
 
-    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", mesg->s);
+  fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", mesg->s);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+  FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_debug() */

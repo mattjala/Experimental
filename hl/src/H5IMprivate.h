@@ -19,11 +19,11 @@
 /* public IM prototypes			*/
 #include "H5IMpublic.h"
 
-#define IMAGE_CLASS   "IMAGE"
+#define IMAGE_CLASS "IMAGE"
 #define PALETTE_CLASS "PALETTE"
 #define IMAGE_VERSION "1.2"
-#define IMAGE8_RANK   2
-#define IMAGE24_RANK  3
+#define IMAGE8_RANK 2
+#define IMAGE24_RANK 3
 
 /*-------------------------------------------------------------------------
  * Private functions

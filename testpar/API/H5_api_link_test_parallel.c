@@ -17,31 +17,29 @@
  */
 static int (*par_link_tests[])(void) = {NULL};
 
-int
-H5_api_link_test_parallel(void)
-{
-    size_t i;
-    int    nerrors;
+int H5_api_link_test_parallel(void) {
+  size_t i;
+  int nerrors;
 
-    if (MAINPROCESS) {
-        printf("**********************************************\n");
-        printf("*                                            *\n");
-        printf("*          API Parallel Link Tests           *\n");
-        printf("*                                            *\n");
-        printf("**********************************************\n\n");
+  if (MAINPROCESS) {
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*          API Parallel Link Tests           *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
+  }
+
+  for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_link_tests); i++) {
+    /* nerrors += (*par_link_tests[i])() ? 1 : 0; */
+
+    if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
+      if (MAINPROCESS)
+        printf("    MPI_Barrier() failed!\n");
     }
+  }
 
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_link_tests); i++) {
-        /* nerrors += (*par_link_tests[i])() ? 1 : 0; */
+  if (MAINPROCESS)
+    printf("\n");
 
-        if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
-            if (MAINPROCESS)
-                printf("    MPI_Barrier() failed!\n");
-        }
-    }
-
-    if (MAINPROCESS)
-        printf("\n");
-
-    return nerrors;
+  return nerrors;
 }

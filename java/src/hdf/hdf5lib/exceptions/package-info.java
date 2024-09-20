@@ -23,9 +23,9 @@
  * HDF5JavaException -- errors raised the HDF5 Java wrapper code
  * </ol>
  * <p>
- * The HDF5LibraryException is the base class for the classes that represent specific error conditions.
- * In particular, HDF5LibraryException has a sub-class for each major
- * error code returned by the HDF5 library.
+ * The HDF5LibraryException is the base class for the classes that represent
+ * specific error conditions. In particular, HDF5LibraryException has a
+ * sub-class for each major error code returned by the HDF5 library.
  *
  */
 package hdf.hdf5lib.exceptions;
