@@ -1536,7 +1536,7 @@ H5Iis_valid(hid_t id)
     H5I__enter(TRUE);
 
     /* Find the ID */
-    if ( NULL == (id_info_ptr = H5I__find_id(id)) ) {
+    if ( NULL == (id_info_ptr = H5I__find_id_info(id)) ) {
 
         ret_value = FALSE;
 
@@ -1582,7 +1582,7 @@ H5Iis_valid(hid_t id)
     H5TRACE1("t", "i", id);
 
     /* Find the ID */
-    if (NULL == (info = H5I__find_id(id)))
+    if (NULL == (info = H5I__find_id_info(id)))
         ret_value = FALSE;
     else if (!info->app_count) /* Check if the found id is an internal id */
         ret_value = FALSE;

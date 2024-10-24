@@ -595,50 +595,50 @@ typedef struct H5I_suint64_t {
  *      H5I__remove_common() reads it and attempts to overwrite it with a modified version.
  *
  *
- * Statistics on the behaviour of the H5I__find_id() function.
+ * Statistics on the behaviour of the H5I__find_id_info() function.
  *
- * H5I__find_id__num_calls: Number of times that H5I__find_id() is called.
+ * H5I__find_id_info__num_calls: Number of times that H5I__find_id_info() is called.
  *
- * H5I__find_id__num_calls_with_global_mutex: Number of times that H5I__find_id() is called
+ * H5I__find_id_info__num_calls_with_global_mutex: Number of times that H5I__find_id_info() is called
  *      by a thread that holds the global mutex.
  *
- * H5I__find_id__num_calls_without_global_mutex: Number of times that H5I__find_id() is 
+ * H5I__find_id_info__num_calls_without_global_mutex: Number of times that H5I__find_id_info() is 
  *      called by a thread that doesn't hold the global mutex.
  *
- * H5I__find_id__ids_found: Number of times that H6I__find_id() succeeds and returns
+ * H5I__find_id_info__ids_found: Number of times that H6I__find_id() succeeds and returns
  *      a pointer to the object associated with the supplied ID.
  *
- * H5I__find_id__num_calls_to_realize_cb: Number of times that H5I__find_id() calls 
+ * H5I__find_id_info__num_calls_to_realize_cb: Number of times that H5I__find_id_info() calls 
  *      the realize_cb.
  *
- * H5I__find_id__global_mutex_locks_for_realize_cb: Number of times that H5I__find_id()
+ * H5I__find_id_info__global_mutex_locks_for_realize_cb: Number of times that H5I__find_id_info()
  *      obtains the global mutex before calling the realize_cb.
  *
- * H5I__find_id__global_mutex_unlocks_for_realize_cb: Number of times that H5I__find_id()
+ * H5I__find_id_info__global_mutex_unlocks_for_realize_cb: Number of times that H5I__find_id_info()
  *      drops the global mutex immediately after calling the realize_cb.
  *
- * H5I__find_id__num_calls_to_H5I__remove_common: Number of times that H5I__find_id()
+ * H5I__find_id_info__num_calls_to_H5I__remove_common: Number of times that H5I__find_id_info()
  *      calls H5I__remove_common().
  *
- * H5I__find_id__num_calls_to_discard_cb: Number of times that H5I__find_id() calls
+ * H5I__find_id_info__num_calls_to_discard_cb: Number of times that H5I__find_id_info() calls
  *      the discard_cb.
  *
- * H5I__find_id__global_mutex_locks_for_discard_cb: Number of times that H5I__find_id()
+ * H5I__find_id_info__global_mutex_locks_for_discard_cb: Number of times that H5I__find_id_info()
  *      obtains the global mutex before calling the discard_cb.
  *
- * H5I__find_id__global_mutex_unlocks_for_discard_cb: Number of times that H5I__find_id()
+ * H5I__find_id_info__global_mutex_unlocks_for_discard_cb: Number of times that H5I__find_id_info()
  *      drops the global mutex immediately after calling the discard_cb.
  *
- * H5I__find_id__future_id_conversions_attempted: Number of times that H5I__find_id()
+ * H5I__find_id_info__future_id_conversions_attempted: Number of times that H5I__find_id_info()
  *      is called on a future ID, and attempts to convert it to a real ID.
  *
- * H5I__find_id__future_id_conversions_completed: Number of times that H5I__find_id()
+ * H5I__find_id_info__future_id_conversions_completed: Number of times that H5I__find_id_info()
  *      successfully converts a future ID to a real ID.
  *
- * H5I__find_id__retries: Number of times that H5I__find_id() has to re-try the 
+ * H5I__find_id_info__retries: Number of times that H5I__find_id_info() has to re-try the 
  *      operation.  This is caused by either another thread modifying the kernel of
  *      instance of H5I_mt_id_info_t associated with the ID in the period between 
- *      the time that H5I__find_id() reads it, and then tries to overwrite it with 
+ *      the time that H5I__find_id_info() reads it, and then tries to overwrite it with 
  *      a modified version, or the function encounters a set do_not_disturb flag.
  *
  *
@@ -694,7 +694,7 @@ typedef struct H5I_suint64_t {
  *
  * H5I__dec_ref__marked_on_entry: Number of times that the supplied ID is marked for
  *      deletion on entry.  Note that this should be almost impossible, as the 
- *      ID will have to be marked for deletion between the call to H5I__find_id() 
+ *      ID will have to be marked for deletion between the call to H5I__find_id_info() 
  *      and the check for the deleted flag early in the do/while loop.
  *
  * H5I__dec_ref__marked_during_call: Number of times that the supplied ID is marked for
@@ -738,7 +738,7 @@ typedef struct H5I_suint64_t {
  *
  * H5I__inc_ref__marked_on_entry:  Number of times that the supplied ID is marked for
  *      deletion on entry.  Note that this should be almost impossible, as the
- *      ID will have to be marked for deletion between the call to H5I__find_id() and 
+ *      ID will have to be marked for deletion between the call to H5I__find_id_info() and 
  *      the check for the marked flag early in the do/while loop.
  *
  * H5I__inc_ref__marked_during_call: Number of times that the supplied ID is marked for
@@ -1000,25 +1000,25 @@ typedef struct H5I_mt_t {
     _Atomic uint64_t H5I__remove_common__target_not_in_lfht;
     _Atomic uint64_t H5I__remove_common__retries;
 
-    /* H5I__find_id() stats */
-    _Atomic uint64_t H5I__find_id__num_calls;
+    /* H5I__find_id_info() stats */
+    _Atomic uint64_t H5I__find_id_info__num_calls;
 
-    _Atomic uint64_t H5I__find_id__num_calls_with_global_mutex;
-    _Atomic uint64_t H5I__find_id__num_calls_without_global_mutex;
+    _Atomic uint64_t H5I__find_id_info__num_calls_with_global_mutex;
+    _Atomic uint64_t H5I__find_id_info__num_calls_without_global_mutex;
 
-    _Atomic uint64_t H5I__find_id__ids_found;
+    _Atomic uint64_t H5I__find_id_info__ids_found;
 
-    _Atomic uint64_t H5I__find_id__num_calls_to_realize_cb;
-    _Atomic uint64_t H5I__find_id__global_mutex_locks_for_realize_cb;
-    _Atomic uint64_t H5I__find_id__global_mutex_unlocks_for_realize_cb;
-    _Atomic uint64_t H5I__find_id__num_calls_to_H5I__remove_common;
-    _Atomic uint64_t H5I__find_id__num_calls_to_discard_cb;
-    _Atomic uint64_t H5I__find_id__global_mutex_locks_for_discard_cb;
-    _Atomic uint64_t H5I__find_id__global_mutex_unlocks_for_discard_cb;
+    _Atomic uint64_t H5I__find_id_info__num_calls_to_realize_cb;
+    _Atomic uint64_t H5I__find_id_info__global_mutex_locks_for_realize_cb;
+    _Atomic uint64_t H5I__find_id_info__global_mutex_unlocks_for_realize_cb;
+    _Atomic uint64_t H5I__find_id_info__num_calls_to_H5I__remove_common;
+    _Atomic uint64_t H5I__find_id_info__num_calls_to_discard_cb;
+    _Atomic uint64_t H5I__find_id_info__global_mutex_locks_for_discard_cb;
+    _Atomic uint64_t H5I__find_id_info__global_mutex_unlocks_for_discard_cb;
 
-    _Atomic uint64_t H5I__find_id__future_id_conversions_attempted;
-    _Atomic uint64_t H5I__find_id__future_id_conversions_completed;
-    _Atomic uint64_t H5I__find_id__retries;
+    _Atomic uint64_t H5I__find_id_info__future_id_conversions_attempted;
+    _Atomic uint64_t H5I__find_id_info__future_id_conversions_completed;
+    _Atomic uint64_t H5I__find_id_info__retries;
 
     /* H5I_register_using_existing_id() stats */
     _Atomic uint64_t H5I_register_using_existing_id__num_calls;
@@ -1555,7 +1555,7 @@ H5_DLL void          *H5I__remove_verify(hid_t id, H5I_type_t type);
 H5_DLL int            H5I__inc_type_ref(H5I_type_t type);
 H5_DLL int            H5I__get_type_ref(H5I_type_t type);
 #ifdef H5_HAVE_MULTITHREAD
-H5_DLL H5I_mt_id_info_t *H5I__find_id(hid_t id);
+H5_DLL H5I_mt_id_info_t *H5I__find_id_info(hid_t id);
 H5_DLL void H5I__enter(hbool_t public_api);
 H5_DLL void H5I__exit(void);
 
@@ -1578,7 +1578,7 @@ H5_DLL void *     H5I_object_verify_internal(hid_t id, H5I_type_t type);
 H5_DLL void *     H5I_remove_internal(hid_t id);
 
 #else /* H5_HAVE_MULTITHREAD */
-H5_DLL H5I_id_info_t *H5I__find_id(hid_t id);
+H5_DLL H5I_id_info_t *H5I__find_id_info(hid_t id);
 #endif /* H5_HAVE_MULTITHREAD */
 
 /* Testing functions */

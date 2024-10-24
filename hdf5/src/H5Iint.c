@@ -107,6 +107,35 @@ typedef struct {
     hbool_t           have_global_mutex; /* whether the global mutex is held by this thread */
 } H5I_iterate_ud_t;
 
+/* User data for H5I_get_first() */
+typedef struct {
+	hid_t *ret_id; /* (out) First ID in specified type, if any */
+	void ** ret_object; /* (out) Object buffer for first ID in specified type, if any */
+} H5I_get_first_ud_t;
+
+/* Types of traversal over the LFHT */
+typedef enum H5I_lfht_traverse_type_t {
+    H5I_LFHT_TRAVERSE_INVALID,
+    H5I_LFHT_TRAVERSE_FIND_ID,
+    H5I_LFHT_TRAVERSE_ITERATE,
+    H5I_LFHT_TRAVERSE_GET_FIRST
+} H5I_lfht_traverse_type_t;
+
+/* Shared user data structure for traversal of the LFHT */
+typedef struct H5I_lfht_traverse_ud_t {
+    H5I_type_t object_type;  /* The type to iterate over */
+    H5I_lfht_traverse_type_t traverse_type; /* Type of traversal operation */
+
+    /* User data for each specific operation */
+    union {
+        H5I_get_id_ud_t *get_id_udata;
+        H5I_iterate_ud_t *iterate_udata;
+        H5I_get_first_ud_t *get_first_udata;
+    } op_ud;
+
+} H5I_lfht_traverse_ud_t;
+
+
 #else /* H5_HAVE_MULTITHREAD */
 
 /* User data for iterator callback for ID iteration */
@@ -171,6 +200,8 @@ static H5I_mt_id_info_t * H5I__new_mt_id_info(hid_t id, unsigned count, unsigned
 static herr_t H5I__clear_mt_type_info_free_list(void);
 static herr_t H5I__discard_mt_type_info(H5I_mt_type_info_t * type_info_ptr);
 static H5I_mt_type_info_t * H5I__new_mt_type_info(const H5I_class_t *cls, unsigned reserved);
+
+static herr_t H5I__lfht_traverse(H5I_lfht_traverse_ud_t *udata);
 #endif /* H5_HAVE_MULTITHREAD */
 
 /*********************/
@@ -404,20 +435,20 @@ H5I_init(void)
     atomic_init(&(H5I_mt_g.H5I__remove_common__target_not_in_lfht), 0ULL);
     atomic_init(&(H5I_mt_g.H5I__remove_common__retries), 0ULL);
 
-    atomic_init(&(H5I_mt_g.H5I__find_id__num_calls), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__ids_found), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__num_calls_to_realize_cb), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__num_calls_to_discard_cb), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__future_id_conversions_attempted), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__future_id_conversions_completed), 0ULL);
-    atomic_init(&(H5I_mt_g.H5I__find_id__retries), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__num_calls), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__ids_found), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_completed), 0ULL);
+    atomic_init(&(H5I_mt_g.H5I__find_id_info__retries), 0ULL);
 
     atomic_init(&(H5I_mt_g.H5I_register_using_existing_id__num_calls), 0ULL);
     atomic_init(&(H5I_mt_g.H5I_register_using_existing_id__num_marked_only), 0ULL);
@@ -729,20 +760,20 @@ H5I_clear_stats(void)
     atomic_store(&(H5I_mt_g.H5I__remove_common__target_not_in_lfht), 0ULL);
     atomic_store(&(H5I_mt_g.H5I__remove_common__retries), 0ULL);
 
-    atomic_store(&(H5I_mt_g.H5I__find_id__num_calls), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__num_calls_without_global_mutex), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__ids_found), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__num_calls_to_realize_cb), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__num_calls_to_discard_cb), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__future_id_conversions_attempted), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__future_id_conversions_completed), 0ULL);
-    atomic_store(&(H5I_mt_g.H5I__find_id__retries), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__num_calls), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__ids_found), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_completed), 0ULL);
+    atomic_store(&(H5I_mt_g.H5I__find_id_info__retries), 0ULL);
 
     atomic_store(&(H5I_mt_g.H5I_register_using_existing_id__num_calls), 0ULL);
     atomic_store(&(H5I_mt_g.H5I_register_using_existing_id__num_marked_only), 0ULL);
@@ -1016,34 +1047,34 @@ H5I_dump_stats(FILE * file_ptr)
     fprintf(file_ptr, "H5I_mt_g.H5I__remove_common__retries                                   = %lld\n\n", 
             (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__remove_common__retries))));
 
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls                                       = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_with_global_mutex                     = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_without_global_mutex                  = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_without_global_mutex))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__ids_found                                       = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__ids_found))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_to_realize_cb                         = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_realize_cb))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb               = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb             = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common                 = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_to_discard_cb                         = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_discard_cb))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb               = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb             = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__future_id_conversions_attempted                 = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__future_id_conversions_attempted))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__future_id_conversions_completed                 = %lld\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__future_id_conversions_completed))));
-    fprintf(file_ptr, "H5I_mt_g.H5I__find_id__retries                                         = %lld\n\n", 
-            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__retries))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls                                       = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex                     = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex                  = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__ids_found                                       = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__ids_found))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb                         = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb               = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb             = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common                 = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb                         = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb               = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb             = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted                 = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__future_id_conversions_completed                 = %lld\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_completed))));
+    fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__retries                                         = %lld\n\n", 
+            (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__retries))));
 
     fprintf(file_ptr, "H5I_mt_g.H5I_register_using_existing_id__num_calls                     = %lld\n", 
             (unsigned long long)(atomic_load(&(H5I_mt_g.H5I_register_using_existing_id__num_calls))));
@@ -1556,63 +1587,63 @@ H5I_dump_nz_stats(FILE * file_ptr, const char * tag)
                 (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__remove_common__retries))));
 
 
-    /* H5I__find_id() stats */
+    /* H5I__find_id_info() stats */
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls                                       = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls                                       = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_with_global_mutex                     = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex                     = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_without_global_mutex))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_without_global_mutex                  = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_without_global_mutex))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex                  = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__ids_found))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__ids_found                                       = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__ids_found))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__ids_found))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__ids_found                                       = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__ids_found))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_realize_cb))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_to_realize_cb                         = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_realize_cb))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb                         = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb               = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb               = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb             = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb             = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common                 = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common                 = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_discard_cb))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__num_calls_to_discard_cb                         = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__num_calls_to_discard_cb))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb                         = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb               = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb               = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb             = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb             = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__future_id_conversions_attempted))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__future_id_conversions_attempted                 = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__future_id_conversions_attempted))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted                 = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__future_id_conversions_completed))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__future_id_conversions_completed                 = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__future_id_conversions_completed))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_completed))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__future_id_conversions_completed                 = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_completed))));
 
-    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__retries))) > 0ULL )
-        fprintf(file_ptr, "H5I_mt_g.H5I__find_id__retries                                         = %lld\n", 
-                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id__retries))));
+    if ( (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__retries))) > 0ULL )
+        fprintf(file_ptr, "H5I_mt_g.H5I__find_id_info__retries                                         = %lld\n", 
+                (unsigned long long)(atomic_load(&(H5I_mt_g.H5I__find_id_info__retries))));
 
 
     /* H5I_register() stats */
@@ -3727,7 +3758,7 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
      * Thus, at present, it seems best to code around the issue, and be able to handle IDs that 
      * are still in the index but are marked as deleted.
      */
-    if (NULL != (old_id_info_ptr = H5I__find_id(existing_id))) {
+    if (NULL != (old_id_info_ptr = H5I__find_id_info(existing_id))) {
 
         info_k = atomic_load(&(old_id_info_ptr->k));
 
@@ -3853,7 +3884,7 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     assert(object);
 
     /* Make sure ID is not already in use */
-    if (NULL != (info = H5I__find_id(existing_id)))
+    if (NULL != (info = H5I__find_id_info(existing_id)))
         HGOTO_ERROR(H5E_ID, H5E_BADRANGE, FAIL, "ID already in use");
 
     /* Make sure type number is valid */
@@ -3984,7 +4015,7 @@ H5I_subst(hid_t id, const void *new_object)
             atomic_fetch_add(&(H5I_mt_g.H5I_subst__retries), 1ULL);
         }
 
-        if ( NULL == (id_info_ptr = H5I__find_id(id)) )
+        if ( NULL == (id_info_ptr = H5I__find_id_info(id)) )
 
             HGOTO_ERROR(H5E_ID, H5E_NOTFOUND, NULL, "can't find ID");
 
@@ -4106,7 +4137,7 @@ H5I_subst(hid_t id, const void *new_object)
     FUNC_ENTER_NOAPI(NULL)
 
     /* General lookup of the ID */
-    if (NULL == (info = H5I__find_id(id)))
+    if (NULL == (info = H5I__find_id_info(id)))
         HGOTO_ERROR(H5E_ID, H5E_NOTFOUND, NULL, "can't get ID ref count");
 
     /* Get the old object pointer to return */
@@ -4184,7 +4215,7 @@ H5I_object_internal(hid_t id)
 #endif /* H5I_MT_DEBUG */
 
     /* General lookup of the ID */
-    if (NULL != (info_ptr = H5I__find_id(id))) {
+    if (NULL != (info_ptr = H5I__find_id_info(id))) {
 
         /* Get the object pointer to return */
 
@@ -4227,7 +4258,7 @@ H5I_object(hid_t id)
     FUNC_ENTER_NOAPI_NOERR
 
     /* General lookup of the ID */
-    if (NULL != (info = H5I__find_id(id))) {
+    if (NULL != (info = H5I__find_id_info(id))) {
         /* Get the object pointer to return */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
         ret_value = (void *)info->object;
@@ -4306,7 +4337,7 @@ H5I_object_verify_internal(hid_t id, H5I_type_t type)
     assert( ( type >= 1 ) && ( (int)type < atomic_load(&(H5I_mt_g.next_type)) ) );
 
     /* Verify that the type of the ID is correct & lookup the ID */
-    if ( ( type == H5I_TYPE(id) ) && ( NULL != (info_ptr = H5I__find_id(id)) ) ) {
+    if ( ( type == H5I_TYPE(id) ) && ( NULL != (info_ptr = H5I__find_id_info(id)) ) ) {
 
         /* Get the object pointer to return */
 
@@ -4354,7 +4385,7 @@ H5I_object_verify(hid_t id, H5I_type_t type)
     assert(type >= 1 && (int)type < H5I_next_type_g);
 
     /* Verify that the type of the ID is correct & lookup the ID */
-    if (type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
+    if (type == H5I_TYPE(id) && NULL != (info = H5I__find_id_info(id))) {
         /* Get the object pointer to return */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
         ret_value = (void *)info->object;
@@ -5175,7 +5206,7 @@ H5I__dec_ref(hid_t id, void **request, hbool_t app)
      * Note that there is no need to repeat this search at the beginning of each 
      * pass through the do/while loop, as any changes will be reflected in *id_info_ptr.
      */
-    if (NULL == (id_info_ptr = H5I__find_id(id)))
+    if (NULL == (id_info_ptr = H5I__find_id_info(id)))
 
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
@@ -5576,7 +5607,7 @@ H5I__dec_ref(hid_t id, void **request)
     assert(id >= 0);
 
     /* General lookup of the ID */
-    if (NULL == (info = H5I__find_id(id)))
+    if (NULL == (info = H5I__find_id_info(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     /* If this is the last reference to the object then invoke the type's
@@ -5805,7 +5836,7 @@ H5I__dec_app_ref(hid_t id, void **request)
         H5I_id_info_t *info = NULL; /* Pointer to the ID info */
 
         /* General lookup of the ID */
-        if (NULL == (info = H5I__find_id(id)))
+        if (NULL == (info = H5I__find_id_info(id)))
             HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
         /* Adjust app_ref */
@@ -6324,8 +6355,7 @@ H5I_inc_ref_internal(hid_t id, hbool_t app_ref)
      * Note that there is no need to repeat this search at the beginning of each
      * pass through the do/while loop, as any changes will be reflected in *id_info_ptr.
      */
-    if (NULL == (id_info_ptr = H5I__find_id(id)))
-
+    if (NULL == (id_info_ptr = H5I__find_id_info(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     do {
@@ -6457,7 +6487,7 @@ H5I_inc_ref(hid_t id, hbool_t app_ref)
     assert(id >= 0);
 
     /* General lookup of the ID */
-    if (NULL == (info = H5I__find_id(id)))
+    if (NULL == (info = H5I__find_id_info(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     /* Adjust reference counts */
@@ -6536,7 +6566,7 @@ H5I_get_ref_internal(hid_t id, hbool_t app_ref)
     assert(id >= 0);
 
     /* General lookup of the ID */
-    if (NULL == (id_info_ptr = H5I__find_id(id)))
+    if (NULL == (id_info_ptr = H5I__find_id_info(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     info_k = atomic_load(&(id_info_ptr->k));
@@ -6574,7 +6604,7 @@ H5I_get_ref(hid_t id, hbool_t app_ref)
     assert(id >= 0);
 
     /* General lookup of the ID */
-    if (NULL == (info = H5I__find_id(id)))
+    if (NULL == (info = H5I__find_id_info(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     /* Set return value */
@@ -7333,8 +7363,6 @@ herr_t
 H5I_iterate_internal(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref)
 {
     hbool_t                  have_global_mutex = TRUE; /* trivially true in the single thread case */
-    H5I_mt_type_info_t      *type_info_ptr = NULL;    /* Pointer to the type */
-    H5I_mt_id_info_kernel_t  info_k;
     herr_t                   ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -7352,51 +7380,28 @@ H5I_iterate_internal(H5I_type_t type, H5I_search_func_t func, void *udata, hbool
     } 
 #endif /* defined(H5_HAVE_THREADSAFE) || defined(H5_HAVE_MULTITHREAD) */
 
-
     /* Check arguments */
     if (type <= H5I_BADID || (int)type >= atomic_load(&(H5I_mt_g.next_type)))
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
 
-    type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[type]));
+    H5I_iterate_ud_t       iter_udata; /* User data for iteration callback */
 
-    /* Only iterate through ID list if it is initialized and there are IDs in type */
-    if ( ( type_info_ptr )  && ( atomic_load(&(type_info_ptr->init_count)) > 0 ) && 
-         ( atomic_load(&(type_info_ptr->id_count)) > 0 ) ) {
+    /* Set up iterator user data */
+    iter_udata.user_func         = func;
+    iter_udata.user_udata        = udata;
+    iter_udata.app_ref           = app_ref;
+    iter_udata.obj_type          = type;
+    iter_udata.have_global_mutex = have_global_mutex;
 
-        H5I_iterate_ud_t       iter_udata; /* User data for iteration callback */
-        H5I_mt_id_info_t      *id_info_ptr = NULL;
-        unsigned long long int id;
-        void * value;
+    H5I_lfht_traverse_ud_t trav_udata;
+    trav_udata.op_ud.iterate_udata = &iter_udata;
+    trav_udata.object_type = type;
+    trav_udata.traverse_type = H5I_LFHT_TRAVERSE_ITERATE;
 
-        /* Set up iterator user data */
-        iter_udata.user_func         = func;
-        iter_udata.user_udata        = udata;
-        iter_udata.app_ref           = app_ref;
-        iter_udata.obj_type          = type;
-        iter_udata.have_global_mutex = have_global_mutex;
-
-        /* Iterate over IDs */
-        if ( lfht_get_first(&(type_info_ptr->lfht), &id, &value) ) {
-
-            do {
-                id_info_ptr = (H5I_mt_id_info_t *)value;
-
-                info_k = atomic_load(&(id_info_ptr->k));
-
-                if (! info_k.marked) {
-
-                    int ret = H5I__iterate_cb((void *)id_info_ptr, NULL, (void *)&iter_udata);
-
-                    if (H5_ITER_ERROR == ret)
-                        HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
-
-                    if (H5_ITER_STOP == ret)
-                        break;
-                }
-            } while (lfht_get_next(&(type_info_ptr->lfht), id, &id, &value));
-        }
-    }
+    /* Iterate over IDs */
+    if (H5I__lfht_traverse(&trav_udata) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
 
 done:
 
@@ -7510,15 +7515,9 @@ done:
 herr_t
 H5I_get_first(H5I_type_t type, hid_t *id_ptr, void ** object_ptr, hbool_t called_from_H5I)
 {
-    H5I_mt_type_info_t      *type_info_ptr    = NULL;    /* Pointer to the type */
-    unsigned long long int   id               = 0;
-    void                    *value            = NULL;
-    void                    *object           = NULL;
-    H5I_mt_id_info_t        *id_info_ptr      = NULL;
-    H5I_mt_id_info_kernel_t  info_k;
-    herr_t                   result;
     herr_t                   ret_value        = SUCCEED; /* Return value */
-
+    H5I_lfht_traverse_ud_t trav_udata; /* User data */
+    H5I_get_first_ud_t get_first_udata; /* Get_first specific user data */
     FUNC_ENTER_NOAPI(FAIL)
 
     if ( ! called_from_H5I ) {
@@ -7539,55 +7538,31 @@ H5I_get_first(H5I_type_t type, hid_t *id_ptr, void ** object_ptr, hbool_t called
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad id or object ptr");
 
-    type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[type]));
+    /* Even though we have just tested to see if the type is non-empty, it is 
+     * possible that it will be emptied during the traversal.
+     * Thus set *id_ptr and *object_ptr to values indicating that the type is
+     * empty before starting our search for the first entry in the type.
+     * Typically, the following assignments will be overwritten.
+     */
+    *id_ptr     = (hid_t)0;
+    *object_ptr = NULL;
 
-    /* Only iterate through ID list if it is initialized and there are IDs in type */
-    if ( ( type_info_ptr )  && ( atomic_load(&(type_info_ptr->init_count)) > 0 ) && 
-         ( atomic_load(&(type_info_ptr->id_count)) > 0 ) ) {
+    /* Set up user data */
+    get_first_udata.ret_id = id_ptr;
+    get_first_udata.ret_object = object_ptr;
 
-        /* Even though we have just tested to see if the type is non-empty, it is 
-         * possible that it will be emptied during the following do-while loop.
-         * Thus set *id_ptr and *object_ptr to values indicating that the type is
-         * empty before starting our search for the first entry in the type.
-         * Typically, the following assignments will be overwritten.
-         */
-        *id_ptr     = (hid_t)0;
-        *object_ptr = NULL;
+    trav_udata.object_type = type;
+    trav_udata.traverse_type = H5I_LFHT_TRAVERSE_GET_FIRST;
+    trav_udata.op_ud.get_first_udata = &get_first_udata;
+    
+    /* Iterate over IDs */
+    htri_t ret = H5I__lfht_traverse(&trav_udata);
 
-        /* Iterate over IDs */
-        if ( lfht_get_first(&(type_info_ptr->lfht), &id, &value) ) {
-
-            do {
-                id_info_ptr = (H5I_mt_id_info_t *)value;
-
-                info_k = atomic_load(&(id_info_ptr->k));
-
-                if ( ! info_k.marked ) {
-
-                    /* The stored object pointer might be an H5VL_object_t, in which
-                     * case we'll need to get the wrapped object struct (H5F_t *, etc.).
-                     */
-#if 0 
-                    H5_GCC_CLANG_DIAG_OFF("cast-qual")
-                    object = H5I__unwrap((void *)info_k.object, type);
-                    H5_GCC_CLANG_DIAG_ON("cast-qual")
-#endif 
-                    H5_GCC_CLANG_DIAG_OFF("cast-qual")
-                    result = H5I__unwrap((void *)info_k.object, type, &object);
-                    H5_GCC_CLANG_DIAG_ON("cast-qual")
-
-                    if ( result < 0 )
-
-                        HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "Can't get unwrapped object");
-
-                    *id_ptr     = (hid_t)id;
-                    *object_ptr = object;
-                    break;
-                }
-            } while (lfht_get_next(&(type_info_ptr->lfht), id, &id, &value));
-        }
-    } else {
-
+    if (ret < 0)
+        HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
+    
+    /* Type was empty */
+    if (ret > 0) {
         *id_ptr     = (hid_t)0;
         *object_ptr = NULL;
     }
@@ -7748,7 +7723,7 @@ done:
 #ifdef H5_HAVE_MULTITHREAD
 
 /*-------------------------------------------------------------------------
- * Function:    H5I__find_id
+ * Function:    H5I__find_id_info
  *
  * Purpose:     Given an object ID find the info struct that describes the
  *              object.
@@ -7760,7 +7735,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5I_mt_id_info_t *
-H5I__find_id(hid_t id)
+H5I__find_id_info(hid_t id)
 {
     hbool_t                 do_not_disturb_set;
     hbool_t                 done = FALSE;
@@ -7780,10 +7755,10 @@ H5I__find_id(hid_t id)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    atomic_fetch_add(&(H5I_mt_g.H5I__find_id__num_calls), 1ULL);
+    atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__num_calls), 1ULL);
 
 #if H5I_MT_DEBUG
-    fprintf(stdout, "   H5I__find_id(0x%llx) called. \n", (unsigned long long)id);
+    fprintf(stdout, "   H5I__find_id_info(0x%llx) called. \n", (unsigned long long)id);
 #endif /* H5I_MT_DEBUG */
 
 #if defined(H5_HAVE_THREADSAFE) || defined(H5_HAVE_MULTITHREAD)
@@ -7796,11 +7771,11 @@ H5I__find_id(hid_t id)
 
     if ( have_global_mutex ) {
 
-        atomic_fetch_add(&(H5I_mt_g.H5I__find_id__num_calls_with_global_mutex), 1ULL);
+        atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__num_calls_with_global_mutex), 1ULL);
 
     } else {
 
-        atomic_fetch_add(&(H5I_mt_g.H5I__find_id__num_calls_without_global_mutex), 1ULL);
+        atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__num_calls_without_global_mutex), 1ULL);
     }
 
     /* Check arguments */
@@ -7817,7 +7792,7 @@ H5I__find_id(hid_t id)
         /* increment the pass and log retries */
         if ( pass++ >= 1 ) {
 
-            atomic_fetch_add(&(H5I_mt_g.H5I__find_id__retries), 1ULL);
+            atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__retries), 1ULL);
         }
 
         type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[type]));
@@ -7977,7 +7952,7 @@ H5I__find_id(hid_t id)
 
                 if ( pass == 1 ) {
 
-                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id__future_id_conversions_attempted), 1ULL);
+                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_attempted), 1ULL);
                 }
 
                 /* attempt to set the do_not_disturb flag.  If we fail, return 
@@ -8052,7 +8027,7 @@ H5I__find_id(hid_t id)
                     atomic_fetch_add(&(H5I_mt_g.num_successful_do_not_disturb_sets), 1ULL);
 
 #if H5I_MT_DEBUG_DO_NOT_DISTURB
-                    fprintf(stdout, "H5I__find_id() set do not disturb on id = 0x%llx.\n",
+                    fprintf(stdout, "H5I__find_id_info() set do not disturb on id = 0x%llx.\n",
                               (unsigned long long)(id_info_ptr->id));
 #endif /* H5I_MT_DEBUG_DO_NOT_DISTURB */
                 }
@@ -8069,7 +8044,7 @@ H5I__find_id(hid_t id)
                 const void * actual_object = NULL;
                 const void * future_object = NULL;
 
-                atomic_fetch_add(&(H5I_mt_g.H5I__find_id__num_calls_to_realize_cb), 1ULL);
+                atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__num_calls_to_realize_cb), 1ULL);
                     
                 /* Invoke the realize callback, to get the actual object.  If this
                  * call fails, we must reset the do_not_disturb flag and return NULL
@@ -8080,13 +8055,13 @@ H5I__find_id(hid_t id)
                  */
                 if ( ( ! have_global_mutex ) && ( ! cls_is_mt_safe ) ) {
 
-                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_realize_cb), 1ULL);
+                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_realize_cb), 1ULL);
                     H5_API_LOCK
                     H5_GCC_CLANG_DIAG_OFF("cast-qual")
                     result = (id_info_ptr->realize_cb)((void *)info_k.object, &actual_id);
                     H5_GCC_CLANG_DIAG_ON("cast-qual")
                     H5_API_UNLOCK
-                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_realize_cb), 1ULL);
+                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_realize_cb), 1ULL);
 
                 } else {
 
@@ -8128,7 +8103,7 @@ H5I__find_id(hid_t id)
                      */
                     actual_object = H5I__remove_common(type_info_ptr, actual_id);
 
-                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id__num_calls_to_H5I__remove_common), 1ULL);
+                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__num_calls_to_H5I__remove_common), 1ULL);
 
                     if ( NULL == actual_object ) {
 
@@ -8139,7 +8114,7 @@ H5I__find_id(hid_t id)
                          * The single thread code contains an assertion that actual_ovject is not NULL -- 
                          * from which I infer that a NULL actual_object should be treated as an error.
                          *
-                         * For now at least, rather than re-work H5I__find_id() to report an error in 
+                         * For now at least, rather than re-work H5I__find_id_info() to report an error in 
                          * this case, we will simply cause the realization of the future ID to fail.
                          */
                         id_info_ptr = NULL;
@@ -8149,7 +8124,7 @@ H5I__find_id(hid_t id)
 
                 if ( ! done ) {
 
-                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id__num_calls_to_discard_cb), 1ULL);
+                    atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__num_calls_to_discard_cb), 1ULL);
 
                     /* Discard the future object.  If we don't hold the global mutex and 
                      * the class is not multi-thread safe, grab the global mutex before 
@@ -8157,13 +8132,13 @@ H5I__find_id(hid_t id)
                      */
                     if ( ( ! have_global_mutex ) && ( ! cls_is_mt_safe ) ) {
 
-                        atomic_fetch_add(&(H5I_mt_g.H5I__find_id__global_mutex_locks_for_discard_cb), 1ULL);
+                        atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__global_mutex_locks_for_discard_cb), 1ULL);
                         H5_API_LOCK
                         H5_GCC_CLANG_DIAG_OFF("cast-qual")
                         result = (id_info_ptr->discard_cb)((void *)future_object);
                         H5_GCC_CLANG_DIAG_ON("cast-qual")
                         H5_API_UNLOCK
-                        atomic_fetch_add(&(H5I_mt_g.H5I__find_id__global_mutex_unlocks_for_discard_cb), 1ULL);
+                        atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__global_mutex_unlocks_for_discard_cb), 1ULL);
 
                     } else {
 
@@ -8196,7 +8171,7 @@ H5I__find_id(hid_t id)
                         mod_info_k.object = actual_object;
 
                         /* update stats */
-                        atomic_fetch_add(&(H5I_mt_g.H5I__find_id__future_id_conversions_completed), 1ULL);
+                        atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__future_id_conversions_completed), 1ULL);
 
                         done = TRUE;
                     }
@@ -8223,7 +8198,7 @@ H5I__find_id(hid_t id)
                 atomic_fetch_add(&(H5I_mt_g.num_do_not_disturb_resets), 1ULL);
 
 #if H5I_MT_DEBUG_DO_NOT_DISTURB
-                fprintf(stdout, "H5I__find_id() reset do not disturb on id = 0x%llx.\n",
+                fprintf(stdout, "H5I__find_id_info() reset do not disturb on id = 0x%llx.\n",
                           (unsigned long long)(dup_id_info_ptr->id));
 #endif /* H5I_MT_DEBUG_DO_NOT_DISTURB */
             }
@@ -8239,7 +8214,7 @@ H5I__find_id(hid_t id)
 
     if ( id_info_ptr ) {
 
-        atomic_fetch_add(&(H5I_mt_g.H5I__find_id__ids_found), 1ULL);
+        atomic_fetch_add(&(H5I_mt_g.H5I__find_id_info__ids_found), 1ULL);
     }
 
     /* Set return value */
@@ -8248,18 +8223,18 @@ H5I__find_id(hid_t id)
 done:
 
 #if H5I_MT_DEBUG
-    fprintf(stdout, "   H5I__find_id(0x%llx) returns 0x%llx. \n", 
+    fprintf(stdout, "   H5I__find_id_info(0x%llx) returns 0x%llx. \n", 
               (unsigned long long)id, (unsigned long long) ret_value);
 #endif /* H5I_MT_DEBUG */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5I__find_id() */
+} /* end H5I__find_id_info() */
 
 #else /* H5_HAVE_MULTITHREAD */
 
 /*-------------------------------------------------------------------------
- * Function:    H5I__find_id
+ * Function:    H5I__find_id_info
  *
  * Purpose:     Given an object ID find the info struct that describes the
  *              object.
@@ -8271,7 +8246,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5I_id_info_t *
-H5I__find_id(hid_t id)
+H5I__find_id_info(hid_t id)
 {
     H5I_type_t       type;             /* ID's type */
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
@@ -8339,7 +8314,7 @@ H5I__find_id(hid_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I__find_id() */
+} /* end H5I__find_id_info() */
 
 #endif /* H5_HAVE_MULTITHREAD */
 
@@ -8380,31 +8355,27 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     info_k = atomic_load(&(id_info_ptr->k));
 
-    /* ignore entries that are marked for deletion */
-    if ( ! info_k.marked ) {
-
-        /* Get a pointer to the VOL connector's data */
+    /* Get a pointer to the VOL connector's data */
 #if 0 
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        object = H5I__unwrap((void *)info_k.object, type); /* will hit global mutex */
-        H5_GCC_CLANG_DIAG_ON("cast-qual")
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
+    object = H5I__unwrap((void *)info_k.object, type); /* will hit global mutex */
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 #endif
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        result = H5I__unwrap((void *)info_k.object, type, &object);
-        H5_GCC_CLANG_DIAG_ON("cast-qual")
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
+    result = H5I__unwrap((void *)info_k.object, type, &object);
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
-        if ( result < 0 ) {
+    if ( result < 0 ) {
 
-            ret_value = H5_ITER_ERROR;
+        ret_value = H5_ITER_ERROR;
 
-        } else {
+    } else {
 
-            /* Check for a match */
-            if (object == udata->object) {
+        /* Check for a match */
+        if (object == udata->object) {
 
-                udata->ret_id = id_info_ptr->id;
-                ret_value     = H5_ITER_STOP;
-            }
+            udata->ret_id = id_info_ptr->id;
+            ret_value     = H5_ITER_STOP;
         }
     }
 
@@ -8458,6 +8429,113 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 #ifdef H5_HAVE_MULTITHREAD
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I__lfht_traverse
+ *
+ * Purpose:     Iterate over a type within the lock-free hash table,
+ *              performing a certain operation based on user data.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *              Hash table is empty/uninit for type: 1
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t H5I__lfht_traverse(H5I_lfht_traverse_ud_t *trav_udata) {
+    htri_t ret_value = SUCCEED;
+    H5I_mt_type_info_t *type_info_ptr = NULL; /* Pointer to the type */
+    H5I_mt_id_info_t   *id_info_ptr = NULL;
+    unsigned long long int scan_id = 0;
+    void *value = NULL;
+    int ret = 0;
+    H5I_mt_id_info_kernel_t info_k;
+    
+    FUNC_ENTER_PACKAGE
+
+    assert(trav_udata);
+
+    /* Set up the type to iterate over */
+    type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[trav_udata->object_type]));
+
+    if (!type_info_ptr)
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
+
+    /* Only iterate through ID list if it is initialized and there are IDs in type */
+    if ( ( atomic_load(&(type_info_ptr->init_count)) == 0 ) || 
+         ( atomic_load(&(type_info_ptr->id_count)) <= 0 ) ) {
+
+        /* Indicate hash table was empty/uninitialized */
+        HGOTO_DONE(1);
+    }
+
+    if ( lfht_get_first(&(type_info_ptr->lfht), &scan_id, &value) ) {
+        do {
+            /* Retrieve underlying ID info */
+            id_info_ptr = (H5I_mt_id_info_t *)value;
+            info_k = atomic_load(&(id_info_ptr->k));
+
+            /* Skip this ID if flagged for deletion */
+            /* TODO: Not a suffcient check to prevent concurrent deletion */
+            if ( info_k.marked )
+                break;
+
+            switch (trav_udata->traverse_type) {
+                case H5I_LFHT_TRAVERSE_FIND_ID: {
+                    ret = H5I__find_id_cb((void *)id_info_ptr, NULL, (void *)trav_udata->op_ud.get_id_udata);
+
+                    if (H5_ITER_ERROR == ret)
+                        HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
+
+                    if (H5_ITER_STOP == ret)
+                        HGOTO_DONE(SUCCEED);
+                }
+                    break;
+
+                case H5I_LFHT_TRAVERSE_GET_FIRST: {
+                    void *object           = NULL;
+
+                    /* The stored object pointer might be an H5VL_object_t, in which
+                     * case we'll need to get the wrapped object struct (H5F_t *, etc.).
+                     */
+                    H5_GCC_CLANG_DIAG_OFF("cast-qual")
+                    ret = (int) H5I__unwrap((void *)info_k.object, trav_udata->object_type, &object);
+                    H5_GCC_CLANG_DIAG_ON("cast-qual")
+
+                    if (ret < 0)
+                        HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "Can't get unwrapped object");
+
+                    *trav_udata->op_ud.get_first_udata->ret_id = (hid_t)scan_id;
+                    *trav_udata->op_ud.get_first_udata->ret_object = object;
+
+                    HGOTO_DONE(SUCCEED);
+                }
+                    break;
+                
+                case H5I_LFHT_TRAVERSE_ITERATE: {
+                    ret = H5I__iterate_cb((void *)id_info_ptr, NULL, (void *)trav_udata->op_ud.iterate_udata);
+
+                    if (H5_ITER_ERROR == ret)
+                        HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
+
+                    /* Iteration ended */
+                    if (H5_ITER_STOP == ret)
+                        HGOTO_DONE(SUCCEED);
+                    
+                }
+                    break;
+                case H5I_LFHT_TRAVERSE_INVALID:
+                default:    
+                    HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "invalid traverse type");
+                    break;
+            }
+        } while (lfht_get_next(&(type_info_ptr->lfht), scan_id, &scan_id, &value));
+    }
+
+done:
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5I_find_id
  *
  * Purpose:     Return the ID of an object by searching through the ID list
@@ -8473,9 +8551,11 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 herr_t
 H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
 {
-    H5I_mt_type_info_t *type_info_ptr = NULL;    /* Pointer to the type */
     herr_t              ret_value = SUCCEED;     /* Return value */
-
+    htri_t traverse_result = SUCCEED; /* Result of LFHT traversal */
+    H5I_lfht_traverse_ud_t traverse_udata; /* User data */
+    H5I_get_id_ud_t         udata; /* Get-id specific user data */
+    
     FUNC_ENTER_NOAPI(FAIL)
 
 #if H5I_MT_DEBUG
@@ -8486,47 +8566,25 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
 
     *id = H5I_INVALID_HID;
 
-    type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[type]));
+    /* Set up iterator user data */
+    udata.object   = object;
+    udata.obj_type = type;
+    udata.ret_id   = H5I_INVALID_HID;
 
-    if ( ( ! type_info_ptr ) || ( atomic_load(&(type_info_ptr->init_count)) <= 0 ) )
+    traverse_udata.object_type = type;
+    traverse_udata.traverse_type = H5I_LFHT_TRAVERSE_FIND_ID;
+    traverse_udata.op_ud.get_id_udata = &udata;
 
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
+    /* Iterate over IDs for the ID type */
+    traverse_result = H5I__lfht_traverse(&traverse_udata);
 
-    /* Only iterate through ID list if it is initialized and there are IDs in type */
-    if ( ( atomic_load(&(type_info_ptr->init_count)) > 0 ) && ( atomic_load(&(type_info_ptr->id_count)) > 0 ) ) {
-
-        H5I_get_id_ud_t         udata; /* User data */
-        H5I_mt_id_info_t       *id_info_ptr = NULL;
-        unsigned long long int  scan_id;
-        void                   *value;
-
-        /* Set up iterator user data */
-        udata.object   = object;
-        udata.obj_type = type;
-        udata.ret_id   = H5I_INVALID_HID;
-
-        /* Iterate over IDs for the ID type */
-        if ( lfht_get_first(&(type_info_ptr->lfht), &scan_id, &value) ) {
-
-            int ret;
-
-            do {
-                id_info_ptr = (H5I_mt_id_info_t *)value;
-
-                ret = H5I__find_id_cb((void *)id_info_ptr, NULL, (void *)&udata);
-
-                if (H5_ITER_ERROR == ret)
-
-                    HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
-
-                if (H5_ITER_STOP == ret)
-
-                    break;
-
-            } while (lfht_get_next(&(type_info_ptr->lfht), scan_id, &scan_id, &value));
-        }
-
-        *id = udata.ret_id;
+    if (traverse_result == SUCCEED) {
+        *id = traverse_udata.op_ud.get_id_udata->ret_id;
+    } else if (traverse_result > 0) {
+        /* Type was empty/uninitialized */
+        *id = H5I_INVALID_HID;
+    } else {
+        HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
     }
 
 done:
