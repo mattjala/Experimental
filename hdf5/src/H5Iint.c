@@ -3293,7 +3293,7 @@ H5I__destroy_type(H5I_type_t type)
 
     type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[type]));
     
-    if (type_info_ptr == NULL || atomic_load(&(type_info_ptr->init_count)) <= 0)
+    if (type_info_ptr == NULL || atomic_load(&(type_info_ptr->init_count)) <= 0 || type_info_ptr->cls == NULL)
         HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
 
     /* Close/clear/destroy all IDs for this type */
@@ -5165,6 +5165,9 @@ H5I__dec_ref(hid_t id, void **request, hbool_t app)
     if ( NULL == (type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[H5I_TYPE(id)]))) )
 
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID type");
+
+    if (NULL == type_info_ptr->cls || type_info_ptr->init_count <= 0)
+        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "invalid type");
 
     /* test the class flags to see if the class is multi-thread safe, and make note of the result */
     cls_is_mt_safe = ((type_info_ptr->cls->flags & H5I_CLASS_IS_MT_SAFE) != 0);
@@ -7822,7 +7825,7 @@ H5I__find_id(hid_t id)
 
         type_info_ptr = atomic_load(&(H5I_mt_g.type_info_array[type]));
 
-        if  ( ( ! type_info_ptr ) || ( atomic_load(&(type_info_ptr->init_count)) <= 0) ) {
+        if  ( ( ! type_info_ptr ) || ( atomic_load(&(type_info_ptr->init_count)) <= 0)  || type_info_ptr->cls == NULL) {
 
             /* type doesn't exist, or has been logically deleted.  No point in
              * in retrying, so just return NULL.
